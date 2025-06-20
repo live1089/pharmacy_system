@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1096</width>
-    <height>572</height>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,21 +33,21 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="drug_selection">
           <property name="text">
            <string>药品选择</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_7">
+         <widget class="QPushButton" name="sales_records">
           <property name="text">
            <string>销售记录</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_4">
+         <widget class="QPushButton" name="expiring_drugs">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -60,7 +60,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_8">
+         <widget class="QPushButton" name="inventory_stock">
           <property name="text">
            <string>剩余药品</string>
           </property>
@@ -77,21 +77,21 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_6">
+         <widget class="QPushButton" name="supplier_info">
           <property name="text">
            <string>供应商</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="drug_inbound">
           <property name="text">
            <string>药品入库</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="drug_outbound">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -107,7 +107,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_5">
+         <widget class="QPushButton" name="recently_added">
           <property name="text">
            <string>最近添加</string>
           </property>
@@ -139,7 +139,7 @@
        </layout>
       </item>
       <item row="0" column="2">
-       <widget class="QLineEdit" name="lineEdit">
+       <widget class="QLineEdit" name="search_le">
         <property name="placeholderText">
          <string>搜索</string>
         </property>
@@ -157,7 +157,7 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QGridLayout" name="gridLayout_4">
@@ -351,6 +351,17 @@ QHeaderView::section {
                </property>
               </column>
              </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_3">
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_7">
+            <item row="0" column="0">
+             <widget class="QTableView" name="expiring_drugs_tableView"/>
             </item>
            </layout>
           </item>
