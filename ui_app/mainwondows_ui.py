@@ -16,11 +16,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QFrame,
-    QGridLayout, QHeaderView, QLineEdit, QMainWindow,
-    QMenu, QMenuBar, QPushButton, QSizePolicy,
-    QSpacerItem, QStackedWidget, QStatusBar, QTableView,
-    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QHeaderView,
+    QLineEdit, QMainWindow, QMenu, QMenuBar,
+    QPushButton, QSizePolicy, QSpacerItem, QStackedWidget,
+    QStatusBar, QTableView, QVBoxLayout, QWidget)
 
 class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
@@ -117,6 +116,13 @@ class Ui_mainWindow(object):
 
         self.gridLayout.addWidget(self.search_le, 0, 2, 1, 1)
 
+        self.line = QFrame(self.centralwidget)
+        self.line.setObjectName(u"line")
+        self.line.setFrameShape(QFrame.Shape.VLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.gridLayout.addWidget(self.line, 1, 1, 1, 1)
+
         self.stackedWidget = QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName(u"stackedWidget")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -127,61 +133,17 @@ class Ui_mainWindow(object):
         self.stackedWidget.setFrameShape(QFrame.Shape.NoFrame)
         self.page = QWidget()
         self.page.setObjectName(u"page")
-        self.gridLayoutWidget = QWidget(self.page)
-        self.gridLayoutWidget.setObjectName(u"gridLayoutWidget")
-        self.gridLayoutWidget.setGeometry(QRect(360, 190, 160, 80))
-        self.gridLayout_3 = QGridLayout(self.gridLayoutWidget)
-        self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_4 = QGridLayout(self.page)
         self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.medicine_table = QTableWidget(self.page)
-        if (self.medicine_table.columnCount() < 5):
-            self.medicine_table.setColumnCount(5)
-        __qtablewidgetitem = QTableWidgetItem()
-        self.medicine_table.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        self.medicine_table.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        __qtablewidgetitem2 = QTableWidgetItem()
-        self.medicine_table.setHorizontalHeaderItem(2, __qtablewidgetitem2)
-        __qtablewidgetitem3 = QTableWidgetItem()
-        self.medicine_table.setHorizontalHeaderItem(3, __qtablewidgetitem3)
-        __qtablewidgetitem4 = QTableWidgetItem()
-        self.medicine_table.setHorizontalHeaderItem(4, __qtablewidgetitem4)
-        if (self.medicine_table.rowCount() < 3):
-            self.medicine_table.setRowCount(3)
-        __qtablewidgetitem5 = QTableWidgetItem()
-        __qtablewidgetitem5.setTextAlignment(Qt.AlignCenter);
-        self.medicine_table.setItem(0, 0, __qtablewidgetitem5)
-        self.medicine_table.setObjectName(u"medicine_table")
-        self.medicine_table.setStyleSheet(u"QTableView {\n"
-"    background-color: #2D2D30;\n"
-"    color: #FFFFFF;\n"
-"    gridline-color: #444444;\n"
-"}\n"
-"QHeaderView::section {\n"
-"    background-color: #3E3E42;\n"
-"    color: #FFFFFF;\n"
-"    border: none;\n"
-"}")
-        self.medicine_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-        self.medicine_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-        self.medicine_table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
-        self.medicine_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.medicine_table.setAlternatingRowColors(True)
-        self.medicine_table.setShowGrid(True)
-        self.medicine_table.setGridStyle(Qt.PenStyle.SolidLine)
-        self.medicine_table.setSortingEnabled(True)
-        self.medicine_table.horizontalHeader().setCascadingSectionResizes(False)
-        self.medicine_table.horizontalHeader().setMinimumSectionSize(60)
-        self.medicine_table.horizontalHeader().setDefaultSectionSize(164)
-        self.medicine_table.horizontalHeader().setHighlightSections(True)
-        self.medicine_table.horizontalHeader().setStretchLastSection(True)
-        self.medicine_table.verticalHeader().setMinimumSectionSize(25)
-        self.medicine_table.verticalHeader().setDefaultSectionSize(30)
-        self.medicine_table.verticalHeader().setStretchLastSection(False)
+        self.gridLayout_3 = QGridLayout()
+        self.gridLayout_3.setObjectName(u"gridLayout_3")
+        self.drug_selection_tableView = QTableView(self.page)
+        self.drug_selection_tableView.setObjectName(u"drug_selection_tableView")
 
-        self.gridLayout_4.addWidget(self.medicine_table, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.drug_selection_tableView, 0, 0, 1, 1)
+
+
+        self.gridLayout_4.addLayout(self.gridLayout_3, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page)
         self.page_2 = QWidget()
@@ -190,44 +152,10 @@ class Ui_mainWindow(object):
         self.gridLayout_6.setObjectName(u"gridLayout_6")
         self.gridLayout_5 = QGridLayout()
         self.gridLayout_5.setObjectName(u"gridLayout_5")
-        self.sales_table = QTableWidget(self.page_2)
-        if (self.sales_table.columnCount() < 3):
-            self.sales_table.setColumnCount(3)
-        __qtablewidgetitem6 = QTableWidgetItem()
-        self.sales_table.setHorizontalHeaderItem(0, __qtablewidgetitem6)
-        __qtablewidgetitem7 = QTableWidgetItem()
-        self.sales_table.setHorizontalHeaderItem(1, __qtablewidgetitem7)
-        __qtablewidgetitem8 = QTableWidgetItem()
-        self.sales_table.setHorizontalHeaderItem(2, __qtablewidgetitem8)
-        if (self.sales_table.rowCount() < 3):
-            self.sales_table.setRowCount(3)
-        __qtablewidgetitem9 = QTableWidgetItem()
-        self.sales_table.setVerticalHeaderItem(0, __qtablewidgetitem9)
-        self.sales_table.setObjectName(u"sales_table")
-        self.sales_table.setStyleSheet(u"QTableView {\n"
-"    background-color: #2D2D30;\n"
-"    color: #FFFFFF;\n"
-"    gridline-color: #444444;\n"
-"}\n"
-"QHeaderView::section {\n"
-"    background-color: #3E3E42;\n"
-"    color: #FFFFFF;\n"
-"    border: none;\n"
-"}")
-        self.sales_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-        self.sales_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-        self.sales_table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
-        self.sales_table.setAlternatingRowColors(True)
-        self.sales_table.setSortingEnabled(True)
-        self.sales_table.horizontalHeader().setCascadingSectionResizes(False)
-        self.sales_table.horizontalHeader().setMinimumSectionSize(70)
-        self.sales_table.horizontalHeader().setDefaultSectionSize(164)
-        self.sales_table.horizontalHeader().setProperty(u"showSortIndicator", True)
-        self.sales_table.horizontalHeader().setStretchLastSection(True)
-        self.sales_table.verticalHeader().setMinimumSectionSize(30)
-        self.sales_table.verticalHeader().setProperty(u"showSortIndicator", False)
+        self.sales_records_tableView = QTableView(self.page_2)
+        self.sales_records_tableView.setObjectName(u"sales_records_tableView")
 
-        self.gridLayout_5.addWidget(self.sales_table, 0, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.sales_records_tableView, 0, 0, 1, 1)
 
 
         self.gridLayout_6.addLayout(self.gridLayout_5, 0, 1, 1, 1)
@@ -250,13 +178,6 @@ class Ui_mainWindow(object):
         self.stackedWidget.addWidget(self.page_3)
 
         self.gridLayout.addWidget(self.stackedWidget, 1, 2, 1, 1)
-
-        self.line = QFrame(self.centralwidget)
-        self.line.setObjectName(u"line")
-        self.line.setFrameShape(QFrame.Shape.VLine)
-        self.line.setFrameShadow(QFrame.Shadow.Sunken)
-
-        self.gridLayout.addWidget(self.line, 1, 1, 1, 1)
 
 
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
@@ -284,7 +205,7 @@ class Ui_mainWindow(object):
 
         self.retranslateUi(mainWindow)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(mainWindow)
@@ -302,29 +223,6 @@ class Ui_mainWindow(object):
         self.drug_outbound.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u51fa\u5e93", None))
         self.recently_added.setText(QCoreApplication.translate("mainWindow", u"\u6700\u8fd1\u6dfb\u52a0", None))
         self.search_le.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u641c\u7d22", None))
-        ___qtablewidgetitem = self.medicine_table.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u540d\u79f0", None));
-        ___qtablewidgetitem1 = self.medicine_table.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("mainWindow", u"\u4fdd\u8d28\u671f", None));
-        ___qtablewidgetitem2 = self.medicine_table.horizontalHeaderItem(2)
-        ___qtablewidgetitem2.setText(QCoreApplication.translate("mainWindow", u"\u751f\u4ea7\u65f6\u95f4", None));
-        ___qtablewidgetitem3 = self.medicine_table.horizontalHeaderItem(3)
-        ___qtablewidgetitem3.setText(QCoreApplication.translate("mainWindow", u"\u6709\u6548\u65e5\u671f", None));
-        ___qtablewidgetitem4 = self.medicine_table.horizontalHeaderItem(4)
-        ___qtablewidgetitem4.setText(QCoreApplication.translate("mainWindow", u"\u662f\u5426\u8fc7\u671f", None));
-
-        __sortingEnabled = self.medicine_table.isSortingEnabled()
-        self.medicine_table.setSortingEnabled(False)
-        self.medicine_table.setSortingEnabled(__sortingEnabled)
-
-        ___qtablewidgetitem5 = self.sales_table.horizontalHeaderItem(0)
-        ___qtablewidgetitem5.setText(QCoreApplication.translate("mainWindow", u"\u51fa\u552e\u836f\u54c1", None));
-        ___qtablewidgetitem6 = self.sales_table.horizontalHeaderItem(1)
-        ___qtablewidgetitem6.setText(QCoreApplication.translate("mainWindow", u"\u51fa\u552e\u65f6\u95f4", None));
-        ___qtablewidgetitem7 = self.sales_table.horizontalHeaderItem(2)
-        ___qtablewidgetitem7.setText(QCoreApplication.translate("mainWindow", u"\u51fa\u552e\u836f\u54c1\u4fe1\u606f", None));
-        ___qtablewidgetitem8 = self.sales_table.verticalHeaderItem(0)
-        ___qtablewidgetitem8.setText(QCoreApplication.translate("mainWindow", u"3", None));
         self.menu.setTitle(QCoreApplication.translate("mainWindow", u"\u6587\u4ef6", None))
         self.menu_2.setTitle(QCoreApplication.translate("mainWindow", u"\u5de5\u5177", None))
         self.menu_3.setTitle(QCoreApplication.translate("mainWindow", u"\u8d26\u53f7", None))

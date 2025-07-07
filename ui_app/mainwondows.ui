@@ -145,6 +145,13 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="2">
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="sizePolicy">
@@ -157,200 +164,25 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
-           <widget class="QTableWidget" name="medicine_table">
-            <property name="styleSheet">
-             <string notr="true">QTableView {
-    background-color: #2D2D30;
-    color: #FFFFFF;
-    gridline-color: #444444;
-}
-QHeaderView::section {
-    background-color: #3E3E42;
-    color: #FFFFFF;
-    border: none;
-}</string>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="sizeAdjustPolicy">
-             <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
-            </property>
-            <property name="editTriggers">
-             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-            </property>
-            <property name="alternatingRowColors">
-             <bool>true</bool>
-            </property>
-            <property name="showGrid">
-             <bool>true</bool>
-            </property>
-            <property name="gridStyle">
-             <enum>Qt::PenStyle::SolidLine</enum>
-            </property>
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-            <attribute name="horizontalHeaderCascadingSectionResizes">
-             <bool>false</bool>
-            </attribute>
-            <attribute name="horizontalHeaderMinimumSectionSize">
-             <number>60</number>
-            </attribute>
-            <attribute name="horizontalHeaderDefaultSectionSize">
-             <number>164</number>
-            </attribute>
-            <attribute name="horizontalHeaderHighlightSections">
-             <bool>true</bool>
-            </attribute>
-            <attribute name="horizontalHeaderStretchLastSection">
-             <bool>true</bool>
-            </attribute>
-            <attribute name="verticalHeaderMinimumSectionSize">
-             <number>25</number>
-            </attribute>
-            <attribute name="verticalHeaderDefaultSectionSize">
-             <number>30</number>
-            </attribute>
-            <attribute name="verticalHeaderStretchLastSection">
-             <bool>false</bool>
-            </attribute>
-            <row/>
-            <row/>
-            <row/>
-            <column>
-             <property name="text">
-              <string>药品名称</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>保质期</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>生产时间</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>有效日期</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>是否过期</string>
-             </property>
-            </column>
+           <layout class="QGridLayout" name="gridLayout_3">
             <item row="0" column="0">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="textAlignment">
-              <set>AlignCenter</set>
-             </property>
+             <widget class="QTableView" name="drug_selection_tableView"/>
             </item>
-           </widget>
+           </layout>
           </item>
          </layout>
-         <widget class="QWidget" name="gridLayoutWidget">
-          <property name="geometry">
-           <rect>
-            <x>360</x>
-            <y>190</y>
-            <width>160</width>
-            <height>80</height>
-           </rect>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_3"/>
-         </widget>
         </widget>
         <widget class="QWidget" name="page_2">
          <layout class="QGridLayout" name="gridLayout_6">
           <item row="0" column="1">
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="0" column="0">
-             <widget class="QTableWidget" name="sales_table">
-              <property name="styleSheet">
-               <string notr="true">QTableView {
-    background-color: #2D2D30;
-    color: #FFFFFF;
-    gridline-color: #444444;
-}
-QHeaderView::section {
-    background-color: #3E3E42;
-    color: #FFFFFF;
-    border: none;
-}</string>
-              </property>
-              <property name="verticalScrollBarPolicy">
-               <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
-              </property>
-              <property name="horizontalScrollBarPolicy">
-               <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
-              </property>
-              <property name="sizeAdjustPolicy">
-               <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
-              </property>
-              <property name="alternatingRowColors">
-               <bool>true</bool>
-              </property>
-              <property name="sortingEnabled">
-               <bool>true</bool>
-              </property>
-              <attribute name="horizontalHeaderCascadingSectionResizes">
-               <bool>false</bool>
-              </attribute>
-              <attribute name="horizontalHeaderMinimumSectionSize">
-               <number>70</number>
-              </attribute>
-              <attribute name="horizontalHeaderDefaultSectionSize">
-               <number>164</number>
-              </attribute>
-              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-               <bool>true</bool>
-              </attribute>
-              <attribute name="horizontalHeaderStretchLastSection">
-               <bool>true</bool>
-              </attribute>
-              <attribute name="verticalHeaderMinimumSectionSize">
-               <number>30</number>
-              </attribute>
-              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
-               <bool>false</bool>
-              </attribute>
-              <row>
-               <property name="text">
-                <string>3</string>
-               </property>
-              </row>
-              <row/>
-              <row/>
-              <column>
-               <property name="text">
-                <string>出售药品</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>出售时间</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>出售药品信息</string>
-               </property>
-              </column>
-             </widget>
+             <widget class="QTableView" name="sales_records_tableView"/>
             </item>
            </layout>
           </item>
@@ -367,13 +199,6 @@ QHeaderView::section {
           </item>
          </layout>
         </widget>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Orientation::Vertical</enum>
-        </property>
        </widget>
       </item>
      </layout>
