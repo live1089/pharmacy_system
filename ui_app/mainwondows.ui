@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1096</width>
+    <width>1086</width>
     <height>580</height>
    </rect>
   </property>
@@ -24,6 +24,20 @@
       <property name="horizontalSpacing">
        <number>6</number>
       </property>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="search_le">
+        <property name="placeholderText">
+         <string>搜索</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <layout class="QVBoxLayout" name="verticalLayout">
         <property name="rightMargin">
@@ -33,9 +47,9 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QPushButton" name="drug_selection">
+         <widget class="QPushButton" name="medicine">
           <property name="text">
-           <string>药品选择</string>
+           <string>药品</string>
           </property>
          </widget>
         </item>
@@ -47,7 +61,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="expiring_drugs">
+         <widget class="QPushButton" name="expiring_medicine">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -60,9 +74,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="inventory_stock">
+         <widget class="QPushButton" name="pharmacy_operation_record">
           <property name="text">
-           <string>剩余药品</string>
+           <string>药库操作记录</string>
           </property>
          </widget>
         </item>
@@ -77,7 +91,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="supplier_info">
+         <widget class="QPushButton" name="supplier">
           <property name="text">
            <string>供应商</string>
           </property>
@@ -86,7 +100,7 @@
         <item>
          <widget class="QPushButton" name="drug_inbound">
           <property name="text">
-           <string>药品入库</string>
+           <string>入库记录</string>
           </property>
          </widget>
         </item>
@@ -102,7 +116,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>药品出库</string>
+           <string>出库记录</string>
           </property>
          </widget>
         </item>
@@ -117,6 +131,34 @@
          <widget class="Line" name="line_3">
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="medicine_purchase">
+          <property name="text">
+           <string>药品采购</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="inventory_record">
+          <property name="text">
+           <string>盘点记录</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="member_customer">
+          <property name="text">
+           <string>会员客户</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="user_information">
+          <property name="text">
+           <string>用户信息</string>
           </property>
          </widget>
         </item>
@@ -138,20 +180,6 @@
         </item>
        </layout>
       </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="search_le">
-        <property name="placeholderText">
-         <string>搜索</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Orientation::Vertical</enum>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="2">
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="sizePolicy">
@@ -164,7 +192,7 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>11</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QGridLayout" name="gridLayout_4">
@@ -177,7 +205,117 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="page_1">
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_9">
+            <item row="0" column="0">
+             <widget class="QTableView" name="supplier_tableView"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
         <widget class="QWidget" name="page_2">
+         <layout class="QGridLayout" name="gridLayout_12">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="0" column="0">
+             <widget class="QTabWidget" name="stock_in_tabWidget">
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="stock_in_main">
+               <attribute name="title">
+                <string>入库主表</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_16">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_15">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="main_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="stock_in_detail">
+               <attribute name="title">
+                <string>入库明细表</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_18">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_17">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="detail_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="inventory_batch">
+               <attribute name="title">
+                <string>入库批次表</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_20">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_19">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="batch_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="pushButton_2">
+              <property name="text">
+               <string>添加药品</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>删除药品</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_3">
+              <property name="text">
+               <string>修改药品</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_3">
+         <layout class="QGridLayout" name="gridLayout_14">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_13">
+            <item row="0" column="0">
+             <widget class="QTableView" name="inventory_tableView"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_4">
          <layout class="QGridLayout" name="gridLayout_6">
           <item row="0" column="1">
            <layout class="QGridLayout" name="gridLayout_5">
@@ -188,12 +326,160 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="page_3">
+        <widget class="QWidget" name="page_5">
          <layout class="QGridLayout" name="gridLayout_8">
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_7">
             <item row="0" column="0">
              <widget class="QTableView" name="expiring_drugs_tableView"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_6">
+         <layout class="QGridLayout" name="gridLayout_24">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_22">
+            <item row="0" column="0">
+             <widget class="QTabWidget" name="stock_out_tabWidget">
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="stock_out_main">
+               <attribute name="title">
+                <string>出库主表</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_26">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_25">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="stock_out_main_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="stock_out_detail">
+               <attribute name="title">
+                <string>出库明细</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_28">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_27">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="stock_out_detail_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_7">
+         <layout class="QGridLayout" name="gridLayout_30">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_29">
+            <item row="0" column="0">
+             <widget class="QTabWidget" name="order_tabWidget">
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="purchase_order">
+               <attribute name="title">
+                <string>采购订单表</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_32">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_31">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="purchase_order_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="purchase_detail">
+               <attribute name="title">
+                <string>采购明细表</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_34">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_33">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="purchase_detail_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_8">
+         <layout class="QGridLayout" name="gridLayout_23">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_21">
+            <item row="0" column="0">
+             <widget class="QTableView" name="recently_added_tableView"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_9">
+         <layout class="QGridLayout" name="gridLayout_36">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_35">
+            <item row="0" column="0">
+             <widget class="QTableView" name="inventory_check_tableView"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_10">
+         <layout class="QGridLayout" name="gridLayout_38">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_37">
+            <item row="0" column="0">
+             <widget class="QTableView" name="customers_tableView"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_11">
+         <layout class="QGridLayout" name="gridLayout_40">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_39">
+            <item row="0" column="0">
+             <widget class="QTableWidget" name="user_tableWidget">
+              <row/>
+              <row/>
+              <column>
+               <property name="text">
+                <string>用户名</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>电话</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>邮箱</string>
+               </property>
+              </column>
+             </widget>
             </item>
            </layout>
           </item>
@@ -210,7 +496,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1096</width>
+     <width>1086</width>
      <height>33</height>
     </rect>
    </property>
