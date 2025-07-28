@@ -3,7 +3,7 @@ import sys
 from PySide6.QtCore import Qt
 from PySide6.QtGui import Qt
 from PySide6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
-from PySide6.QtWidgets import QMessageBox, QTableView
+from PySide6.QtWidgets import QMessageBox
 
 
 class DatabaseInit(QSqlDatabase, QMessageBox):
@@ -31,7 +31,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 purchase_date DATE,          -- 采购日期可选
                 quantity INTEGER NOT NULL CHECK (quantity >= 0),   -- 库存数量
                 price REAL NOT NULL CHECK (price >= 0),
-                barcode TEXT,                   -- 批次条码
+                barcode TEXT,                   -- 国药准字
                 category_id INTEGER NOT NULL,  -- 分类必选
                 supplier_id INTEGER NOT NULL,  -- 供应商必选
                 FOREIGN KEY (category_id) REFERENCES MedicineCategories(category_id),
@@ -315,7 +315,7 @@ class MedicineModel(BaseTableModel):
         7: "采购日期",
         8: "库存数量",
         9: "单价",
-        10: "批次条码",
+        10: "国药准字",
         11: "分类",
         12: "供应商",
     }
@@ -436,7 +436,7 @@ class SalesModel(BaseTableModel):
         3: "销售单价",
         4: "销售日期",
     }
-    HIDDEN_COLUMNS = [0]
+    HIDDEN_COLUMNS = [0, 5]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -591,6 +591,7 @@ class StockOutDetailModel(BaseTableModel):
             hidden_columns=self.HIDDEN_COLUMNS
         )
 
+
 # 库存盘点模式
 class InventoryCheckModel(BaseTableModel):
     HEADERS = {
@@ -602,13 +603,83 @@ class InventoryCheckModel(BaseTableModel):
         5: "盘点结果",
         6: "备注",
     }
-    HIDDEN_COLUMNS = [0]
+    HIDDEN_COLUMNS = [0, 7]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
             parent=parent,
             db=db,
             table_name="inventory_check",
+            headers=self.HEADERS,
+            hidden_columns=self.HIDDEN_COLUMNS
+        )
+
+
+class MedicineCategoriesModel(BaseTableModel):
+    HEADERS = {
+        0: "ID",
+        1: "类型"
+    }
+    HIDDEN_COLUMNS = []
+
+    def __init__(self, parent=None, db=None):
+        super().__init__(
+            parent=parent,
+            db=db,
+            table_name="MedicineCategories",
+            headers=self.HEADERS,
+            hidden_columns=self.HIDDEN_COLUMNS
+        )
+
+
+class DrugRormulationModel(BaseTableModel):
+    HEADERS = {
+        0: "ID",
+        1: "剂型"
+    }
+    HIDDEN_COLUMNS = []
+
+    def __init__(self, parent=None, db=None):
+        super().__init__(
+            parent=parent,
+            db=db,
+            table_name="drug_formulation",
+            headers=self.HEADERS,
+            hidden_columns=self.HIDDEN_COLUMNS
+        )
+
+
+class DrugUnitModel(BaseTableModel):
+    HEADERS = {
+        0: "ID",
+        1: "单位"
+    }
+    HIDDEN_COLUMNS = []
+
+    def __init__(self, parent=None, db=None):
+        super().__init__(
+            parent=parent,
+            db=db,
+            table_name="drug_unit",
+            headers=self.HEADERS,
+            hidden_columns=self.HIDDEN_COLUMNS
+        )
+
+
+class SpecificationModel(BaseTableModel):
+    HEADERS = {
+        0: "ID",
+        1: "剂量",
+        2: "包装单位",
+        3: "包装数量"
+    }
+    HIDDEN_COLUMNS = [4, 5]
+
+    def __init__(self, parent=None, db=None):
+        super().__init__(
+            parent=parent,
+            db=db,
+            table_name="Specification",
             headers=self.HEADERS,
             hidden_columns=self.HIDDEN_COLUMNS
         )
@@ -741,6 +812,7 @@ def get_inventory_model(self):
         self.inventory_tableView.hideColumn(col)
 
     return self.inventory_model
+
 
 # 库存盘点
 def get_inventory_check(self):

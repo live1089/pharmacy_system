@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1086</width>
-    <height>580</height>
+    <height>579</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,168 +19,138 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
+    <item row="1" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="medicine">
+        <property name="text">
+         <string>药品</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="sales_records">
+        <property name="text">
+         <string>销售记录</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="expiring_medicine">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>临期药品</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pharmacy_operation_record">
+        <property name="text">
+         <string>药库操作记录</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="lineWidth">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="supplier">
+        <property name="text">
+         <string>供应商</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="drug_inbound">
+        <property name="text">
+         <string>入库记录</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="drug_outbound">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>出库记录</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="recently_added">
+        <property name="text">
+         <string>最近添加</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="medicine_purchase">
+        <property name="text">
+         <string>药品采购</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="inventory_record">
+        <property name="text">
+         <string>盘点记录</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="member_customer">
+        <property name="text">
+         <string>会员客户</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="user_information">
+        <property name="text">
+         <string>用户信息</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
      <layout class="QGridLayout" name="gridLayout">
       <property name="horizontalSpacing">
        <number>6</number>
       </property>
       <item row="0" column="2">
-       <widget class="QLineEdit" name="search_le">
-        <property name="placeholderText">
-         <string>搜索</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Orientation::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QPushButton" name="medicine">
-          <property name="text">
-           <string>药品</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="sales_records">
-          <property name="text">
-           <string>销售记录</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="expiring_medicine">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>临期药品</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pharmacy_operation_record">
-          <property name="text">
-           <string>药库操作记录</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_2">
-          <property name="lineWidth">
-           <number>1</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="supplier">
-          <property name="text">
-           <string>供应商</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="drug_inbound">
-          <property name="text">
-           <string>入库记录</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="drug_outbound">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>出库记录</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="recently_added">
-          <property name="text">
-           <string>最近添加</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_3">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="medicine_purchase">
-          <property name="text">
-           <string>药品采购</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="inventory_record">
-          <property name="text">
-           <string>盘点记录</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="member_customer">
-          <property name="text">
-           <string>会员客户</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="user_information">
-          <property name="text">
-           <string>用户信息</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Policy::Expanding</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="2">
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -192,14 +162,177 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>11</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page">
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
            <layout class="QGridLayout" name="gridLayout_3">
             <item row="0" column="0">
-             <widget class="QTableView" name="drug_selection_tableView"/>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QLineEdit" name="search_le">
+                <property name="placeholderText">
+                 <string>搜索药品</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="drug_selection_query_btn">
+                <property name="text">
+                 <string>查询</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="drug_add_btn">
+                <property name="text">
+                 <string>添加药品</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="drug_revise_btn">
+                <property name="text">
+                 <string>修改药品</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="drug_del_btn">
+                <property name="text">
+                 <string>删除药品</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <widget class="QTabWidget" name="drug_tabWidget">
+              <property name="currentIndex">
+               <number>1</number>
+              </property>
+              <widget class="QWidget" name="tab">
+               <attribute name="title">
+                <string>基本信息</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_4">
+                <item row="0" column="0">
+                 <widget class="QTableView" name="drug_selection_tableView"/>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="drug_class_pate">
+               <attribute name="title">
+                <string>分类设置</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_42">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_41">
+                  <item row="3" column="3">
+                   <widget class="QListView" name="unit_listView"/>
+                  </item>
+                  <item row="2" column="2">
+                   <widget class="QLabel" name="label_10">
+                    <property name="text">
+                     <string>剂型</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="2">
+                   <widget class="QListView" name="dosages_listView"/>
+                  </item>
+                  <item row="1" column="0">
+                   <spacer name="verticalSpacer">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Policy::Fixed</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>9</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QListView" name="drug_attribute_listView"/>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_8">
+                    <property name="text">
+                     <string>药品属性</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="3">
+                   <widget class="QLabel" name="label_9">
+                    <property name="text">
+                     <string>最小单位</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QListView" name="specifications_listView"/>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QLabel" name="label_11">
+                    <property name="layoutDirection">
+                     <enum>Qt::LayoutDirection::LeftToRight</enum>
+                    </property>
+                    <property name="text">
+                     <string>规格</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QPushButton" name="drugs_set_btn">
+                    <property name="text">
+                     <string>药品设置</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QPushButton" name="specifications_set_btn">
+                    <property name="text">
+                     <string>规格设置</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QPushButton" name="dosage_set_btn">
+                    <property name="text">
+                     <string>剂型设置</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QPushButton" name="unit_set_btn">
+                    <property name="text">
+                     <string>单位设置</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </widget>
             </item>
            </layout>
           </item>
@@ -207,10 +340,28 @@
         </widget>
         <widget class="QWidget" name="page_1">
          <layout class="QGridLayout" name="gridLayout_10">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_9">
-            <item row="0" column="0">
+            <item row="1" column="0">
              <widget class="QTableView" name="supplier_tableView"/>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QLineEdit" name="supplier_lineEdit">
+              <property name="placeholderText">
+               <string>输入供应商查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="supplier_query_btn">
+              <property name="text">
+               <string>查询</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -219,18 +370,79 @@
         <widget class="QWidget" name="page_2">
          <layout class="QGridLayout" name="gridLayout_12">
           <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QLineEdit" name="stock_in_lineEdit">
+              <property name="placeholderText">
+               <string>输入商品ID</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_in_query_btn">
+              <property name="text">
+               <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_in_all_btn">
+              <property name="text">
+               <string>所有库存</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_in_com_btn">
+              <property name="text">
+               <string>综合查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_in_btn">
+              <property name="text">
+               <string>入库处理</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_11">
             <item row="0" column="0">
              <widget class="QTabWidget" name="stock_in_tabWidget">
+              <property name="tabPosition">
+               <enum>QTabWidget::TabPosition::North</enum>
+              </property>
+              <property name="tabShape">
+               <enum>QTabWidget::TabShape::Rounded</enum>
+              </property>
               <property name="currentIndex">
                <number>0</number>
+              </property>
+              <property name="tabsClosable">
+               <bool>false</bool>
               </property>
               <widget class="QWidget" name="stock_in_main">
                <attribute name="title">
                 <string>入库主表</string>
                </attribute>
                <layout class="QGridLayout" name="gridLayout_16">
-                <item row="0" column="0">
+                <item row="2" column="0">
                  <layout class="QGridLayout" name="gridLayout_15">
                   <item row="0" column="0">
                    <widget class="QTableView" name="main_tableView"/>
@@ -271,45 +483,65 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QPushButton" name="pushButton_2">
-              <property name="text">
-               <string>添加药品</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton">
-              <property name="text">
-               <string>删除药品</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_3">
-              <property name="text">
-               <string>修改药品</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="page_3">
          <layout class="QGridLayout" name="gridLayout_14">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_13">
             <item row="0" column="0">
              <widget class="QTableView" name="inventory_tableView"/>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>起始日期</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="inventory_dateEdit_start"/>
+            </item>
+            <item>
+             <widget class="Line" name="line_4">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>截止日期</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="inventory_dateEdit_deadline"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inventory_btn">
+              <property name="text">
+               <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -317,10 +549,61 @@
         </widget>
         <widget class="QWidget" name="page_4">
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="0" column="1">
+          <item row="1" column="1">
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="0" column="0">
              <widget class="QTableView" name="sales_records_tableView"/>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>起始日期</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="sales_records_dateEdit_start"/>
+            </item>
+            <item>
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>截止日期</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="sales_records_dateEdit_deadline"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="sales_records_btn">
+              <property name="text">
+               <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -328,10 +611,54 @@
         </widget>
         <widget class="QWidget" name="page_5">
          <layout class="QGridLayout" name="gridLayout_8">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_7">
             <item row="0" column="0">
              <widget class="QTableView" name="expiring_drugs_tableView"/>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>临期提前天数</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="expiring_drugs_lineEdit_day">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>360</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="expiring_drugs_save_btn">
+              <property name="text">
+               <string>保存天数</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -339,7 +666,7 @@
         </widget>
         <widget class="QWidget" name="page_6">
          <layout class="QGridLayout" name="gridLayout_24">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_22">
             <item row="0" column="0">
              <widget class="QTabWidget" name="stock_out_tabWidget">
@@ -378,11 +705,69 @@
             </item>
            </layout>
           </item>
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>起始时间</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="stock_out_dateEdit_start"/>
+            </item>
+            <item>
+             <widget class="Line" name="line_5">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>截止时间</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="stock_out_dateEdit_deadline"/>
+            </item>
+            <item>
+             <widget class="Line" name="line_6">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_out_btn">
+              <property name="text">
+               <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="page_7">
          <layout class="QGridLayout" name="gridLayout_30">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_29">
             <item row="0" column="0">
              <widget class="QTabWidget" name="order_tabWidget">
@@ -421,6 +806,64 @@
             </item>
            </layout>
           </item>
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>起始时间</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="purchase_order_dateEdit_start"/>
+            </item>
+            <item>
+             <widget class="Line" name="line_11">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>截止时间</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="purchase_order_dateEdit_deadline"/>
+            </item>
+            <item>
+             <widget class="Line" name="line_12">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="purchase_order_btn">
+              <property name="text">
+               <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="page_8">
@@ -436,10 +879,68 @@
         </widget>
         <widget class="QWidget" name="page_9">
          <layout class="QGridLayout" name="gridLayout_36">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_35">
             <item row="0" column="0">
              <widget class="QTableView" name="inventory_check_tableView"/>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>起始时间</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="inventory_check_dateEdit_start"/>
+            </item>
+            <item>
+             <widget class="Line" name="line_13">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_15">
+              <property name="text">
+               <string>截止时间</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="inventory_check_dateEdit_deadline"/>
+            </item>
+            <item>
+             <widget class="Line" name="line_14">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inventory_check_query_btn">
+              <property name="text">
+               <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -460,6 +961,13 @@
          <layout class="QGridLayout" name="gridLayout_40">
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_39">
+            <item row="1" column="0">
+             <widget class="QPushButton" name="add_user_btn">
+              <property name="text">
+               <string>添加用户</string>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
              <widget class="QTableWidget" name="user_tableWidget">
               <row/>
@@ -479,6 +987,13 @@
                 <string>邮箱</string>
                </property>
               </column>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="delete_user_btn">
+              <property name="text">
+               <string>删除用户</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -506,6 +1021,7 @@
     </property>
     <addaction name="actionout"/>
     <addaction name="separator"/>
+    <addaction name="actionh"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -516,6 +1032,7 @@
     <property name="title">
      <string>账号</string>
     </property>
+    <addaction name="actionfg"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -525,6 +1042,16 @@
   <action name="actionout">
    <property name="text">
     <string>导出报表</string>
+   </property>
+  </action>
+  <action name="actionfg">
+   <property name="text">
+    <string>切换账号</string>
+   </property>
+  </action>
+  <action name="actionh">
+   <property name="text">
+    <string>导入报表</string>
    </property>
   </action>
  </widget>

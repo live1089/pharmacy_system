@@ -16,41 +16,31 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QHBoxLayout,
-    QHeaderView, QLineEdit, QMainWindow, QMenu,
-    QMenuBar, QPushButton, QSizePolicy, QSpacerItem,
-    QStackedWidget, QStatusBar, QTabWidget, QTableView,
-    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QDateEdit, QFrame, QGridLayout,
+    QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+    QListView, QMainWindow, QMenu, QMenuBar,
+    QPushButton, QSizePolicy, QSpacerItem, QStackedWidget,
+    QStatusBar, QTabWidget, QTableView, QTableWidget,
+    QTableWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
         if not mainWindow.objectName():
             mainWindow.setObjectName(u"mainWindow")
-        mainWindow.resize(1086, 580)
+        mainWindow.resize(1086, 579)
         icon = QIcon()
         icon.addFile(u"../../python_code/Res.ico", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         mainWindow.setWindowIcon(icon)
         self.actionout = QAction(mainWindow)
         self.actionout.setObjectName(u"actionout")
+        self.actionfg = QAction(mainWindow)
+        self.actionfg.setObjectName(u"actionfg")
+        self.actionh = QAction(mainWindow)
+        self.actionh.setObjectName(u"actionh")
         self.centralwidget = QWidget(mainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout_2 = QGridLayout(self.centralwidget)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.gridLayout = QGridLayout()
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.gridLayout.setHorizontalSpacing(6)
-        self.search_le = QLineEdit(self.centralwidget)
-        self.search_le.setObjectName(u"search_le")
-
-        self.gridLayout.addWidget(self.search_le, 0, 2, 1, 1)
-
-        self.line = QFrame(self.centralwidget)
-        self.line.setObjectName(u"line")
-        self.line.setFrameShape(QFrame.Shape.VLine)
-        self.line.setFrameShadow(QFrame.Shadow.Sunken)
-
-        self.gridLayout.addWidget(self.line, 1, 1, 1, 1)
-
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(-1, -1, 0, 0)
@@ -137,13 +127,12 @@ class Ui_mainWindow(object):
 
         self.verticalLayout.addWidget(self.user_information)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout.addItem(self.verticalSpacer)
+        self.gridLayout_2.addLayout(self.verticalLayout, 1, 0, 1, 1)
 
-
-        self.gridLayout.addLayout(self.verticalLayout, 1, 0, 1, 1)
-
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setHorizontalSpacing(6)
         self.stackedWidget = QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName(u"stackedWidget")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -154,17 +143,136 @@ class Ui_mainWindow(object):
         self.stackedWidget.setFrameShape(QFrame.Shape.NoFrame)
         self.page = QWidget()
         self.page.setObjectName(u"page")
-        self.gridLayout_4 = QGridLayout(self.page)
-        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.verticalLayout_2 = QVBoxLayout(self.page)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.gridLayout_3 = QGridLayout()
         self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.drug_selection_tableView = QTableView(self.page)
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.search_le = QLineEdit(self.page)
+        self.search_le.setObjectName(u"search_le")
+
+        self.horizontalLayout_6.addWidget(self.search_le)
+
+        self.drug_selection_query_btn = QPushButton(self.page)
+        self.drug_selection_query_btn.setObjectName(u"drug_selection_query_btn")
+
+        self.horizontalLayout_6.addWidget(self.drug_selection_query_btn)
+
+        self.drug_add_btn = QPushButton(self.page)
+        self.drug_add_btn.setObjectName(u"drug_add_btn")
+
+        self.horizontalLayout_6.addWidget(self.drug_add_btn)
+
+        self.drug_revise_btn = QPushButton(self.page)
+        self.drug_revise_btn.setObjectName(u"drug_revise_btn")
+
+        self.horizontalLayout_6.addWidget(self.drug_revise_btn)
+
+        self.drug_del_btn = QPushButton(self.page)
+        self.drug_del_btn.setObjectName(u"drug_del_btn")
+
+        self.horizontalLayout_6.addWidget(self.drug_del_btn)
+
+
+        self.gridLayout_3.addLayout(self.horizontalLayout_6, 0, 0, 1, 1)
+
+        self.drug_tabWidget = QTabWidget(self.page)
+        self.drug_tabWidget.setObjectName(u"drug_tabWidget")
+        self.tab = QWidget()
+        self.tab.setObjectName(u"tab")
+        self.gridLayout_4 = QGridLayout(self.tab)
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.drug_selection_tableView = QTableView(self.tab)
         self.drug_selection_tableView.setObjectName(u"drug_selection_tableView")
 
-        self.gridLayout_3.addWidget(self.drug_selection_tableView, 0, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.drug_selection_tableView, 0, 0, 1, 1)
+
+        self.drug_tabWidget.addTab(self.tab, "")
+        self.drug_class_pate = QWidget()
+        self.drug_class_pate.setObjectName(u"drug_class_pate")
+        self.gridLayout_42 = QGridLayout(self.drug_class_pate)
+        self.gridLayout_42.setObjectName(u"gridLayout_42")
+        self.gridLayout_41 = QGridLayout()
+        self.gridLayout_41.setObjectName(u"gridLayout_41")
+        self.unit_listView = QListView(self.drug_class_pate)
+        self.unit_listView.setObjectName(u"unit_listView")
+
+        self.gridLayout_41.addWidget(self.unit_listView, 3, 3, 1, 1)
+
+        self.label_10 = QLabel(self.drug_class_pate)
+        self.label_10.setObjectName(u"label_10")
+        self.label_10.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_41.addWidget(self.label_10, 2, 2, 1, 1)
+
+        self.dosages_listView = QListView(self.drug_class_pate)
+        self.dosages_listView.setObjectName(u"dosages_listView")
+
+        self.gridLayout_41.addWidget(self.dosages_listView, 3, 2, 1, 1)
+
+        self.verticalSpacer = QSpacerItem(20, 9, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+
+        self.gridLayout_41.addItem(self.verticalSpacer, 1, 0, 1, 1)
+
+        self.drug_attribute_listView = QListView(self.drug_class_pate)
+        self.drug_attribute_listView.setObjectName(u"drug_attribute_listView")
+
+        self.gridLayout_41.addWidget(self.drug_attribute_listView, 3, 0, 1, 1)
+
+        self.label_8 = QLabel(self.drug_class_pate)
+        self.label_8.setObjectName(u"label_8")
+        self.label_8.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_41.addWidget(self.label_8, 2, 0, 1, 1)
+
+        self.label_9 = QLabel(self.drug_class_pate)
+        self.label_9.setObjectName(u"label_9")
+        self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_41.addWidget(self.label_9, 2, 3, 1, 1)
+
+        self.specifications_listView = QListView(self.drug_class_pate)
+        self.specifications_listView.setObjectName(u"specifications_listView")
+
+        self.gridLayout_41.addWidget(self.specifications_listView, 3, 1, 1, 1)
+
+        self.label_11 = QLabel(self.drug_class_pate)
+        self.label_11.setObjectName(u"label_11")
+        self.label_11.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.label_11.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_41.addWidget(self.label_11, 2, 1, 1, 1)
+
+        self.drugs_set_btn = QPushButton(self.drug_class_pate)
+        self.drugs_set_btn.setObjectName(u"drugs_set_btn")
+
+        self.gridLayout_41.addWidget(self.drugs_set_btn, 0, 0, 1, 1)
+
+        self.specifications_set_btn = QPushButton(self.drug_class_pate)
+        self.specifications_set_btn.setObjectName(u"specifications_set_btn")
+
+        self.gridLayout_41.addWidget(self.specifications_set_btn, 0, 1, 1, 1)
+
+        self.dosage_set_btn = QPushButton(self.drug_class_pate)
+        self.dosage_set_btn.setObjectName(u"dosage_set_btn")
+
+        self.gridLayout_41.addWidget(self.dosage_set_btn, 0, 2, 1, 1)
+
+        self.unit_set_btn = QPushButton(self.drug_class_pate)
+        self.unit_set_btn.setObjectName(u"unit_set_btn")
+
+        self.gridLayout_41.addWidget(self.unit_set_btn, 0, 3, 1, 1)
 
 
-        self.gridLayout_4.addLayout(self.gridLayout_3, 0, 0, 1, 1)
+        self.gridLayout_42.addLayout(self.gridLayout_41, 0, 0, 1, 1)
+
+        self.drug_tabWidget.addTab(self.drug_class_pate, "")
+
+        self.gridLayout_3.addWidget(self.drug_tabWidget, 1, 0, 1, 1)
+
+
+        self.verticalLayout_2.addLayout(self.gridLayout_3)
 
         self.stackedWidget.addWidget(self.page)
         self.page_1 = QWidget()
@@ -176,20 +284,72 @@ class Ui_mainWindow(object):
         self.supplier_tableView = QTableView(self.page_1)
         self.supplier_tableView.setObjectName(u"supplier_tableView")
 
-        self.gridLayout_9.addWidget(self.supplier_tableView, 0, 0, 1, 1)
+        self.gridLayout_9.addWidget(self.supplier_tableView, 1, 0, 1, 1)
 
 
-        self.gridLayout_10.addLayout(self.gridLayout_9, 0, 0, 1, 1)
+        self.gridLayout_10.addLayout(self.gridLayout_9, 1, 0, 1, 1)
+
+        self.horizontalLayout_10 = QHBoxLayout()
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
+        self.supplier_lineEdit = QLineEdit(self.page_1)
+        self.supplier_lineEdit.setObjectName(u"supplier_lineEdit")
+
+        self.horizontalLayout_10.addWidget(self.supplier_lineEdit)
+
+        self.supplier_query_btn = QPushButton(self.page_1)
+        self.supplier_query_btn.setObjectName(u"supplier_query_btn")
+
+        self.horizontalLayout_10.addWidget(self.supplier_query_btn)
+
+
+        self.gridLayout_10.addLayout(self.horizontalLayout_10, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_1)
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
         self.gridLayout_12 = QGridLayout(self.page_2)
         self.gridLayout_12.setObjectName(u"gridLayout_12")
+        self.horizontalLayout_11 = QHBoxLayout()
+        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
+        self.stock_in_lineEdit = QLineEdit(self.page_2)
+        self.stock_in_lineEdit.setObjectName(u"stock_in_lineEdit")
+
+        self.horizontalLayout_11.addWidget(self.stock_in_lineEdit)
+
+        self.stock_in_query_btn = QPushButton(self.page_2)
+        self.stock_in_query_btn.setObjectName(u"stock_in_query_btn")
+
+        self.horizontalLayout_11.addWidget(self.stock_in_query_btn)
+
+        self.stock_in_all_btn = QPushButton(self.page_2)
+        self.stock_in_all_btn.setObjectName(u"stock_in_all_btn")
+
+        self.horizontalLayout_11.addWidget(self.stock_in_all_btn)
+
+        self.stock_in_com_btn = QPushButton(self.page_2)
+        self.stock_in_com_btn.setObjectName(u"stock_in_com_btn")
+
+        self.horizontalLayout_11.addWidget(self.stock_in_com_btn)
+
+        self.stock_in_btn = QPushButton(self.page_2)
+        self.stock_in_btn.setObjectName(u"stock_in_btn")
+
+        self.horizontalLayout_11.addWidget(self.stock_in_btn)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_11.addItem(self.horizontalSpacer_4)
+
+
+        self.gridLayout_12.addLayout(self.horizontalLayout_11, 0, 0, 1, 1)
+
         self.gridLayout_11 = QGridLayout()
         self.gridLayout_11.setObjectName(u"gridLayout_11")
         self.stock_in_tabWidget = QTabWidget(self.page_2)
         self.stock_in_tabWidget.setObjectName(u"stock_in_tabWidget")
+        self.stock_in_tabWidget.setTabPosition(QTabWidget.TabPosition.North)
+        self.stock_in_tabWidget.setTabShape(QTabWidget.TabShape.Rounded)
+        self.stock_in_tabWidget.setTabsClosable(False)
         self.stock_in_main = QWidget()
         self.stock_in_main.setObjectName(u"stock_in_main")
         self.gridLayout_16 = QGridLayout(self.stock_in_main)
@@ -202,7 +362,7 @@ class Ui_mainWindow(object):
         self.gridLayout_15.addWidget(self.main_tableView, 0, 0, 1, 1)
 
 
-        self.gridLayout_16.addLayout(self.gridLayout_15, 0, 0, 1, 1)
+        self.gridLayout_16.addLayout(self.gridLayout_15, 2, 0, 1, 1)
 
         self.stock_in_tabWidget.addTab(self.stock_in_main, "")
         self.stock_in_detail = QWidget()
@@ -239,28 +399,7 @@ class Ui_mainWindow(object):
         self.gridLayout_11.addWidget(self.stock_in_tabWidget, 0, 0, 1, 1)
 
 
-        self.gridLayout_12.addLayout(self.gridLayout_11, 0, 0, 1, 1)
-
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, 0, -1, -1)
-        self.pushButton_2 = QPushButton(self.page_2)
-        self.pushButton_2.setObjectName(u"pushButton_2")
-
-        self.horizontalLayout.addWidget(self.pushButton_2)
-
-        self.pushButton = QPushButton(self.page_2)
-        self.pushButton.setObjectName(u"pushButton")
-
-        self.horizontalLayout.addWidget(self.pushButton)
-
-        self.pushButton_3 = QPushButton(self.page_2)
-        self.pushButton_3.setObjectName(u"pushButton_3")
-
-        self.horizontalLayout.addWidget(self.pushButton_3)
-
-
-        self.gridLayout_12.addLayout(self.horizontalLayout, 1, 0, 1, 1)
+        self.gridLayout_12.addLayout(self.gridLayout_11, 1, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_2)
         self.page_3 = QWidget()
@@ -275,7 +414,48 @@ class Ui_mainWindow(object):
         self.gridLayout_13.addWidget(self.inventory_tableView, 0, 0, 1, 1)
 
 
-        self.gridLayout_14.addLayout(self.gridLayout_13, 0, 0, 1, 1)
+        self.gridLayout_14.addLayout(self.gridLayout_13, 1, 0, 1, 1)
+
+        self.horizontalLayout_9 = QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.label_4 = QLabel(self.page_3)
+        self.label_4.setObjectName(u"label_4")
+
+        self.horizontalLayout_9.addWidget(self.label_4)
+
+        self.inventory_dateEdit_start = QDateEdit(self.page_3)
+        self.inventory_dateEdit_start.setObjectName(u"inventory_dateEdit_start")
+
+        self.horizontalLayout_9.addWidget(self.inventory_dateEdit_start)
+
+        self.line_4 = QFrame(self.page_3)
+        self.line_4.setObjectName(u"line_4")
+        self.line_4.setFrameShape(QFrame.Shape.VLine)
+        self.line_4.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_9.addWidget(self.line_4)
+
+        self.label_5 = QLabel(self.page_3)
+        self.label_5.setObjectName(u"label_5")
+
+        self.horizontalLayout_9.addWidget(self.label_5)
+
+        self.inventory_dateEdit_deadline = QDateEdit(self.page_3)
+        self.inventory_dateEdit_deadline.setObjectName(u"inventory_dateEdit_deadline")
+
+        self.horizontalLayout_9.addWidget(self.inventory_dateEdit_deadline)
+
+        self.inventory_btn = QPushButton(self.page_3)
+        self.inventory_btn.setObjectName(u"inventory_btn")
+
+        self.horizontalLayout_9.addWidget(self.inventory_btn)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_9.addItem(self.horizontalSpacer_3)
+
+
+        self.gridLayout_14.addLayout(self.horizontalLayout_9, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_3)
         self.page_4 = QWidget()
@@ -290,7 +470,48 @@ class Ui_mainWindow(object):
         self.gridLayout_5.addWidget(self.sales_records_tableView, 0, 0, 1, 1)
 
 
-        self.gridLayout_6.addLayout(self.gridLayout_5, 0, 1, 1, 1)
+        self.gridLayout_6.addLayout(self.gridLayout_5, 1, 1, 1, 1)
+
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.label = QLabel(self.page_4)
+        self.label.setObjectName(u"label")
+
+        self.horizontalLayout_7.addWidget(self.label)
+
+        self.sales_records_dateEdit_start = QDateEdit(self.page_4)
+        self.sales_records_dateEdit_start.setObjectName(u"sales_records_dateEdit_start")
+
+        self.horizontalLayout_7.addWidget(self.sales_records_dateEdit_start)
+
+        self.line = QFrame(self.page_4)
+        self.line.setObjectName(u"line")
+        self.line.setFrameShape(QFrame.Shape.VLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_7.addWidget(self.line)
+
+        self.label_2 = QLabel(self.page_4)
+        self.label_2.setObjectName(u"label_2")
+
+        self.horizontalLayout_7.addWidget(self.label_2)
+
+        self.sales_records_dateEdit_deadline = QDateEdit(self.page_4)
+        self.sales_records_dateEdit_deadline.setObjectName(u"sales_records_dateEdit_deadline")
+
+        self.horizontalLayout_7.addWidget(self.sales_records_dateEdit_deadline)
+
+        self.sales_records_btn = QPushButton(self.page_4)
+        self.sales_records_btn.setObjectName(u"sales_records_btn")
+
+        self.horizontalLayout_7.addWidget(self.sales_records_btn)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_7.addItem(self.horizontalSpacer)
+
+
+        self.gridLayout_6.addLayout(self.horizontalLayout_7, 0, 1, 1, 1)
 
         self.stackedWidget.addWidget(self.page_4)
         self.page_5 = QWidget()
@@ -305,7 +526,33 @@ class Ui_mainWindow(object):
         self.gridLayout_7.addWidget(self.expiring_drugs_tableView, 0, 0, 1, 1)
 
 
-        self.gridLayout_8.addLayout(self.gridLayout_7, 0, 0, 1, 1)
+        self.gridLayout_8.addLayout(self.gridLayout_7, 1, 0, 1, 1)
+
+        self.horizontalLayout_8 = QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_8.addItem(self.horizontalSpacer_2)
+
+        self.label_3 = QLabel(self.page_5)
+        self.label_3.setObjectName(u"label_3")
+
+        self.horizontalLayout_8.addWidget(self.label_3)
+
+        self.expiring_drugs_lineEdit_day = QLineEdit(self.page_5)
+        self.expiring_drugs_lineEdit_day.setObjectName(u"expiring_drugs_lineEdit_day")
+        sizePolicy.setHeightForWidth(self.expiring_drugs_lineEdit_day.sizePolicy().hasHeightForWidth())
+        self.expiring_drugs_lineEdit_day.setSizePolicy(sizePolicy)
+
+        self.horizontalLayout_8.addWidget(self.expiring_drugs_lineEdit_day)
+
+        self.expiring_drugs_save_btn = QPushButton(self.page_5)
+        self.expiring_drugs_save_btn.setObjectName(u"expiring_drugs_save_btn")
+
+        self.horizontalLayout_8.addWidget(self.expiring_drugs_save_btn)
+
+
+        self.gridLayout_8.addLayout(self.horizontalLayout_8, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_5)
         self.page_6 = QWidget()
@@ -350,7 +597,55 @@ class Ui_mainWindow(object):
         self.gridLayout_22.addWidget(self.stock_out_tabWidget, 0, 0, 1, 1)
 
 
-        self.gridLayout_24.addLayout(self.gridLayout_22, 0, 0, 1, 1)
+        self.gridLayout_24.addLayout(self.gridLayout_22, 1, 0, 1, 1)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.label_6 = QLabel(self.page_6)
+        self.label_6.setObjectName(u"label_6")
+
+        self.horizontalLayout_2.addWidget(self.label_6)
+
+        self.stock_out_dateEdit_start = QDateEdit(self.page_6)
+        self.stock_out_dateEdit_start.setObjectName(u"stock_out_dateEdit_start")
+
+        self.horizontalLayout_2.addWidget(self.stock_out_dateEdit_start)
+
+        self.line_5 = QFrame(self.page_6)
+        self.line_5.setObjectName(u"line_5")
+        self.line_5.setFrameShape(QFrame.Shape.VLine)
+        self.line_5.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_2.addWidget(self.line_5)
+
+        self.label_7 = QLabel(self.page_6)
+        self.label_7.setObjectName(u"label_7")
+
+        self.horizontalLayout_2.addWidget(self.label_7)
+
+        self.stock_out_dateEdit_deadline = QDateEdit(self.page_6)
+        self.stock_out_dateEdit_deadline.setObjectName(u"stock_out_dateEdit_deadline")
+
+        self.horizontalLayout_2.addWidget(self.stock_out_dateEdit_deadline)
+
+        self.line_6 = QFrame(self.page_6)
+        self.line_6.setObjectName(u"line_6")
+        self.line_6.setFrameShape(QFrame.Shape.VLine)
+        self.line_6.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_2.addWidget(self.line_6)
+
+        self.stock_out_btn = QPushButton(self.page_6)
+        self.stock_out_btn.setObjectName(u"stock_out_btn")
+
+        self.horizontalLayout_2.addWidget(self.stock_out_btn)
+
+        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_5)
+
+
+        self.gridLayout_24.addLayout(self.horizontalLayout_2, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_6)
         self.page_7 = QWidget()
@@ -395,7 +690,55 @@ class Ui_mainWindow(object):
         self.gridLayout_29.addWidget(self.order_tabWidget, 0, 0, 1, 1)
 
 
-        self.gridLayout_30.addLayout(self.gridLayout_29, 0, 0, 1, 1)
+        self.gridLayout_30.addLayout(self.gridLayout_29, 1, 0, 1, 1)
+
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.label_12 = QLabel(self.page_7)
+        self.label_12.setObjectName(u"label_12")
+
+        self.horizontalLayout_5.addWidget(self.label_12)
+
+        self.purchase_order_dateEdit_start = QDateEdit(self.page_7)
+        self.purchase_order_dateEdit_start.setObjectName(u"purchase_order_dateEdit_start")
+
+        self.horizontalLayout_5.addWidget(self.purchase_order_dateEdit_start)
+
+        self.line_11 = QFrame(self.page_7)
+        self.line_11.setObjectName(u"line_11")
+        self.line_11.setFrameShape(QFrame.Shape.VLine)
+        self.line_11.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_5.addWidget(self.line_11)
+
+        self.label_13 = QLabel(self.page_7)
+        self.label_13.setObjectName(u"label_13")
+
+        self.horizontalLayout_5.addWidget(self.label_13)
+
+        self.purchase_order_dateEdit_deadline = QDateEdit(self.page_7)
+        self.purchase_order_dateEdit_deadline.setObjectName(u"purchase_order_dateEdit_deadline")
+
+        self.horizontalLayout_5.addWidget(self.purchase_order_dateEdit_deadline)
+
+        self.line_12 = QFrame(self.page_7)
+        self.line_12.setObjectName(u"line_12")
+        self.line_12.setFrameShape(QFrame.Shape.VLine)
+        self.line_12.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_5.addWidget(self.line_12)
+
+        self.purchase_order_btn = QPushButton(self.page_7)
+        self.purchase_order_btn.setObjectName(u"purchase_order_btn")
+
+        self.horizontalLayout_5.addWidget(self.purchase_order_btn)
+
+        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_8)
+
+
+        self.gridLayout_30.addLayout(self.horizontalLayout_5, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_7)
         self.page_8 = QWidget()
@@ -425,7 +768,55 @@ class Ui_mainWindow(object):
         self.gridLayout_35.addWidget(self.inventory_check_tableView, 0, 0, 1, 1)
 
 
-        self.gridLayout_36.addLayout(self.gridLayout_35, 0, 0, 1, 1)
+        self.gridLayout_36.addLayout(self.gridLayout_35, 1, 0, 1, 1)
+
+        self.horizontalLayout_12 = QHBoxLayout()
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.label_14 = QLabel(self.page_9)
+        self.label_14.setObjectName(u"label_14")
+
+        self.horizontalLayout_12.addWidget(self.label_14)
+
+        self.inventory_check_dateEdit_start = QDateEdit(self.page_9)
+        self.inventory_check_dateEdit_start.setObjectName(u"inventory_check_dateEdit_start")
+
+        self.horizontalLayout_12.addWidget(self.inventory_check_dateEdit_start)
+
+        self.line_13 = QFrame(self.page_9)
+        self.line_13.setObjectName(u"line_13")
+        self.line_13.setFrameShape(QFrame.Shape.VLine)
+        self.line_13.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_12.addWidget(self.line_13)
+
+        self.label_15 = QLabel(self.page_9)
+        self.label_15.setObjectName(u"label_15")
+
+        self.horizontalLayout_12.addWidget(self.label_15)
+
+        self.inventory_check_dateEdit_deadline = QDateEdit(self.page_9)
+        self.inventory_check_dateEdit_deadline.setObjectName(u"inventory_check_dateEdit_deadline")
+
+        self.horizontalLayout_12.addWidget(self.inventory_check_dateEdit_deadline)
+
+        self.line_14 = QFrame(self.page_9)
+        self.line_14.setObjectName(u"line_14")
+        self.line_14.setFrameShape(QFrame.Shape.VLine)
+        self.line_14.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_12.addWidget(self.line_14)
+
+        self.inventory_check_query_btn = QPushButton(self.page_9)
+        self.inventory_check_query_btn.setObjectName(u"inventory_check_query_btn")
+
+        self.horizontalLayout_12.addWidget(self.inventory_check_query_btn)
+
+        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_12.addItem(self.horizontalSpacer_9)
+
+
+        self.gridLayout_36.addLayout(self.horizontalLayout_12, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_9)
         self.page_10 = QWidget()
@@ -449,6 +840,11 @@ class Ui_mainWindow(object):
         self.gridLayout_40.setObjectName(u"gridLayout_40")
         self.gridLayout_39 = QGridLayout()
         self.gridLayout_39.setObjectName(u"gridLayout_39")
+        self.add_user_btn = QPushButton(self.page_11)
+        self.add_user_btn.setObjectName(u"add_user_btn")
+
+        self.gridLayout_39.addWidget(self.add_user_btn, 1, 0, 1, 1)
+
         self.user_tableWidget = QTableWidget(self.page_11)
         if (self.user_tableWidget.columnCount() < 3):
             self.user_tableWidget.setColumnCount(3)
@@ -464,15 +860,20 @@ class Ui_mainWindow(object):
 
         self.gridLayout_39.addWidget(self.user_tableWidget, 0, 0, 1, 1)
 
+        self.delete_user_btn = QPushButton(self.page_11)
+        self.delete_user_btn.setObjectName(u"delete_user_btn")
+
+        self.gridLayout_39.addWidget(self.delete_user_btn, 2, 0, 1, 1)
+
 
         self.gridLayout_40.addLayout(self.gridLayout_39, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_11)
 
-        self.gridLayout.addWidget(self.stackedWidget, 1, 2, 1, 1)
+        self.gridLayout.addWidget(self.stackedWidget, 0, 2, 1, 1)
 
 
-        self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
+        self.gridLayout_2.addLayout(self.gridLayout, 1, 1, 1, 1)
 
         mainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(mainWindow)
@@ -494,10 +895,13 @@ class Ui_mainWindow(object):
         self.menubar.addAction(self.menu_3.menuAction())
         self.menu.addAction(self.actionout)
         self.menu.addSeparator()
+        self.menu.addAction(self.actionh)
+        self.menu_3.addAction(self.actionfg)
 
         self.retranslateUi(mainWindow)
 
-        self.stackedWidget.setCurrentIndex(11)
+        self.stackedWidget.setCurrentIndex(0)
+        self.drug_tabWidget.setCurrentIndex(1)
         self.stock_in_tabWidget.setCurrentIndex(0)
         self.stock_out_tabWidget.setCurrentIndex(0)
         self.order_tabWidget.setCurrentIndex(0)
@@ -509,7 +913,8 @@ class Ui_mainWindow(object):
     def retranslateUi(self, mainWindow):
         mainWindow.setWindowTitle(QCoreApplication.translate("mainWindow", u"\u836f\u623f\u7ba1\u7406\u7cfb\u7edf", None))
         self.actionout.setText(QCoreApplication.translate("mainWindow", u"\u5bfc\u51fa\u62a5\u8868", None))
-        self.search_le.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u641c\u7d22", None))
+        self.actionfg.setText(QCoreApplication.translate("mainWindow", u"\u5207\u6362\u8d26\u53f7", None))
+        self.actionh.setText(QCoreApplication.translate("mainWindow", u"\u5bfc\u5165\u62a5\u8868", None))
         self.medicine.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1", None))
         self.sales_records.setText(QCoreApplication.translate("mainWindow", u"\u9500\u552e\u8bb0\u5f55", None))
         self.expiring_medicine.setText(QCoreApplication.translate("mainWindow", u"\u4e34\u671f\u836f\u54c1", None))
@@ -522,22 +927,61 @@ class Ui_mainWindow(object):
         self.inventory_record.setText(QCoreApplication.translate("mainWindow", u"\u76d8\u70b9\u8bb0\u5f55", None))
         self.member_customer.setText(QCoreApplication.translate("mainWindow", u"\u4f1a\u5458\u5ba2\u6237", None))
         self.user_information.setText(QCoreApplication.translate("mainWindow", u"\u7528\u6237\u4fe1\u606f", None))
+        self.search_le.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u641c\u7d22\u836f\u54c1", None))
+        self.drug_selection_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.drug_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u836f\u54c1", None))
+        self.drug_revise_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u836f\u54c1", None))
+        self.drug_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u836f\u54c1", None))
+        self.drug_tabWidget.setTabText(self.drug_tabWidget.indexOf(self.tab), QCoreApplication.translate("mainWindow", u"\u57fa\u672c\u4fe1\u606f", None))
+        self.label_10.setText(QCoreApplication.translate("mainWindow", u"\u5242\u578b", None))
+        self.label_8.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u5c5e\u6027", None))
+        self.label_9.setText(QCoreApplication.translate("mainWindow", u"\u6700\u5c0f\u5355\u4f4d", None))
+        self.label_11.setText(QCoreApplication.translate("mainWindow", u"\u89c4\u683c", None))
+        self.drugs_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u8bbe\u7f6e", None))
+        self.specifications_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u89c4\u683c\u8bbe\u7f6e", None))
+        self.dosage_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u5242\u578b\u8bbe\u7f6e", None))
+        self.unit_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u5355\u4f4d\u8bbe\u7f6e", None))
+        self.drug_tabWidget.setTabText(self.drug_tabWidget.indexOf(self.drug_class_pate), QCoreApplication.translate("mainWindow", u"\u5206\u7c7b\u8bbe\u7f6e", None))
+        self.supplier_lineEdit.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u8f93\u5165\u4f9b\u5e94\u5546\u67e5\u8be2", None))
+        self.supplier_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.stock_in_lineEdit.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u8f93\u5165\u5546\u54c1ID", None))
+        self.stock_in_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.stock_in_all_btn.setText(QCoreApplication.translate("mainWindow", u"\u6240\u6709\u5e93\u5b58", None))
+        self.stock_in_com_btn.setText(QCoreApplication.translate("mainWindow", u"\u7efc\u5408\u67e5\u8be2", None))
+        self.stock_in_btn.setText(QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u5904\u7406", None))
         self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.stock_in_main), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u4e3b\u8868", None))
         self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.stock_in_detail), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u660e\u7ec6\u8868", None))
         self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.inventory_batch), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u6279\u6b21\u8868", None))
-        self.pushButton_2.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u836f\u54c1", None))
-        self.pushButton.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u836f\u54c1", None))
-        self.pushButton_3.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u836f\u54c1", None))
+        self.label_4.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65e5\u671f", None))
+        self.label_5.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65e5\u671f", None))
+        self.inventory_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.label.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65e5\u671f", None))
+        self.label_2.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65e5\u671f", None))
+        self.sales_records_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.label_3.setText(QCoreApplication.translate("mainWindow", u"\u4e34\u671f\u63d0\u524d\u5929\u6570", None))
+        self.expiring_drugs_lineEdit_day.setText(QCoreApplication.translate("mainWindow", u"360", None))
+        self.expiring_drugs_save_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fdd\u5b58\u5929\u6570", None))
         self.stock_out_tabWidget.setTabText(self.stock_out_tabWidget.indexOf(self.stock_out_main), QCoreApplication.translate("mainWindow", u"\u51fa\u5e93\u4e3b\u8868", None))
         self.stock_out_tabWidget.setTabText(self.stock_out_tabWidget.indexOf(self.stock_out_detail), QCoreApplication.translate("mainWindow", u"\u51fa\u5e93\u660e\u7ec6", None))
+        self.label_6.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
+        self.label_7.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
+        self.stock_out_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
         self.order_tabWidget.setTabText(self.order_tabWidget.indexOf(self.purchase_order), QCoreApplication.translate("mainWindow", u"\u91c7\u8d2d\u8ba2\u5355\u8868", None))
         self.order_tabWidget.setTabText(self.order_tabWidget.indexOf(self.purchase_detail), QCoreApplication.translate("mainWindow", u"\u91c7\u8d2d\u660e\u7ec6\u8868", None))
+        self.label_12.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
+        self.label_13.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
+        self.purchase_order_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.label_14.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
+        self.label_15.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
+        self.inventory_check_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.add_user_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u7528\u6237", None))
         ___qtablewidgetitem = self.user_tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("mainWindow", u"\u7528\u6237\u540d", None));
         ___qtablewidgetitem1 = self.user_tableWidget.horizontalHeaderItem(1)
         ___qtablewidgetitem1.setText(QCoreApplication.translate("mainWindow", u"\u7535\u8bdd", None));
         ___qtablewidgetitem2 = self.user_tableWidget.horizontalHeaderItem(2)
         ___qtablewidgetitem2.setText(QCoreApplication.translate("mainWindow", u"\u90ae\u7bb1", None));
+        self.delete_user_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u7528\u6237", None))
         self.menu.setTitle(QCoreApplication.translate("mainWindow", u"\u6587\u4ef6", None))
         self.menu_2.setTitle(QCoreApplication.translate("mainWindow", u"\u5de5\u5177", None))
         self.menu_3.setTitle(QCoreApplication.translate("mainWindow", u"\u8d26\u53f7", None))
