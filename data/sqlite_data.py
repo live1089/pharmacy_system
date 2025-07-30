@@ -10,7 +10,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
     def __init__(self):
         super().__init__()
         self.db = QSqlDatabase.addDatabase("QSQLITE")
-        self.db.setDatabaseName("pharmacy.db")
+        self.db.setDatabaseName("data/pharmacy.db")
         if not self.db.open():
             QMessageBox.critical(
                 None, "数据库错误",
@@ -41,26 +41,49 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         )
         """)
 
+        # query.exec("""
+        # CREATE TABLE IF NOT EXISTS drug_formulation(
+        #         formulation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #         formulation_name TEXT NOT NULL           -- 剂型名称
+        # )""")
+        #
+        # query.exec("""
+        # CREATE TABLE IF NOT EXISTS drug_unit(
+        #         unit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #         unit_name TEXT NOT NULL              -- 单位名称
+        # )""")
+        #
+        # query.exec("""
+        # CREATE TABLE IF NOT EXISTS Specification(
+        #         specification_id INT PRIMARY KEY,
+        #         formulation_id INT,
+        #         unit_id INT,
+        #         dosage VARCHAR(50),                -- 剂量
+        #         packaging_unit VARCHAR(20),        -- 包装单位
+        #         packaging_quantity INT,            -- 包装数量
+        #         FOREIGN KEY (formulation_id) REFERENCES drug_formulation(formulation_id),
+        #         FOREIGN KEY (unit_id) REFERENCES drug_unit(unit_id)
+        # )""")
+
         query.exec("""
         CREATE TABLE IF NOT EXISTS drug_formulation(
                 formulation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                formulation_name TEXT NOT NULL           -- 剂型名称
+                formulation_name TEXT NOT NULL UNIQUE           -- 剂型名称（唯一约束）
         )""")
 
         query.exec("""
         CREATE TABLE IF NOT EXISTS drug_unit(
                 unit_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                unit_name TEXT NOT NULL              -- 单位名称
+                unit_name TEXT NOT NULL UNIQUE               -- 单位名称（唯一约束），粒/片/支等
         )""")
 
         query.exec("""
         CREATE TABLE IF NOT EXISTS Specification(
-                specification_id INT PRIMARY KEY,
-                formulation_id INT,
-                unit_id INT,
-                dosage VARCHAR(50),                -- 剂量
-                packaging_unit VARCHAR(20),        -- 包装单位
-                packaging_quantity INT,            -- 包装数量
+                specification_id INTEGER PRIMARY KEY AUTOINCREMENT,     -- 规格id
+                formulation_id INTEGER,                        -- 剂型
+                unit_id INTEGER,                               -- 最小药品单位
+                packaging_quantity INTEGER NOT NULL CHECK(packaging_quantity > 0),  -- 包装数量
+                packaging_unit TEXT,                           -- 最小包装单位（盒/瓶等）
                 FOREIGN KEY (formulation_id) REFERENCES drug_formulation(formulation_id),
                 FOREIGN KEY (unit_id) REFERENCES drug_unit(unit_id)
         )""")
@@ -289,10 +312,14 @@ class BaseTableModel(QSqlTableModel):
     def __init__(self, parent=None, db=None, table_name="", headers=None, hidden_columns=None):
         super().__init__(parent, db)
         self.setTable(table_name)
-        self.select()
 
-        # 设置查询（带行数限制）
         self.setQuery(f"SELECT * FROM {table_name} LIMIT 100")
+
+        # 检查表是否存在并可以访问
+        if not self.select():
+            print(f"无法从表 {table_name} 加载数据: {self.lastError().text()}")
+        else:
+            print(f"成功加载表 {table_name}，行数: {self.rowCount()}")
 
         # 设置表头
         if headers:
@@ -303,9 +330,12 @@ class BaseTableModel(QSqlTableModel):
         self.hidden_columns = hidden_columns or []
 
 
+
+
 # 药物模型
 class MedicineModel(BaseTableModel):
     HEADERS = {
+        0: "药品ID",
         1: "药品名称",
         2: "通用名",
         3: "规格",
@@ -319,7 +349,7 @@ class MedicineModel(BaseTableModel):
         11: "分类",
         12: "供应商",
     }
-    HIDDEN_COLUMNS = [0, 13, 14, 15]  # 隐藏的列索引
+    HIDDEN_COLUMNS = []  # 隐藏的列索引
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -340,7 +370,7 @@ class ExpiringMedicineModel(BaseTableModel):
         4: "剩余库存数量",
         5: "临期提醒时间"
     }
-    HIDDEN_COLUMNS = [0, 6]
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -367,7 +397,7 @@ class SupplierModel(BaseTableModel):
         10: "创建时间",
         11: "创建人"
     }
-    HIDDEN_COLUMNS = [0, 12, 13]  # 隐藏的列索引
+    HIDDEN_COLUMNS = [0]  # 隐藏的列索引
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -390,7 +420,7 @@ class PurchaseOrderModel(BaseTableModel):
         5: "状态",
         6: "备注"
     }
-    HIDDEN_COLUMNS = [0, 7, 8]  # 隐藏的列索引
+    HIDDEN_COLUMNS = [0]  # 隐藏的列索引
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -415,7 +445,7 @@ class PurchaseDetailModel(BaseTableModel):
         7: "批号",
         8: "有效期"
     }
-    HIDDEN_COLUMNS = [0, 9, 10]  # 隐藏的列索引
+    HIDDEN_COLUMNS = [0]  # 隐藏的列索引
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -436,7 +466,7 @@ class SalesModel(BaseTableModel):
         3: "销售单价",
         4: "销售日期",
     }
-    HIDDEN_COLUMNS = [0, 5]
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -532,7 +562,7 @@ class InventoryDatchModel(BaseTableModel):
         8: "入库日期",
         9: "货位",
     }
-    HIDDEN_COLUMNS = [0, 10]
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -556,7 +586,7 @@ class StockOutMainModel(BaseTableModel):
         6: "出库总金额",
         7: "备注",
     }
-    HIDDEN_COLUMNS = [0, 8]
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -580,7 +610,7 @@ class StockOutDetailModel(BaseTableModel):
         6: "成本单价",
         7: "小计",
     }
-    HIDDEN_COLUMNS = [0, 8]
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -603,7 +633,7 @@ class InventoryCheckModel(BaseTableModel):
         5: "盘点结果",
         6: "备注",
     }
-    HIDDEN_COLUMNS = [0, 7]
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -620,7 +650,7 @@ class MedicineCategoriesModel(BaseTableModel):
         0: "ID",
         1: "类型"
     }
-    HIDDEN_COLUMNS = []
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -637,7 +667,7 @@ class DrugRormulationModel(BaseTableModel):
         0: "ID",
         1: "剂型"
     }
-    HIDDEN_COLUMNS = []
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -654,7 +684,7 @@ class DrugUnitModel(BaseTableModel):
         0: "ID",
         1: "单位"
     }
-    HIDDEN_COLUMNS = []
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -669,11 +699,12 @@ class DrugUnitModel(BaseTableModel):
 class SpecificationModel(BaseTableModel):
     HEADERS = {
         0: "ID",
-        1: "剂量",
-        2: "包装单位",
-        3: "包装数量"
+        1: "剂型",
+        2: "药品单位",
+        3: "包装数量",
+        4: "包装单位"
     }
-    HIDDEN_COLUMNS = [4, 5]
+    HIDDEN_COLUMNS = [0, 1, 2]
 
     def __init__(self, parent=None, db=None):
         super().__init__(

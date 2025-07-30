@@ -45,11 +45,6 @@ class Ui_RormuDialog(object):
 
         self.verticalLayout.addWidget(self.del_btn)
 
-        self.modify_btn = QPushButton(RormuDialog)
-        self.modify_btn.setObjectName(u"modify_btn")
-
-        self.verticalLayout.addWidget(self.modify_btn)
-
         self.verticalSpacer = QSpacerItem(20, 270, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
 
         self.verticalLayout.addItem(self.verticalSpacer)
@@ -76,6 +71,5 @@ class Ui_RormuDialog(object):
         self.refresh_btn.setText(QCoreApplication.translate("RormuDialog", u"\u5237\u65b0", None))
         self.add_btn.setText(QCoreApplication.translate("RormuDialog", u"\u6dfb\u52a0", None))
         self.del_btn.setText(QCoreApplication.translate("RormuDialog", u"\u5220\u9664", None))
-        self.modify_btn.setText(QCoreApplication.translate("RormuDialog", u"\u4fee\u6539", None))
     # retranslateUi
 

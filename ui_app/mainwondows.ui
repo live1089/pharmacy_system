@@ -229,9 +229,6 @@
                <layout class="QGridLayout" name="gridLayout_42">
                 <item row="0" column="0">
                  <layout class="QGridLayout" name="gridLayout_41">
-                  <item row="3" column="3">
-                   <widget class="QListView" name="unit_listView"/>
-                  </item>
                   <item row="2" column="2">
                    <widget class="QLabel" name="label_10">
                     <property name="text">
@@ -241,9 +238,6 @@
                      <set>Qt::AlignmentFlag::AlignCenter</set>
                     </property>
                    </widget>
-                  </item>
-                  <item row="3" column="2">
-                   <widget class="QListView" name="dosages_listView"/>
                   </item>
                   <item row="1" column="0">
                    <spacer name="verticalSpacer">
@@ -260,9 +254,6 @@
                      </size>
                     </property>
                    </spacer>
-                  </item>
-                  <item row="3" column="0">
-                   <widget class="QListView" name="drug_attribute_listView"/>
                   </item>
                   <item row="2" column="0">
                    <widget class="QLabel" name="label_8">
@@ -283,9 +274,6 @@
                      <set>Qt::AlignmentFlag::AlignCenter</set>
                     </property>
                    </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <widget class="QListView" name="specifications_listView"/>
                   </item>
                   <item row="2" column="1">
                    <widget class="QLabel" name="label_11">
@@ -327,6 +315,18 @@
                      <string>单位设置</string>
                     </property>
                    </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QTableView" name="drug_attr_table_view"/>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QTableView" name="spec_table_view"/>
+                  </item>
+                  <item row="3" column="2">
+                   <widget class="QTableView" name="dosage_table_view"/>
+                  </item>
+                  <item row="3" column="3">
+                   <widget class="QTableView" name="unit_table_view"/>
                   </item>
                  </layout>
                 </item>

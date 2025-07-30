@@ -18,10 +18,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QDateEdit, QFrame, QGridLayout,
     QHBoxLayout, QHeaderView, QLabel, QLineEdit,
-    QListView, QMainWindow, QMenu, QMenuBar,
-    QPushButton, QSizePolicy, QSpacerItem, QStackedWidget,
-    QStatusBar, QTabWidget, QTableView, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget)
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QSizePolicy, QSpacerItem, QStackedWidget, QStatusBar,
+    QTabWidget, QTableView, QTableWidget, QTableWidgetItem,
+    QVBoxLayout, QWidget)
 
 class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
@@ -195,30 +195,15 @@ class Ui_mainWindow(object):
         self.gridLayout_42.setObjectName(u"gridLayout_42")
         self.gridLayout_41 = QGridLayout()
         self.gridLayout_41.setObjectName(u"gridLayout_41")
-        self.unit_listView = QListView(self.drug_class_pate)
-        self.unit_listView.setObjectName(u"unit_listView")
-
-        self.gridLayout_41.addWidget(self.unit_listView, 3, 3, 1, 1)
-
         self.label_10 = QLabel(self.drug_class_pate)
         self.label_10.setObjectName(u"label_10")
         self.label_10.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.gridLayout_41.addWidget(self.label_10, 2, 2, 1, 1)
 
-        self.dosages_listView = QListView(self.drug_class_pate)
-        self.dosages_listView.setObjectName(u"dosages_listView")
-
-        self.gridLayout_41.addWidget(self.dosages_listView, 3, 2, 1, 1)
-
         self.verticalSpacer = QSpacerItem(20, 9, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
 
         self.gridLayout_41.addItem(self.verticalSpacer, 1, 0, 1, 1)
-
-        self.drug_attribute_listView = QListView(self.drug_class_pate)
-        self.drug_attribute_listView.setObjectName(u"drug_attribute_listView")
-
-        self.gridLayout_41.addWidget(self.drug_attribute_listView, 3, 0, 1, 1)
 
         self.label_8 = QLabel(self.drug_class_pate)
         self.label_8.setObjectName(u"label_8")
@@ -231,11 +216,6 @@ class Ui_mainWindow(object):
         self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.gridLayout_41.addWidget(self.label_9, 2, 3, 1, 1)
-
-        self.specifications_listView = QListView(self.drug_class_pate)
-        self.specifications_listView.setObjectName(u"specifications_listView")
-
-        self.gridLayout_41.addWidget(self.specifications_listView, 3, 1, 1, 1)
 
         self.label_11 = QLabel(self.drug_class_pate)
         self.label_11.setObjectName(u"label_11")
@@ -263,6 +243,26 @@ class Ui_mainWindow(object):
         self.unit_set_btn.setObjectName(u"unit_set_btn")
 
         self.gridLayout_41.addWidget(self.unit_set_btn, 0, 3, 1, 1)
+
+        self.drug_attr_table_view = QTableView(self.drug_class_pate)
+        self.drug_attr_table_view.setObjectName(u"drug_attr_table_view")
+
+        self.gridLayout_41.addWidget(self.drug_attr_table_view, 3, 0, 1, 1)
+
+        self.spec_table_view = QTableView(self.drug_class_pate)
+        self.spec_table_view.setObjectName(u"spec_table_view")
+
+        self.gridLayout_41.addWidget(self.spec_table_view, 3, 1, 1, 1)
+
+        self.dosage_table_view = QTableView(self.drug_class_pate)
+        self.dosage_table_view.setObjectName(u"dosage_table_view")
+
+        self.gridLayout_41.addWidget(self.dosage_table_view, 3, 2, 1, 1)
+
+        self.unit_table_view = QTableView(self.drug_class_pate)
+        self.unit_table_view.setObjectName(u"unit_table_view")
+
+        self.gridLayout_41.addWidget(self.unit_table_view, 3, 3, 1, 1)
 
 
         self.gridLayout_42.addLayout(self.gridLayout_41, 0, 0, 1, 1)

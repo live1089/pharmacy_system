@@ -20,7 +20,7 @@ import data.sqlite_data
 import ui_app.log_in_ui
 import ui_app.mainwondows_ui
 from page_window.medicines_page import MedicinesPage, DrugAttributePage, DrugRormulationPage, DrugUnitPage, \
-    DrugSpecificationPage
+    DrugSpecificationPage, calss_page
 
 
 # 其他工具
@@ -50,7 +50,7 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.sub_window_event()
         self.db = data.sqlite_data.DatabaseInit()
         self.sqlite_data()
-
+        calss_page(self)
         # # 创建模型并设置表名
         # self.model = QSqlTableModel(self, self.db)
         # self.model.setTable("medicines")
@@ -72,7 +72,9 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         data.sqlite_data.get_purchase_order_model(self)  # 采购订单
         data.sqlite_data.get_purchase_order_detail_model(self)  # 采购订单明细
         data.sqlite_data.get_inventory_check(self)  # 库存盘点
+
         self.stock_in_tabWidget.currentChanged.connect(self.tab_changed)  # 入库标签切换时触发
+
 
     # def page_switch(self, page_name):
     #     self.medicine.clicked.connect(lambda: self.show_page_by_name(page_name))
