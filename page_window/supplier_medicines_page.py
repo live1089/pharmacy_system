@@ -1,0 +1,122 @@
+from datetime import datetime
+
+from PySide6.QtCore import QDateTime
+from PySide6.QtSql import QSqlQuery
+from PySide6.QtWidgets import QDialog, QMessageBox, QLineEdit, QPlainTextEdit, QDateTimeEdit
+
+from ui_app.supplier_drug_ui import Ui_SupDialog
+
+
+class SupplierDrugPage(QDialog, Ui_SupDialog):
+    def __init__(self, parent):
+        super().__init__()
+        self.setupUi(self)
+        self.ui = parent
+        self.bind_event()
+
+    def bind_event(self):
+        self.supplier_save_btn.clicked.connect(self.save)
+
+    def save(self):
+        create_time = self.create_time.dateTime().toString("yyyy-MM-dd hh:mm:ss")
+        update_time = self.update_time.dateTime().toString("yyyy-MM-dd hh:mm:ss")
+        supp = self.supplier_line_edit.text()
+        contact = self.contact_line_edit.text()
+        updater = self.updater_line_edit.text()
+        creator = self.creator_line_edit.text()
+        phone = self.phone_line_edit.text()
+        address = self.address_line_edit.text()
+        email = self.email_line_edit.text()
+        remark = self.plainTextEdit_remark.toPlainText()
+
+        query = QSqlQuery()
+
+        query.prepare(
+            "INSERT INTO supplier (name, contact_person, phone, address, email, remarks, update_at, update_by, create_at, created_by)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+
+        query.addBindValue(supp)
+        query.addBindValue(contact)
+        query.addBindValue(phone)
+        query.addBindValue(address)
+        query.addBindValue(email)
+        query.addBindValue(remark)
+        query.addBindValue(update_time)
+        query.addBindValue(updater)
+        query.addBindValue(create_time)
+        query.addBindValue(creator)
+        if not query.exec():
+            QMessageBox.critical(self, "数据库错误", f"添加供应商失败: {query.lastError().text()}")
+        else:
+            QMessageBox.information(self, "成功", "添加供应商成功")
+
+    def load_supplier_time(self):
+        self.create_time.setDateTime(QDateTime.currentDateTime())
+        self.update_time.setDateTime(QDateTime.currentDateTime())
+
+    def show_mod_supplier_data(self, id_s):
+        """根据供应商ID填充数据到UI控件"""
+        # 检查是否有选中行
+        if not id_s:
+            QMessageBox.warning(self, "警告", "请先选择要修改的供应商记录")
+            return
+
+        # 获取第一个选中的ID（假设一次只修改一条记录）
+        if isinstance(id_s, list) and len(id_s) > 0:
+            supplier_id = id_s[0]
+        else:
+            supplier_id = id_s
+
+        # 使用参数化查询防止SQL注入
+        query = QSqlQuery()
+        query.prepare("SELECT * FROM supplier WHERE supplier_id = ?")
+        query.addBindValue(supplier_id)
+
+        if not query.exec():
+            QMessageBox.critical(self, "错误", f"查询失败: {query.lastError().text()}")
+            return
+
+        if query.next():
+            # 成功查询到数据，填充到对应控件
+            self.supplier_line_edit.setText(query.value("name") or "")
+            self.contact_line_edit.setText(query.value("contact_person") or "")
+            self.phone_line_edit.setText(query.value("phone") or "")
+            self.address_line_edit.setText(query.value("address") or "")
+            self.email_line_edit.setText(query.value("email") or "")
+            self.plainTextEdit_remark.setPlainText(query.value("remarks") or "")
+
+            self.update_time.setDateTime(QDateTime.currentDateTime())
+
+            # 处理创建时间
+            create_at = query.value("create_at")
+            if create_at:
+                if isinstance(create_at, str):
+                    qdatetime = QDateTime.fromString(create_at, "yyyy-MM-dd HH:mm:ss")
+                    if qdatetime.isValid():
+                        self.create_time.setDateTime(qdatetime)
+                elif isinstance(create_at, QDateTime):
+                    self.create_time.setDateTime(create_at)
+
+            self.updater_line_edit.setText(query.value("update_by") or "")
+            self.creator_line_edit.setText(query.value("created_by") or "")
+        else:
+            QMessageBox.warning(self, "警告", "未找到对应的供应商记录")
+
+
+def get_selected_logical_rows(tableView):
+    """获取视图中的选中行（逻辑行）"""
+    selection_model = tableView.selectionModel()
+    if not selection_model:
+        return []
+
+    selected_rows = set()
+    for index in selection_model.selectedRows():
+        if index.isValid():
+            selected_rows.add(index.row())
+
+    return sorted(selected_rows)
+
+
+def del_rows(rows, db):
+    query = QSqlQuery(db)
+    query.exec(f"DELETE FROM supplier WHERE {rows}")

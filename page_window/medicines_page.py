@@ -1,12 +1,85 @@
 from PySide6.QtSql import QSqlQuery
+from PySide6.QtWidgets import QMessageBox, QLineEdit, QDialog, QDialogButtonBox, QVBoxLayout
 
 from data.sqlite_data import MedicineCategoriesModel, DrugRormulationModel, DrugUnitModel, SpecificationModel
 from ui_app.drug_add_ui import Ui_Dialog
-from PySide6.QtWidgets import QWidget, QMessageBox, QLineEdit, QDialog, QDialogButtonBox, QVBoxLayout
 from ui_app.drug_attribute_ui import Ui_class_dialog
 from ui_app.drug_rormulation_ui import Ui_RormuDialog
 from ui_app.drug_specification_ui import Ui_SpecificationDialog
 from ui_app.drug_unit_ui import Ui_UnitDialog
+
+
+def delete_selected_rows(self, tableView, model, db, parent=None):
+    """
+    删除表格视图中选中的行（通用函数）
+
+    参数:
+        tableView (QTableView): 表格视图实例
+        model (BaseTableModel): 数据模型实例
+        db (QSqlDatabase): 数据库连接
+        parent (QWidget): 父窗口，用于显示对话框
+
+    返回:
+        bool: 操作是否成功
+        str: 错误消息（成功时为空）
+    """
+    # 1. 获取选中的行
+    selection = tableView.selectionModel().selectedRows()
+    if not selection:
+        QMessageBox.warning(parent, "提示", "请先选择要删除的行", QMessageBox.StandardButton.Ok)
+
+    # 2. 确认对话框
+    reply = QMessageBox.question(
+        parent,
+        "确认删除",
+        f"确定要删除选中的 {len(selection)} 行吗？此操作无法撤销！",
+        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+    )
+    if reply == QMessageBox.StandardButton.No:
+        return False, "用户取消操作"
+
+    # 3. 获取主键列名
+    pk_column = model.get_primary_key_column()
+    if not pk_column:
+        return False, "无法确定主键列"
+
+    # 4. 收集要删除的主键值
+    ids_to_delete = []
+    for index in selection:
+        row = index.row()
+        record = model.record(row)
+        pk_value = record.value(pk_column)
+        if pk_value is not None:
+            ids_to_delete.append(pk_value)
+
+    if not ids_to_delete:
+        return False, "无法获取选中行的主键值"
+
+    try:
+        # 构建 IN 语句
+        placeholders = ", ".join(["?"] * len(ids_to_delete))
+
+        # 构造删除语句
+        query = QSqlQuery(db)
+        sql = f"DELETE FROM {model.tableName()} WHERE {pk_column} IN ({placeholders})"
+
+        if not query.prepare(sql):
+            raise Exception(f"SQL准备失败: {query.lastError().text()}")
+
+        # 绑定参数
+        for i, pk_value in enumerate(ids_to_delete):
+            query.bindValue(i, pk_value)
+
+        # 执行查询
+        if not query.exec():
+            raise Exception(f"删除失败: {query.lastError().text()}")
+
+        return True, f"成功删除 {len(ids_to_delete)} 行数据"
+
+    except Exception as e:
+        # 回滚事务
+        db.rollback()
+        return False, str(e)
 
 
 class PopupDialog(QDialog):
@@ -34,47 +107,78 @@ class PopupDialog(QDialog):
         self.setLayout(layout)
 
 
-class SpecificationDialog(QDialog):
-    def __init__(self, parent=None, title="输入数据"):
-        super().__init__(parent)
-        self.setWindowTitle(title)
-        self.setFixedSize(320, 188)
-
-        # 设置布局
-        layout = QVBoxLayout()
-
-        # 添加输入框
-        self.input_lineEdit_uint = QLineEdit()
-        self.input_lineEdit_uint.setPlaceholderText("请输入包装单位")
-        self.input_lineEdit_quan = QLineEdit()
-        self.input_lineEdit_quan.setPlaceholderText("请输入包装数量")
-        layout.addWidget(self.input_lineEdit_uint)
-        layout.addWidget(self.input_lineEdit_quan)
-
-        # 添加按钮组
-        self.buttonBox = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        layout.addWidget(self.buttonBox)
-
-        self.setLayout(layout)
-
-
-# 药品页面
+# 药品添加页面
 class MedicinesPage(QDialog, Ui_Dialog):
     def __init__(self, parent):
         super().__init__()
         self.setupUi(self)
         self.ui = parent
         self.bind_event()
+        self.load_medicine_combo()
 
     def bind_event(self):
         self.drug_add_save_btn.clicked.connect(self.save)
 
+    def load_medicine_combo(self):
+        """加载药品到下拉框"""
+        self.drug_classify_combox.clear()
+        self.pack_combox.clear()
+        self.drug_unit_combox.clear()
+        self.dosage_combox.clear()
+
+        query = QSqlQuery("SELECT category_id, category_name FROM MedicineCategories")
+        while query.next():
+            drug_classify_id = query.value(0)
+            drug_classify_name = query.value(1)
+            self.drug_classify_combox.addItem(drug_classify_name, drug_classify_id)
+
+        query = QSqlQuery("SELECT formulation_id, formulation_name FROM drug_formulation")
+        while query.next():
+            drug_dosage_id = query.value(0)
+            drug_dosage_name = query.value(1)
+            self.dosage_combox.addItem(drug_dosage_name, drug_dosage_id)
+
+        query = QSqlQuery("SELECT unit_id, unit_name FROM drug_unit")
+        while query.next():
+            drug_dosage_id = query.value(0)
+            drug_dosage_name = query.value(1)
+            self.drug_unit_combox.addItem(drug_dosage_name, drug_dosage_id)
+
+        query = QSqlQuery("SELECT specification_id, packaging_specifications FROM Specification")
+        while query.next():
+            drug_dosage_id = query.value(0)
+            drug_dosage_name = query.value(1)
+            self.pack_combox.addItem(drug_dosage_name, drug_dosage_id)
+
     def save(self):
         drug_name = self.drug_name_line_edit.text()
+        drug_genre = self.generic_name_line_edit.text()
+        drug_class = self.drug_classify_combox.itemData(self.drug_classify_combox.currentIndex())
+        drug_pack = self.pack_combox.itemData(self.pack_combox.currentIndex())
+        drug_unit = self.drug_unit_combox.itemData(self.drug_unit_combox.currentIndex())
+        drug_price = self.price_line_edit.text()
+        drug_cmsw = self.cmsw_line_edit.text()
+        drug_dosage = self.dosage_combox.itemData(self.dosage_combox.currentIndex())
+        drug_manufactur = self.manufacturer_line_edit.text()
+
+        query = QSqlQuery()
+
+        query.prepare(
+            "INSERT INTO medicine_dic (trade_name, generic_name, specification_id, manufacturer, formulation_id, approval_number ,category_id, unit_id, price)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        query.addBindValue(drug_name)
+        query.addBindValue(drug_genre)
+        query.addBindValue(drug_pack)
+        query.addBindValue(drug_manufactur)
+        query.addBindValue(drug_dosage)
+        query.addBindValue(drug_cmsw)
+        query.addBindValue(drug_class)
+        query.addBindValue(drug_unit)
+        query.addBindValue(drug_price)
+        if not query.exec():
+            QMessageBox.critical(self, "数据库错误", f"添加失败: {query.lastError().text()}")
+        else:
+            QMessageBox.information(self, "成功", "添加成功")
 
 
 # 类别属性页面
@@ -90,6 +194,7 @@ class DrugAttributePage(QDialog, Ui_class_dialog):
     def bind_event(self):
         self.add_btn.clicked.connect(self.add_drug_attribute)
         self.refresh_btn.clicked.connect(self.get_drug_attribute_model)
+        self.del_btn.clicked.connect(self.delete_selected_row)
 
     def add_drug_attribute(self):
         dialog = PopupDialog(self, "输入药品分类")
@@ -102,6 +207,7 @@ class DrugAttributePage(QDialog, Ui_class_dialog):
                 QMessageBox.critical(self, "数据库错误", f"添加分类失败: {query.lastError().text()}")
             else:
                 QMessageBox.information(self, "成功", "分类添加成功")
+                self.get_drug_attribute_model()
                 print(f"输入药品属性: {input_text}")
 
     def get_drug_attribute_model(self):
@@ -110,6 +216,23 @@ class DrugAttributePage(QDialog, Ui_class_dialog):
         for col in self.drug_attribute_model.hidden_columns:
             self.class_set_tableView.hideColumn(col)
         return self.drug_attribute_model
+
+    def delete_selected_row(self):
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.class_set_tableView,
+            model=self.drug_attribute_model,  # 您的BaseTableModel实例
+            db=self.db,  # QSqlDatabase实例
+            parent=self  # 父窗口
+        )
+
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            self.get_drug_attribute_model()
+            # 可选：清除选择
+            self.class_set_tableView.clearSelection()
+        else:
+            QMessageBox.critical(self, "错误", msg, QMessageBox.StandardButton.Ok)
 
 
 # 药品剂型
@@ -132,6 +255,7 @@ class DrugRormulationPage(QDialog, Ui_RormuDialog):
     def bind_event(self):
         self.add_btn.clicked.connect(self.add_drug_rormulateon)
         self.refresh_btn.clicked.connect(self.get_drug_rormulateon_model)
+        self.del_btn.clicked.connect(self.delete_selected_row)
 
     def add_drug_rormulateon(self):
         dialog = PopupDialog(self, "输入药品剂型")
@@ -145,9 +269,26 @@ class DrugRormulationPage(QDialog, Ui_RormuDialog):
                 QMessageBox.critical(self, "数据库错误", f"添加剂型失败: {query.lastError().text()}")
             else:
                 QMessageBox.information(self, "成功", "剂型添加成功")
+                self.get_drug_rormulateon_model()
                 print(f"输入药品剂型: {input_text}")
 
+    def delete_selected_row(self):
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.rormulation_set_tableView,
+            model=self.drug_rormulateon,  # 您的BaseTableModel实例
+            db=self.db,  # QSqlDatabase实例
+            parent=self  # 父窗口
+        )
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            self.get_drug_rormulateon_model()
+            # 可选：清除选择
+            self.rormulation_set_tableView.clearSelection()
+        else:
+            QMessageBox.critical(self, "错误", msg, QMessageBox.StandardButton.Ok)
 
+# 药品单位
 class DrugUnitPage(QDialog, Ui_UnitDialog):
     def __init__(self, parent):
         super().__init__()
@@ -167,6 +308,7 @@ class DrugUnitPage(QDialog, Ui_UnitDialog):
     def bind_event(self):
         self.add_btn.clicked.connect(self.add_drug_unit)
         self.refresh_btn.clicked.connect(self.get_drug_unit_model)
+        self.del_btn.clicked.connect(self.delete_selected_row)
 
     def add_drug_unit(self):
         dialog = PopupDialog(self, "输入药品单位")
@@ -179,9 +321,26 @@ class DrugUnitPage(QDialog, Ui_UnitDialog):
                 QMessageBox.critical(self, "数据库错误", f"添加单位失败: {query.lastError().text()}")
             else:
                 QMessageBox.information(self, "成功", "单位添加成功")
+                self.get_drug_unit_model()
                 print(f"输入药品单位: {input_text}")
+    def delete_selected_row(self):
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.unit_set_tableView,
+            model=self.drug_unit,  # 您的BaseTableModel实例
+            db=self.db,  # QSqlDatabase实例
+            parent=self  # 父窗口
+        )
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            self.get_drug_unit_model()
+            # 可选：清除选择
+            self.unit_set_tableView.clearSelection()
+        else:
+            QMessageBox.critical(self, "错误", msg, QMessageBox.StandardButton.Ok)
 
 
+# 药品规格
 class DrugSpecificationPage(QDialog, Ui_SpecificationDialog):
     def __init__(self, parent):
         super().__init__()
@@ -201,25 +360,38 @@ class DrugSpecificationPage(QDialog, Ui_SpecificationDialog):
     def bind_event(self):
         self.add_btn.clicked.connect(self.add_drug_specification)
         self.refresh_btn.clicked.connect(self.get_drug_specification_model)
+        self.del_btn.clicked.connect(self.delete_selected_row)
 
     def add_drug_specification(self):
-        dialog = SpecificationDialog(self, "输入药品规格")
+        dialog = PopupDialog(self, "输入药品规格")
         if dialog.exec_() == QDialog.DialogCode.Accepted:
-            input_uint = dialog.input_lineEdit_uint.text()
-            input_quan = dialog.input_lineEdit_quan.text()
+            input_text = dialog.input_lineEdit.text()
             query = QSqlQuery()
-            query.prepare("INSERT INTO Specification (packaging_quantity, packaging_unit) VALUES (?, ?)")
-            query.addBindValue(input_quan)
-            query.addBindValue(input_uint)
+            query.prepare("INSERT INTO Specification (packaging_specifications) VALUES (?)")
+            query.addBindValue(input_text)
             if not query.exec():
                 QMessageBox.critical(self, "数据库错误", f"添加规格失败: {query.lastError().text()}")
             else:
                 QMessageBox.information(self, "成功", "规格添加成功")
+                self.get_drug_specification_model()
+                print(f"输入包装单位: {input_text}")
+    def delete_selected_row(self):
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.specification_tableView,
+            model=self.drug_specification,  # 您的BaseTableModel实例
+            db=self.db,  # QSqlDatabase实例
+            parent=self  # 父窗口
+        )
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            self.get_drug_specification_model()
+            # 可选：清除选择
+            self.specification_tableView.clearSelection()
+        else:
+            QMessageBox.critical(self, "错误", msg, QMessageBox.StandardButton.Ok)
 
-            print(f"输入包装单位: {input_uint}，输入包装数量: {input_quan}")
-
-
-def calss_page(self):
+def class_set_page(self):
     self.drug_spec = SpecificationModel(self, self.db)
     self.spec_table_view.setModel(self.drug_spec)
     for col in self.drug_spec.hidden_columns:
@@ -235,10 +407,11 @@ def calss_page(self):
     for col in self.drug_units.hidden_columns:
         self.unit_table_view.hideColumn(col)
 
-
     self.drug_ror = DrugRormulationModel(self, self.db)
     self.dosage_table_view.setModel(self.drug_ror)
     for col in self.drug_ror.hidden_columns:
         self.dosage_table_view.hideColumn(col)
 
     return self.drug_spec, self.drug_attr, self.drug_units, self.drug_ror
+
+

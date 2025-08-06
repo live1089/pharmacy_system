@@ -19,51 +19,82 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             sys.exit(1)
 
         query = QSqlQuery()
-        query.exec("""
-        CREATE TABLE IF NOT EXISTS medicine (             -- 药品信息表
-                medicine_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                generic_name TEXT,
-                specification_id INTEGER NOT NULL ,        -- 规格型号
-                manufacturer TEXT NOT NULL,  -- 生产厂家必填
-                batch_number TEXT NOT NULL,  -- 批号必填
-                expiry_date DATE NOT NULL,    -- 有效期必填
-                purchase_date DATE,          -- 采购日期可选
-                quantity INTEGER NOT NULL CHECK (quantity >= 0),   -- 库存数量
-                price REAL NOT NULL CHECK (price >= 0),
-                barcode TEXT,                   -- 国药准字
-                category_id INTEGER NOT NULL,  -- 分类必选
-                supplier_id INTEGER NOT NULL,  -- 供应商必选
-                FOREIGN KEY (category_id) REFERENCES MedicineCategories(category_id),
-                FOREIGN KEY (supplier_id) REFERENCES Supplier(supplier_id),
-                FOREIGN KEY (specification_id) REFERENCES Specification(specification_id),
-                UNIQUE (name, manufacturer, batch_number)  -- 防重复批号
-        )
-        """)
 
         # query.exec("""
-        # CREATE TABLE IF NOT EXISTS drug_formulation(
-        #         formulation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #         formulation_name TEXT NOT NULL           -- 剂型名称
-        # )""")
-        #
+        # CREATE TABLE IF NOT EXISTS medicine_dic(
+        #     name TEXT NOT NULL,
+        #     generic_name TEXT,
+        #     specification_id INTEGER NOT NULL ,        -- 规格型号
+        #     manufacturer TEXT NOT NULL,     -- 生产厂家必填
+        #     category_id INTEGER NOT NULL,   -- 分类
+        #     formulation_name TEXT NOT NULL UNIQUE, -- 剂型名称（唯一约束）
+        #     barcode TEXT,                   -- 国药准字
+        #     FOREIGN KEY (category_id) REFERENCES MedicineCategories(category_id),
+        #     FOREIGN KEY (specification_id) REFERENCES Specification(specification_id)
+        # )
+        # """)
         # query.exec("""
-        # CREATE TABLE IF NOT EXISTS drug_unit(
-        #         unit_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #         unit_name TEXT NOT NULL              -- 单位名称
-        # )""")
-        #
-        # query.exec("""
-        # CREATE TABLE IF NOT EXISTS Specification(
-        #         specification_id INT PRIMARY KEY,
-        #         formulation_id INT,
-        #         unit_id INT,
-        #         dosage VARCHAR(50),                -- 剂量
-        #         packaging_unit VARCHAR(20),        -- 包装单位
-        #         packaging_quantity INT,            -- 包装数量
-        #         FOREIGN KEY (formulation_id) REFERENCES drug_formulation(formulation_id),
-        #         FOREIGN KEY (unit_id) REFERENCES drug_unit(unit_id)
-        # )""")
+        # CREATE TABLE IF NOT EXISTS medicine (             -- 药品信息表
+        #         medicine_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #         name TEXT NOT NULL,
+        #         generic_name TEXT,
+        #         specification_id INTEGER NOT NULL ,        -- 规格型号
+        #         manufacturer TEXT NOT NULL,  -- 生产厂家必填
+        #         batch_number TEXT NOT NULL,  -- 批号必填
+        #         expiry_date DATE NOT NULL,    -- 到期时间必填
+        #         purchase_date DATE,          -- 采购日期可选
+        #         quantity INTEGER NOT NULL CHECK (quantity >= 0),   -- 库存数量
+        #         price REAL NOT NULL CHECK (price >= 0),
+        #         barcode TEXT,                   -- 国药准字
+        #         category_id INTEGER NOT NULL,  -- 分类必选
+        #         supplier_id INTEGER NOT NULL,  -- 供应商必选
+        #         FOREIGN KEY (category_id) REFERENCES MedicineCategories(category_id),
+        #         FOREIGN KEY (supplier_id) REFERENCES Supplier(supplier_id),
+        #         FOREIGN KEY (specification_id) REFERENCES Specification(specification_id),
+        #         UNIQUE (name, manufacturer, batch_number)  -- 防重复批号
+        # )
+        # """)
+
+        query.exec("""
+        CREATE TABLE IF NOT EXISTS medicine_dic(
+                dic_id INTEGER PRIMARY KEY AUTOINCREMENT,     -- 新增主键
+                trade_name TEXT NOT NULL,                     -- 商品名
+                generic_name TEXT NOT NULL,                   -- 通用名
+                specification_id INTEGER NOT NULL,            -- 规格型号ID
+                manufacturer TEXT NOT NULL,                   -- 生产厂家
+                formulation_id INTEGER NOT NULL,              -- 剂型
+                approval_number TEXT,                 -- 批准文号(国药准字)
+                category_id INTEGER NOT NULL,                 -- 分类ID
+                unit_id INTEGER NOT NULL,                     -- 单位ID
+                price REAL  CHECK (price >= 0),           -- 单价
+                
+                
+                FOREIGN KEY (category_id) REFERENCES MedicineCategories(category_id),
+                FOREIGN KEY (specification_id) REFERENCES Specification(specification_id),
+                FOREIGN KEY (formulation_id) REFERENCES drug_formulation(formulation_id),
+                FOREIGN KEY (unit_id) REFERENCES drug_unit(unit_id),
+                
+                -- 确保基本药品信息唯一性
+                UNIQUE (generic_name, specification_id, manufacturer)
+        )
+        """)
+        query.exec("""
+                    CREATE TABLE IF NOT EXISTS medicine (             -- 药品信息表
+                medicine_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dic_id INTEGER NOT NULL,                     -- 引用字典表ID
+                batch_number TEXT,                   -- 批号
+                expiry_date DATE,                   -- 有效期至
+                purchase_date DATE,                          -- 采购日期
+                quantity INTEGER  CHECK (quantity >= 0),  -- 库存数量
+                supplier_id INTEGER NOT NULL,                 -- 供应商ID
+                
+                FOREIGN KEY (dic_id) REFERENCES medicine_dic(dic_id),
+                FOREIGN KEY (supplier_id) REFERENCES Supplier(supplier_id),
+                
+                -- 防重复批号: 同一药品不同批号
+                UNIQUE (dic_id, batch_number)
+        )
+        """)
 
         query.exec("""
         CREATE TABLE IF NOT EXISTS drug_formulation(
@@ -82,8 +113,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 specification_id INTEGER PRIMARY KEY AUTOINCREMENT,     -- 规格id
                 formulation_id INTEGER,                        -- 剂型
                 unit_id INTEGER,                               -- 最小药品单位
-                packaging_quantity INTEGER NOT NULL CHECK(packaging_quantity > 0),  -- 包装数量
-                packaging_unit TEXT,                           -- 最小包装单位（盒/瓶等）
+                packaging_specifications TEXT,                --包装规格
                 FOREIGN KEY (formulation_id) REFERENCES drug_formulation(formulation_id),
                 FOREIGN KEY (unit_id) REFERENCES drug_unit(unit_id)
         )""")
@@ -127,7 +157,6 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             phone TEXT,                                         -- 联系电话
             address TEXT,                                       -- 地址
             email TEXT,                                        -- 邮箱
-            status BOOLEAN DEFAULT 1,                          -- 状态（1: 正常，0: 禁用）
             remarks TEXT,                                      -- 备注
             update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- 更新时间
             update_by TEXT,                                    -- 更新人
@@ -311,6 +340,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
 class BaseTableModel(QSqlTableModel):
     def __init__(self, parent=None, db=None, table_name="", headers=None, hidden_columns=None):
         super().__init__(parent, db)
+        # 设置表名
         self.setTable(table_name)
 
         self.setQuery(f"SELECT * FROM {table_name} LIMIT 100")
@@ -324,10 +354,32 @@ class BaseTableModel(QSqlTableModel):
         # 设置表头
         if headers:
             for col_index, header_text in headers.items():
-                self.setHeaderData(col_index, Qt.Horizontal, header_text)
+                self.setHeaderData(col_index, Qt.Orientation.Horizontal, header_text)
 
         # 记录隐藏列
         self.hidden_columns = hidden_columns or []
+
+
+
+
+    def get_primary_key_column(self):
+        """获取表的主键列名（只取第一个主键）"""
+        # 尝试从隐藏列中查找主键
+        for col in self.hidden_columns:
+            if "id" in self.headerData(col, Qt.Orientation.Horizontal).lower():
+                return self.record().fieldName(col)
+
+        # 没有找到，则查询数据库元数据
+        query = QSqlQuery(self.database())
+        query.exec(f"PRAGMA table_info({self.tableName()})")
+
+        while query.next():
+            # name(1), type(2), pk(5)
+            if query.value(5) > 0:  # pk列不为0
+                return query.value(1)
+
+        # 默认返回 "id"（常见主键名称）
+        return "id"
 
 
 
@@ -357,8 +409,9 @@ class MedicineModel(BaseTableModel):
             db=db,
             table_name="medicine",
             headers=self.HEADERS,
-            hidden_columns=self.HIDDEN_COLUMNS
+            hidden_columns=self.HIDDEN_COLUMNS,
         )
+
 
 
 # 临期模型
@@ -385,17 +438,17 @@ class ExpiringMedicineModel(BaseTableModel):
 # 供应商模式
 class SupplierModel(BaseTableModel):
     HEADERS = {
+        0: "ID",
         1: "名称",
         2: "联系人",
         3: "电话",
         4: "地址",
         5: "邮箱",
-        6: "状态",
-        7: "备注",
-        8: "更新时间",
-        9: "更新人",
-        10: "创建时间",
-        11: "创建人"
+        6: "备注",
+        7: "更新时间",
+        8: "更新人",
+        9: "创建时间",
+        10: "创建人"
     }
     HIDDEN_COLUMNS = [0]  # 隐藏的列索引
 
@@ -701,8 +754,7 @@ class SpecificationModel(BaseTableModel):
         0: "ID",
         1: "剂型",
         2: "药品单位",
-        3: "包装数量",
-        4: "包装单位"
+        3: "包装规格",
     }
     HIDDEN_COLUMNS = [0, 1, 2]
 
@@ -716,6 +768,57 @@ class SpecificationModel(BaseTableModel):
         )
 
 
+
+class DrugDicModel(BaseTableModel):
+    HEADERS = {
+        0: "ID",
+        1: "药品",
+        2: "通用名",
+        3: "规格型号",
+        4: "生产厂家",
+        5: "剂型",
+        6: "国药准字",
+        7: "分类",
+        8: "单位",
+        9: "价格",
+    }
+    HIDDEN_COLUMNS = [0]
+
+    def __init__(self, parent=None, db=None):
+        super().__init__(
+            parent=parent,
+            db=db,
+            table_name="medicine_dic",
+            headers=self.HEADERS,
+            hidden_columns=self.HIDDEN_COLUMNS
+        )
+
+def get_medicine_dic_model(self):
+    self.medicine_dic_model = DrugDicModel(self, self.db)
+    sql = f"""
+        SELECT
+            e.dic_id,
+            e.trade_name,
+            e.generic_name,
+            d.packaging_specifications  as 规格,
+            e.manufacturer,
+            f.formulation_name as 剂型,
+            e.approval_number,
+            m.category_name as 分类,
+            u.unit_name as 单位,
+            e.price
+        FROM medicine_dic e
+        LEFT JOIN Specification d ON e.specification_id = d.specification_id
+        LEFT JOIN drug_unit u ON e.unit_id = u.unit_id
+        LEFT JOIN drug_formulation f ON e.formulation_id = f.formulation_id
+        LEFT JOIN MedicineCategories m ON e.category_id = m.category_id
+    """
+    self.medicine_dic_model.setQuery(sql, self.db)
+    self.drug_dic_tableView.setModel(self.medicine_dic_model)
+    for col in self.medicine_dic_model.HIDDEN_COLUMNS:
+        self.drug_dic_tableView.hideColumn(col)
+
+    return self.medicine_dic_model
 # 药品
 def get_medicines_model(self):
     self.medicine_model = MedicineModel(self, self.db)

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
-    <height>329</height>
+    <width>624</width>
+    <height>250</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -34,7 +34,7 @@
      <item row="1" column="2">
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>包装单位</string>
+        <string>包装规格</string>
        </property>
       </widget>
      </item>
@@ -61,13 +61,6 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="2">
-      <widget class="QLabel" name="label_10">
-       <property name="text">
-        <string>包装数量</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
@@ -76,7 +69,7 @@
       </widget>
      </item>
      <item row="1" column="3">
-      <widget class="QComboBox" name="pack_uint_combox"/>
+      <widget class="QComboBox" name="pack_combox"/>
      </item>
      <item row="2" column="2">
       <widget class="QLabel" name="label_7">
@@ -105,9 +98,6 @@
      <item row="3" column="1">
       <widget class="QLineEdit" name="price_line_edit"/>
      </item>
-     <item row="3" column="3">
-      <widget class="QComboBox" name="pack_quan_combox"/>
-     </item>
      <item row="4" column="0">
       <widget class="QLabel" name="label_9">
        <property name="text">
@@ -121,14 +111,14 @@
      <item row="4" column="1">
       <widget class="QComboBox" name="dosage_combox"/>
      </item>
-     <item row="4" column="2">
+     <item row="3" column="2">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>生产厂家</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="3">
+     <item row="3" column="3">
       <widget class="QLineEdit" name="manufacturer_line_edit"/>
      </item>
     </layout>

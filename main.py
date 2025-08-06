@@ -10,17 +10,20 @@ from enum import Enum
 from PySide6.QtCore import Signal
 from PySide6.QtSql import QSqlQuery
 # 导入pyside6库
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QMessageBox)
 # 主题
 from qtmodern.styles import dark
 
 # 数据库
 import data.sqlite_data
+from data.sqlite_data import DrugDicModel, SupplierModel
 # 外部UI
 import ui_app.log_in_ui
 import ui_app.mainwondows_ui
 from page_window.medicines_page import MedicinesPage, DrugAttributePage, DrugRormulationPage, DrugUnitPage, \
-    DrugSpecificationPage, calss_page
+    DrugSpecificationPage, class_set_page, delete_selected_rows
+from page_window.sell_medicines_page import sell_drug_ui_dialog
+from page_window.supplier_medicines_page import SupplierDrugPage, get_selected_logical_rows, del_rows
 
 
 # 其他工具
@@ -40,6 +43,7 @@ class PageMap(Enum):
     inventory_check_tableView = 9  # 库存盘点
     customers_tableView = 10  # 会员客户
     user_tableWidget = 11  # 本地用户
+    drug_dic_tableView = 12  # 药品字典
 
 
 class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
@@ -50,7 +54,8 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.sub_window_event()
         self.db = data.sqlite_data.DatabaseInit()
         self.sqlite_data()
-        calss_page(self)
+        class_set_page(self)
+
         # # 创建模型并设置表名
         # self.model = QSqlTableModel(self, self.db)
         # self.model.setTable("medicines")
@@ -72,9 +77,9 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         data.sqlite_data.get_purchase_order_model(self)  # 采购订单
         data.sqlite_data.get_purchase_order_detail_model(self)  # 采购订单明细
         data.sqlite_data.get_inventory_check(self)  # 库存盘点
+        data.sqlite_data.get_medicine_dic_model(self)  # 药品字典
 
         self.stock_in_tabWidget.currentChanged.connect(self.tab_changed)  # 入库标签切换时触发
-
 
     # def page_switch(self, page_name):
     #     self.medicine.clicked.connect(lambda: self.show_page_by_name(page_name))
@@ -96,6 +101,61 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.inventory_record.clicked.connect(lambda: self.show_page_by_name(PageMap.inventory_check_tableView.value))
         self.member_customer.clicked.connect(lambda: self.show_page_by_name(PageMap.customers_tableView.value))
         self.user_information.clicked.connect(lambda: self.show_page_by_name(PageMap.user_tableWidget.value))
+        self.drug_dic_btn.clicked.connect(lambda: self.show_page_by_name(PageMap.drug_dic_tableView.value))
+        # self.ref_btn.clicked.connect(self.refresh_page)
+        self.drug_dic_del_btn.clicked.connect(self.del_dic)
+        self.supplier_del_btn.clicked.connect(self.supplier_del)
+        self.supplier_mod_btn.clicked.connect(self.supplier_mod)
+
+    def del_dic(self):
+        self.dic = DrugDicModel(self, self.db)
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.drug_dic_tableView,
+            model=self.dic,
+            db=self.db,
+        )
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            data.sqlite_data.get_medicine_dic_model(self)
+            self.drug_dic_tableView.clearSelection()
+        else:
+            QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+    def supplier_mod(self):
+        selected_rows = get_selected_logical_rows(self.supplier_tableView)
+        if not selected_rows:
+            QMessageBox.warning(self, "警告", "请先选择要修改的供应商记录")
+            return
+
+        # 获取选中行的supplier_id
+        model = self.supplier_tableView.model()
+        if model and len(selected_rows) > 0:
+            # 假设supplier_id在第一列（索引为0）
+            supplier_id = model.data(model.index(selected_rows[0], 0))
+
+            self.sup = SupplierDrugPage(self)
+            self.sup.show_mod_supplier_data(supplier_id)  # 先填充数据
+            self.sup.exec()  # 再显示对话框
+            # del_rows(supplier_id, self.db)
+            data.sqlite_data.get_supplier_model(self)
+
+    def supplier_del(self):
+        self.supp = SupplierModel(self,self.db)
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.supplier_tableView,
+            model=self.supp,
+            db=self.db,
+        )
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            data.sqlite_data.get_supplier_model(self)
+            self.supplier_tableView.clearSelection()
+        else:
+            QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+
 
     # 添加跳出子窗口事件
     def sub_window_event(self):
@@ -104,6 +164,9 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.dosage_set_btn.clicked.connect(self.drug_rormulation)
         self.unit_set_btn.clicked.connect(self.drug_unit)
         self.specifications_set_btn.clicked.connect(self.drug_specification)
+        self.sell_drug_dtn.clicked.connect(self.sell_drug_func)
+        self.supplier_add_btn.clicked.connect(self.supplier_add)
+
 
     # 药品添加
     def drug_adds(self):
@@ -127,16 +190,53 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.drug_sp = DrugSpecificationPage(self)
         self.drug_sp.exec()
 
+    def sell_drug_func(self):
+        self.sell_d = sell_drug_ui_dialog(self)
+        self.sell_d.show()
+
+    def supplier_add(self):
+        self.sup = SupplierDrugPage(self)
+        self.sup.load_supplier_time()
+        self.sup.exec()
+        data.sqlite_data.get_supplier_model(self)
+
+
+
     def show_page_by_name(self, page_name):
         """通过页面名称切换页面"""
         if page_name in PageMap:
             # 切换到目标页面
             self.stackedWidget.setCurrentIndex(page_name)
-
             # 这里可以添加页面切换时的额外逻辑
             print(f"已切换到页面: {page_name}")
         else:
             print(f"错误: 找不到页面 '{page_name}'")
+
+        if page_name == PageMap.drug_dic_tableView.value:
+            data.sqlite_data.get_medicine_dic_model(self)
+        if page_name == PageMap.stock_in_tabWidget.value:
+            data.sqlite_data.get_stock_in_main_model(self)
+            data.sqlite_data.get_stock_in_detail_model(self)
+            data.sqlite_data.get_inventory_datch_model(self)
+        if page_name == PageMap.stock_out_tabWidget.value:
+            data.sqlite_data.get_stock_out_main_model(self)
+            data.sqlite_data.get_stock_out_detail_model(self)
+        if page_name == PageMap.order_tabWidget.value:
+            data.sqlite_data.get_purchase_order_model(self)
+            data.sqlite_data.get_purchase_order_detail_model(self)
+        if page_name == PageMap.inventory_check_tableView.value:
+            data.sqlite_data.get_inventory_check(self)
+        if page_name == PageMap.drug_selection_tableView.value:
+            data.sqlite_data.get_medicines_model(self)
+            class_set_page(self)
+        if page_name == PageMap.inventory_tableView.value:
+            data.sqlite_data.get_inventory_model(self)
+        if page_name == PageMap.sales_records_tableView.value:
+            data.sqlite_data.get_sales_model(self)
+        if page_name == PageMap.expiring_drugs_tableView.value:
+            data.sqlite_data.get_expiring_medicine_model(self)
+        if page_name == PageMap.supplier_tableView.value:
+            data.sqlite_data.get_supplier_model(self)
 
 
 class LoginWindow(QWidget, ui_app.log_in_ui.Ui_Form):
@@ -189,3 +289,5 @@ if __name__ == "__main__":
     # window.setWindowIcon(icon)
     LoginWindow.show()
     app.exec()
+
+

@@ -27,7 +27,7 @@ class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
         if not mainWindow.objectName():
             mainWindow.setObjectName(u"mainWindow")
-        mainWindow.resize(1086, 579)
+        mainWindow.resize(1073, 579)
         icon = QIcon()
         icon.addFile(u"../../python_code/Res.ico", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         mainWindow.setWindowIcon(icon)
@@ -174,6 +174,13 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout_6.addWidget(self.drug_del_btn)
 
+        self.ref_btn = QPushButton(self.page)
+        self.ref_btn.setObjectName(u"ref_btn")
+        sizePolicy.setHeightForWidth(self.ref_btn.sizePolicy().hasHeightForWidth())
+        self.ref_btn.setSizePolicy(sizePolicy)
+
+        self.horizontalLayout_6.addWidget(self.ref_btn)
+
 
         self.gridLayout_3.addLayout(self.horizontalLayout_6, 0, 0, 1, 1)
 
@@ -285,6 +292,26 @@ class Ui_mainWindow(object):
         self.supplier_tableView.setObjectName(u"supplier_tableView")
 
         self.gridLayout_9.addWidget(self.supplier_tableView, 1, 0, 1, 1)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.supplier_add_btn = QPushButton(self.page_1)
+        self.supplier_add_btn.setObjectName(u"supplier_add_btn")
+
+        self.horizontalLayout.addWidget(self.supplier_add_btn)
+
+        self.supplier_mod_btn = QPushButton(self.page_1)
+        self.supplier_mod_btn.setObjectName(u"supplier_mod_btn")
+
+        self.horizontalLayout.addWidget(self.supplier_mod_btn)
+
+        self.supplier_del_btn = QPushButton(self.page_1)
+        self.supplier_del_btn.setObjectName(u"supplier_del_btn")
+
+        self.horizontalLayout.addWidget(self.supplier_del_btn)
+
+
+        self.gridLayout_9.addLayout(self.horizontalLayout, 2, 0, 1, 1)
 
 
         self.gridLayout_10.addLayout(self.gridLayout_9, 1, 0, 1, 1)
@@ -869,16 +896,46 @@ class Ui_mainWindow(object):
         self.gridLayout_40.addLayout(self.gridLayout_39, 0, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_11)
+        self.page_12 = QWidget()
+        self.page_12.setObjectName(u"page_12")
+        self.gridLayout_44 = QGridLayout(self.page_12)
+        self.gridLayout_44.setObjectName(u"gridLayout_44")
+        self.gridLayout_43 = QGridLayout()
+        self.gridLayout_43.setObjectName(u"gridLayout_43")
+        self.drug_dic_tableView = QTableView(self.page_12)
+        self.drug_dic_tableView.setObjectName(u"drug_dic_tableView")
+
+        self.gridLayout_43.addWidget(self.drug_dic_tableView, 0, 0, 1, 1)
+
+        self.drug_dic_del_btn = QPushButton(self.page_12)
+        self.drug_dic_del_btn.setObjectName(u"drug_dic_del_btn")
+
+        self.gridLayout_43.addWidget(self.drug_dic_del_btn, 1, 0, 1, 1)
+
+
+        self.gridLayout_44.addLayout(self.gridLayout_43, 1, 0, 1, 1)
+
+        self.stackedWidget.addWidget(self.page_12)
 
         self.gridLayout.addWidget(self.stackedWidget, 0, 2, 1, 1)
 
 
         self.gridLayout_2.addLayout(self.gridLayout, 1, 1, 1, 1)
 
+        self.drug_dic_btn = QPushButton(self.centralwidget)
+        self.drug_dic_btn.setObjectName(u"drug_dic_btn")
+
+        self.gridLayout_2.addWidget(self.drug_dic_btn, 0, 0, 1, 1)
+
+        self.sell_drug_dtn = QPushButton(self.centralwidget)
+        self.sell_drug_dtn.setObjectName(u"sell_drug_dtn")
+
+        self.gridLayout_2.addWidget(self.sell_drug_dtn, 0, 1, 1, 1)
+
         mainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(mainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1086, 33))
+        self.menubar.setGeometry(QRect(0, 0, 1073, 33))
         self.menu = QMenu(self.menubar)
         self.menu.setObjectName(u"menu")
         self.menu_2 = QMenu(self.menubar)
@@ -900,8 +957,8 @@ class Ui_mainWindow(object):
 
         self.retranslateUi(mainWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
-        self.drug_tabWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(1)
+        self.drug_tabWidget.setCurrentIndex(0)
         self.stock_in_tabWidget.setCurrentIndex(0)
         self.stock_out_tabWidget.setCurrentIndex(0)
         self.order_tabWidget.setCurrentIndex(0)
@@ -932,6 +989,7 @@ class Ui_mainWindow(object):
         self.drug_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u836f\u54c1", None))
         self.drug_revise_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u836f\u54c1", None))
         self.drug_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u836f\u54c1", None))
+        self.ref_btn.setText(QCoreApplication.translate("mainWindow", u"\u5237\u65b0\u754c\u9762", None))
         self.drug_tabWidget.setTabText(self.drug_tabWidget.indexOf(self.tab), QCoreApplication.translate("mainWindow", u"\u57fa\u672c\u4fe1\u606f", None))
         self.label_10.setText(QCoreApplication.translate("mainWindow", u"\u5242\u578b", None))
         self.label_8.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u5c5e\u6027", None))
@@ -942,6 +1000,9 @@ class Ui_mainWindow(object):
         self.dosage_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u5242\u578b\u8bbe\u7f6e", None))
         self.unit_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u5355\u4f4d\u8bbe\u7f6e", None))
         self.drug_tabWidget.setTabText(self.drug_tabWidget.indexOf(self.drug_class_pate), QCoreApplication.translate("mainWindow", u"\u5206\u7c7b\u8bbe\u7f6e", None))
+        self.supplier_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0", None))
+        self.supplier_mod_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539", None))
+        self.supplier_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664", None))
         self.supplier_lineEdit.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u8f93\u5165\u4f9b\u5e94\u5546\u67e5\u8be2", None))
         self.supplier_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
         self.stock_in_lineEdit.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u8f93\u5165\u5546\u54c1ID", None))
@@ -982,6 +1043,9 @@ class Ui_mainWindow(object):
         ___qtablewidgetitem2 = self.user_tableWidget.horizontalHeaderItem(2)
         ___qtablewidgetitem2.setText(QCoreApplication.translate("mainWindow", u"\u90ae\u7bb1", None));
         self.delete_user_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u7528\u6237", None))
+        self.drug_dic_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664", None))
+        self.drug_dic_btn.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u8bcd\u5178", None))
+        self.sell_drug_dtn.setText(QCoreApplication.translate("mainWindow", u"\u9500\u552e", None))
         self.menu.setTitle(QCoreApplication.translate("mainWindow", u"\u6587\u4ef6", None))
         self.menu_2.setTitle(QCoreApplication.translate("mainWindow", u"\u5de5\u5177", None))
         self.menu_3.setTitle(QCoreApplication.translate("mainWindow", u"\u8d26\u53f7", None))
