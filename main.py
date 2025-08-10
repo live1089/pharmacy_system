@@ -20,9 +20,11 @@ from data.sqlite_data import DrugDicModel, SupplierModel
 # 外部UI
 import ui_app.log_in_ui
 import ui_app.mainwondows_ui
+from page_window.drug_entry_medicines_page import DrugEntryPage
 from page_window.medicines_page import MedicinesPage, DrugAttributePage, DrugRormulationPage, DrugUnitPage, \
     DrugSpecificationPage, class_set_page, delete_selected_rows
 from page_window.sell_medicines_page import sell_drug_ui_dialog
+from page_window.stock_medicines_page import StockMedicinesPage
 from page_window.supplier_medicines_page import SupplierDrugPage, get_selected_logical_rows, del_rows
 
 
@@ -166,6 +168,8 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.specifications_set_btn.clicked.connect(self.drug_specification)
         self.sell_drug_dtn.clicked.connect(self.sell_drug_func)
         self.supplier_add_btn.clicked.connect(self.supplier_add)
+        self.stock_in_btn.clicked.connect(self.stock_in)
+        self.drug_entry_btn.clicked.connect(self.drug_entry)
 
 
     # 药品添加
@@ -199,6 +203,15 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.sup.load_supplier_time()
         self.sup.exec()
         data.sqlite_data.get_supplier_model(self)
+
+    def stock_in(self):
+        self.stock_inbo = StockMedicinesPage(self)
+        self.stock_inbo.exec()
+
+
+    def drug_entry(self):
+        self.drug_en = DrugEntryPage(self)
+        self.drug_en.exec()
 
 
 

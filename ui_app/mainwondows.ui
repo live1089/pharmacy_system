@@ -162,7 +162,7 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -441,6 +441,13 @@
              <widget class="QPushButton" name="stock_in_btn">
               <property name="text">
                <string>入库处理</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="drug_entry_btn">
+              <property name="text">
+               <string>药品录入</string>
               </property>
              </widget>
             </item>
@@ -884,6 +891,20 @@
              <widget class="QPushButton" name="purchase_order_btn">
               <property name="text">
                <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="purchase_add_btn">
+              <property name="text">
+               <string>添加采购单</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="purchase_del_btn">
+              <property name="text">
+               <string>删除采购单</string>
               </property>
              </widget>
             </item>

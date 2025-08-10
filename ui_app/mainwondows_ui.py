@@ -363,6 +363,11 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout_11.addWidget(self.stock_in_btn)
 
+        self.drug_entry_btn = QPushButton(self.page_2)
+        self.drug_entry_btn.setObjectName(u"drug_entry_btn")
+
+        self.horizontalLayout_11.addWidget(self.drug_entry_btn)
+
         self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_11.addItem(self.horizontalSpacer_4)
@@ -760,6 +765,16 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout_5.addWidget(self.purchase_order_btn)
 
+        self.purchase_add_btn = QPushButton(self.page_7)
+        self.purchase_add_btn.setObjectName(u"purchase_add_btn")
+
+        self.horizontalLayout_5.addWidget(self.purchase_add_btn)
+
+        self.purchase_del_btn = QPushButton(self.page_7)
+        self.purchase_del_btn.setObjectName(u"purchase_del_btn")
+
+        self.horizontalLayout_5.addWidget(self.purchase_del_btn)
+
         self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_5.addItem(self.horizontalSpacer_8)
@@ -957,7 +972,7 @@ class Ui_mainWindow(object):
 
         self.retranslateUi(mainWindow)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(2)
         self.drug_tabWidget.setCurrentIndex(0)
         self.stock_in_tabWidget.setCurrentIndex(0)
         self.stock_out_tabWidget.setCurrentIndex(0)
@@ -1010,6 +1025,7 @@ class Ui_mainWindow(object):
         self.stock_in_all_btn.setText(QCoreApplication.translate("mainWindow", u"\u6240\u6709\u5e93\u5b58", None))
         self.stock_in_com_btn.setText(QCoreApplication.translate("mainWindow", u"\u7efc\u5408\u67e5\u8be2", None))
         self.stock_in_btn.setText(QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u5904\u7406", None))
+        self.drug_entry_btn.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u5f55\u5165", None))
         self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.stock_in_main), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u4e3b\u8868", None))
         self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.stock_in_detail), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u660e\u7ec6\u8868", None))
         self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.inventory_batch), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u6279\u6b21\u8868", None))
@@ -1032,6 +1048,8 @@ class Ui_mainWindow(object):
         self.label_12.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
         self.label_13.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
         self.purchase_order_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.purchase_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u91c7\u8d2d\u5355", None))
+        self.purchase_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u91c7\u8d2d\u5355", None))
         self.label_14.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
         self.label_15.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
         self.inventory_check_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
