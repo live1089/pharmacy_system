@@ -27,7 +27,7 @@ class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
         if not mainWindow.objectName():
             mainWindow.setObjectName(u"mainWindow")
-        mainWindow.resize(1073, 579)
+        mainWindow.resize(1073, 577)
         icon = QIcon()
         icon.addFile(u"../../python_code/Res.ico", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         mainWindow.setWindowIcon(icon)
@@ -363,10 +363,15 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout_11.addWidget(self.stock_in_btn)
 
-        self.drug_entry_btn = QPushButton(self.page_2)
-        self.drug_entry_btn.setObjectName(u"drug_entry_btn")
+        self.stock_del_btn = QPushButton(self.page_2)
+        self.stock_del_btn.setObjectName(u"stock_del_btn")
 
-        self.horizontalLayout_11.addWidget(self.drug_entry_btn)
+        self.horizontalLayout_11.addWidget(self.stock_del_btn)
+
+        self.stock_mod_btn = QPushButton(self.page_2)
+        self.stock_mod_btn.setObjectName(u"stock_mod_btn")
+
+        self.horizontalLayout_11.addWidget(self.stock_mod_btn)
 
         self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -412,21 +417,6 @@ class Ui_mainWindow(object):
         self.gridLayout_18.addLayout(self.gridLayout_17, 0, 0, 1, 1)
 
         self.stock_in_tabWidget.addTab(self.stock_in_detail, "")
-        self.inventory_batch = QWidget()
-        self.inventory_batch.setObjectName(u"inventory_batch")
-        self.gridLayout_20 = QGridLayout(self.inventory_batch)
-        self.gridLayout_20.setObjectName(u"gridLayout_20")
-        self.gridLayout_19 = QGridLayout()
-        self.gridLayout_19.setObjectName(u"gridLayout_19")
-        self.batch_tableView = QTableView(self.inventory_batch)
-        self.batch_tableView.setObjectName(u"batch_tableView")
-
-        self.gridLayout_19.addWidget(self.batch_tableView, 0, 0, 1, 1)
-
-
-        self.gridLayout_20.addLayout(self.gridLayout_19, 0, 0, 1, 1)
-
-        self.stock_in_tabWidget.addTab(self.inventory_batch, "")
 
         self.gridLayout_11.addWidget(self.stock_in_tabWidget, 0, 0, 1, 1)
 
@@ -765,6 +755,11 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout_5.addWidget(self.purchase_order_btn)
 
+        self.add_an_order_btn = QPushButton(self.page_7)
+        self.add_an_order_btn.setObjectName(u"add_an_order_btn")
+
+        self.horizontalLayout_5.addWidget(self.add_an_order_btn)
+
         self.purchase_add_btn = QPushButton(self.page_7)
         self.purchase_add_btn.setObjectName(u"purchase_add_btn")
 
@@ -774,6 +769,11 @@ class Ui_mainWindow(object):
         self.purchase_del_btn.setObjectName(u"purchase_del_btn")
 
         self.horizontalLayout_5.addWidget(self.purchase_del_btn)
+
+        self.purchase_mod_btn = QPushButton(self.page_7)
+        self.purchase_mod_btn.setObjectName(u"purchase_mod_btn")
+
+        self.horizontalLayout_5.addWidget(self.purchase_mod_btn)
 
         self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -1025,10 +1025,10 @@ class Ui_mainWindow(object):
         self.stock_in_all_btn.setText(QCoreApplication.translate("mainWindow", u"\u6240\u6709\u5e93\u5b58", None))
         self.stock_in_com_btn.setText(QCoreApplication.translate("mainWindow", u"\u7efc\u5408\u67e5\u8be2", None))
         self.stock_in_btn.setText(QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u5904\u7406", None))
-        self.drug_entry_btn.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u5f55\u5165", None))
+        self.stock_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664", None))
+        self.stock_mod_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539", None))
         self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.stock_in_main), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u4e3b\u8868", None))
         self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.stock_in_detail), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u660e\u7ec6\u8868", None))
-        self.stock_in_tabWidget.setTabText(self.stock_in_tabWidget.indexOf(self.inventory_batch), QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u6279\u6b21\u8868", None))
         self.label_4.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65e5\u671f", None))
         self.label_5.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65e5\u671f", None))
         self.inventory_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
@@ -1048,8 +1048,10 @@ class Ui_mainWindow(object):
         self.label_12.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
         self.label_13.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
         self.purchase_order_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.add_an_order_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u8ba2\u5355", None))
         self.purchase_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u91c7\u8d2d\u5355", None))
         self.purchase_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u91c7\u8d2d\u5355", None))
+        self.purchase_mod_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u91c7\u8d2d\u5355", None))
         self.label_14.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
         self.label_15.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
         self.inventory_check_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))

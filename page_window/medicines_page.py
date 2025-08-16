@@ -26,7 +26,8 @@ def delete_selected_rows(self, tableView, model, db, parent=None):
     # 1. 获取选中的行
     selection = tableView.selectionModel().selectedRows()
     if not selection:
-        QMessageBox.warning(parent, "提示", "请先选择要删除的行", QMessageBox.StandardButton.Ok)
+        # QMessageBox.warning(parent, "提示", "请先选择要删除的行", QMessageBox.StandardButton.Ok)
+        return False, "请先选择要删除的行"
 
     # 2. 确认对话框
     reply = QMessageBox.question(

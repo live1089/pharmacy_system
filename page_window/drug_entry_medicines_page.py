@@ -32,32 +32,64 @@ class DrugEntryPage(QDialog, Ui_DrugEntryDialog):
             self.in_id_combox.addItem(str(in_id), in_id)
 
     def save(self):
-        in_id = self.in_id_combox.itemData(self.in_id_combox.currentIndex())
-        stock_drug = self.stock_drug_combox.itemData(self.stock_drug_combox.currentIndex())  # 获取药品名称
-        expiration_date = self.expiration_date_edit.dateTime().toString("yyyy-MM-dd")  # 获取有效期
-        purchase = self.purchase_unit_price_spin_box.value()  # 获取采购单价
-        incoming_quantity = self.incoming_quantity_spin_box.value() # 获取入库数量
-        actual_quantity = self.actual_incoming_quantity_spin_box.value()
+        in_id = self.in_id_combox.itemData(self.in_id_combox.currentIndex())                 # 获取入库单ID
+        stock_drug = self.stock_drug_combox.itemData(self.stock_drug_combox.currentIndex())  # 获取药品ID
+        expiration_date = self.expiration_date_edit.dateTime().toString("yyyy-MM-dd")        # 获取有效期
+        purchase = self.purchase_unit_price_spin_box.value()                                 # 获取采购单价
+        incoming_quantity = self.incoming_quantity_spin_box.value()                          # 获取入库数量
+        actual_quantity = self.actual_incoming_quantity_spin_box.value()                     # 获取实际入库数量
 
-
+        # 开始事务以确保数据一致性
         query = QSqlQuery()
-        query.prepare(
-            "Insert into stock_in_detail(in_id, medicine_id, purchase_price, dic_id, quantity, actual_quantity)"
-            "values (?,?,?,?,?,?)")
-        query.addBindValue(in_id)
-        query.addBindValue(stock_drug)
-        query.addBindValue(purchase)
-        query.addBindValue(stock_drug)
-        query.addBindValue(incoming_quantity)
-        query.addBindValue(actual_quantity)
+        if not query.exec("BEGIN"):
+            QMessageBox.critical(self, "数据库错误", f"无法开始事务: {query.lastError().text()}")
+            return
 
-        if not query.exec():
-            QMessageBox.critical(self, "数据库错误", f"添加入库单失败: {query.lastError().text()}")
-        else:
-            QMessageBox.information(self, "成功", "添加入库单成功")
-            self.exec()
+        try:
+            # 插入入库明细数据
+            query.prepare(
+                "INSERT INTO stock_in_detail(in_id, medicine_id, dic_id, quantity, actual_quantity) "
+                "VALUES (?,?,?,?,?)")
+            query.addBindValue(in_id)
+            query.addBindValue(stock_drug)
+            query.addBindValue(purchase)
+            query.addBindValue(stock_drug)
+            query.addBindValue(incoming_quantity)
+            query.addBindValue(actual_quantity)
 
-        # query = QSqlQuery()
-        # query.prepare(
-        #     "Insert into inventory_batch(batch_id, medicine_id, in_detail_id, current_quantity)"
-        #     "values (?,?,?,?)")
+            if not query.exec():
+                raise Exception(f"添加入库明细失败: {query.lastError().text()}")
+
+            # 获取刚刚插入的明细ID
+            query.exec("SELECT last_insert_rowid()")
+            if query.next():
+                detail_id = query.value(0)
+            else:
+                raise Exception("无法获取插入的明细ID")
+
+            # 插入库存批次数据
+            query.prepare(
+                "INSERT INTO inventory_batch(batch_number, buy_detail_id, in_detail_id, medicine_id, expiry_date, inventory_id, location, created_at, last_updated) "
+                "VALUES (?,?,?,?,?,?,?,?,?)")
+            # 这里需要生成或获取批号，暂时使用简单方式生成
+            batch_number = f"BN{QDate.currentDate().toString('yyyyMMdd')}{detail_id}"
+            query.addBindValue(batch_number)
+            query.addBindValue(detail_id)
+            query.addBindValue(stock_drug)
+            query.addBindValue(expiration_date)
+            query.addBindValue(actual_quantity)
+
+            if not query.exec():
+                raise Exception(f"添加库存批次失败: {query.lastError().text()}")
+
+            # 提交事务
+            if not query.exec("COMMIT"):
+                raise Exception(f"无法提交事务: {query.lastError().text()}")
+
+            QMessageBox.information(self, "成功", "添加入库单和库存批次成功")
+            self.accept()  # 关闭对话框
+
+        except Exception as e:
+            # 回滚事务
+            query.exec("ROLLBACK")
+            QMessageBox.critical(self, "数据库错误", str(e))

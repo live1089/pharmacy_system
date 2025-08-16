@@ -43,6 +43,8 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             QMessageBox.information(self, "成功", "添加入库单成功")
             self.exec()
 
+
+
     def load_stock_data(self):
         self.inbound_date_time_edit.setDateTime(QDateTime.currentDateTime())
         query = QSqlQuery("SELECT supplier_id, name FROM supplier")

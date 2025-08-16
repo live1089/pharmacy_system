@@ -12,12 +12,19 @@ class SupplierDrugPage(QDialog, Ui_SupDialog):
         super().__init__()
         self.setupUi(self)
         self.ui = parent
+        self.supplier_id = None
         self.bind_event()
 
     def bind_event(self):
         self.supplier_save_btn.clicked.connect(self.save)
 
     def save(self):
+        if self.supplier_id:
+            self.update_supplier()
+        else:
+            self.create_supplier()
+
+    def create_supplier(self):
         create_time = self.create_time.dateTime().toString("yyyy-MM-dd hh:mm:ss")
         update_time = self.update_time.dateTime().toString("yyyy-MM-dd hh:mm:ss")
         supp = self.supplier_line_edit.text()
@@ -50,22 +57,50 @@ class SupplierDrugPage(QDialog, Ui_SupDialog):
         else:
             QMessageBox.information(self, "成功", "添加供应商成功")
 
+    def update_supplier(self):
+        """更新供应商信息"""
+        update_time = self.update_time.dateTime().toString("yyyy-MM-dd hh:mm:ss")
+        supp = self.supplier_line_edit.text()
+        contact = self.contact_line_edit.text()
+        updater = self.updater_line_edit.text()
+        phone = self.phone_line_edit.text()
+        address = self.address_line_edit.text()
+        email = self.email_line_edit.text()
+        remark = self.plainTextEdit_remark.toPlainText()
+
+        query = QSqlQuery()
+        query.prepare("""
+                    UPDATE supplier 
+                    SET name=?, contact_person=?, phone=?, address=?, email=?, remarks=?, update_at=?, update_by=?
+                    WHERE supplier_id=?
+                """)
+
+        query.addBindValue(supp)
+        query.addBindValue(contact)
+        query.addBindValue(phone)
+        query.addBindValue(address)
+        query.addBindValue(email)
+        query.addBindValue(remark)
+        query.addBindValue(update_time)
+        query.addBindValue(updater)
+        query.addBindValue(self.supplier_id)
+
+        if not query.exec():
+            QMessageBox.critical(self, "数据库错误", f"更新供应商失败: {query.lastError().text()}")
+        else:
+            QMessageBox.information(self, "成功", "更新供应商成功")
+            self.accept()  # 关闭对话框
     def load_supplier_time(self):
         self.create_time.setDateTime(QDateTime.currentDateTime())
         self.update_time.setDateTime(QDateTime.currentDateTime())
 
-    def show_mod_supplier_data(self, id_s):
+    def show_mod_supplier_data(self, supplier_id):
         """根据供应商ID填充数据到UI控件"""
-        # 检查是否有选中行
-        if not id_s:
-            QMessageBox.warning(self, "警告", "请先选择要修改的供应商记录")
-            return
+        # 保存供应商ID用于更新操作
+        self.supplier_id = supplier_id
 
-        # 获取第一个选中的ID（假设一次只修改一条记录）
-        if isinstance(id_s, list) and len(id_s) > 0:
-            supplier_id = id_s[0]
-        else:
-            supplier_id = id_s
+        # 修改保存按钮文本
+        self.supplier_save_btn.setText("更新")
 
         # 使用参数化查询防止SQL注入
         query = QSqlQuery()
@@ -97,10 +132,17 @@ class SupplierDrugPage(QDialog, Ui_SupDialog):
                 elif isinstance(create_at, QDateTime):
                     self.create_time.setDateTime(create_at)
 
-            self.updater_line_edit.setText(query.value("update_by") or "")
-            self.creator_line_edit.setText(query.value("created_by") or "")
+            # 如果数据库中有更新人和创建人信息，则使用数据库中的值
+            # 否则可以保留用户手动输入的值
+            updater = query.value("update_by")
+            creator = query.value("created_by")
+            if updater:
+                self.updater_line_edit.setText(updater)
+            if creator:
+                self.creator_line_edit.setText(creator)
         else:
             QMessageBox.warning(self, "警告", "未找到对应的供应商记录")
+
 
 
 def get_selected_logical_rows(tableView):
@@ -117,6 +159,3 @@ def get_selected_logical_rows(tableView):
     return sorted(selected_rows)
 
 
-def del_rows(rows, db):
-    query = QSqlQuery(db)
-    query.exec(f"DELETE FROM supplier WHERE {rows}")

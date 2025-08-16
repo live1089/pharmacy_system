@@ -10,22 +10,25 @@ from enum import Enum
 from PySide6.QtCore import Signal
 from PySide6.QtSql import QSqlQuery
 # 导入pyside6库
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QMessageBox)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QMessageBox, QDialog)
 # 主题
 from qtmodern.styles import dark
 
 # 数据库
 import data.sqlite_data
-from data.sqlite_data import DrugDicModel, SupplierModel
+from data.sqlite_data import DrugDicModel, SupplierModel, PurchaseOrderModel, StockInMainModel, StockInDetailModel, \
+    InventoryDatchModel
 # 外部UI
 import ui_app.log_in_ui
 import ui_app.mainwondows_ui
 from page_window.drug_entry_medicines_page import DrugEntryPage
 from page_window.medicines_page import MedicinesPage, DrugAttributePage, DrugRormulationPage, DrugUnitPage, \
     DrugSpecificationPage, class_set_page, delete_selected_rows
+from page_window.purchase_page import PurAddPage, AnOrderPage
 from page_window.sell_medicines_page import sell_drug_ui_dialog
 from page_window.stock_medicines_page import StockMedicinesPage
-from page_window.supplier_medicines_page import SupplierDrugPage, get_selected_logical_rows, del_rows
+from page_window.supplier_medicines_page import SupplierDrugPage, get_selected_logical_rows
+from ui_app.add_an_order_ui import Ui_AnOrderDialog
 
 
 # 其他工具
@@ -73,7 +76,7 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         data.sqlite_data.get_inventory_model(self)  # 库存
         data.sqlite_data.get_stock_in_main_model(self)  # 入库
         data.sqlite_data.get_stock_in_detail_model(self)  # 入库明细
-        data.sqlite_data.get_inventory_datch_model(self)  # 库存批次
+        # data.sqlite_data.get_inventory_datch_model(self)  # 库存批次
         data.sqlite_data.get_stock_out_main_model(self)  # 出库
         data.sqlite_data.get_stock_out_detail_model(self)  # 出库明细
         data.sqlite_data.get_purchase_order_model(self)  # 采购订单
@@ -108,6 +111,10 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.drug_dic_del_btn.clicked.connect(self.del_dic)
         self.supplier_del_btn.clicked.connect(self.supplier_del)
         self.supplier_mod_btn.clicked.connect(self.supplier_mod)
+        self.purchase_del_btn.clicked.connect(self.purchase_del)
+        self.purchase_mod_btn.clicked.connect(self.purchase_modify)
+        self.stock_del_btn.clicked.connect(self.stock_del)
+        self.stock_mod_btn.clicked.connect(self.stock_mod)
 
     def del_dic(self):
         self.dic = DrugDicModel(self, self.db)
@@ -138,12 +145,11 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
 
             self.sup = SupplierDrugPage(self)
             self.sup.show_mod_supplier_data(supplier_id)  # 先填充数据
-            self.sup.exec()  # 再显示对话框
-            # del_rows(supplier_id, self.db)
-            data.sqlite_data.get_supplier_model(self)
+            if self.sup.exec() == QDialog.DialogCode.Accepted:  # 如果成功保存
+                data.sqlite_data.get_supplier_model(self)  # 刷新供应商列表
 
     def supplier_del(self):
-        self.supp = SupplierModel(self,self.db)
+        self.supp = SupplierModel(self, self.db)
         success, msg = delete_selected_rows(
             self=self,
             tableView=self.supplier_tableView,
@@ -157,7 +163,90 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         else:
             QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
 
+    def purchase_del(self):
+        # 获取当前采购标签页的索引
+        current_order_tab_index = self.order_tabWidget.currentIndex()
+        if current_order_tab_index == 0:  # 采购订单表
+            self.pur = PurchaseOrderModel(self, self.db)
+            success, msg = delete_selected_rows(
+                self=self,
+                tableView=self.purchase_order_tableView,
+                model=self.pur,
+                db=self.db,
+            )
+            if success:
+                QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+                data.sqlite_data.get_purchase_order_model(self)
+                self.purchase_order_tableView.clearSelection()
+            else:
+                QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
 
+        elif current_order_tab_index == 1:  # 采购明细表
+            from data.sqlite_data import PurchaseDetailModel
+            self.pur_detail = PurchaseDetailModel(self, self.db)
+            success, msg = delete_selected_rows(
+                self=self,
+                tableView=self.purchase_detail_tableView,
+                model=self.pur_detail,
+                db=self.db,
+            )
+            if success:
+                QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+                data.sqlite_data.get_purchase_order_detail_model(self)
+                self.purchase_detail_tableView.clearSelection()
+            else:
+                QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+    def stock_del(self):
+        # 获取当前采购标签页的索引
+        current_order_tab_index = self.stock_in_tabWidget.currentIndex()
+        if current_order_tab_index == 0:
+            self.stock = StockInMainModel(self, self.db)
+            success, msg = delete_selected_rows(
+                self=self,
+                tableView=self.main_tableView,
+                model=self.stock,
+                db=self.db,
+            )
+            if success:
+                QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+                data.sqlite_data.get_stock_in_main_model(self)
+                self.main_tableView.clearSelection()
+            else:
+                QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+        if current_order_tab_index == 1:
+            self.stock = StockInDetailModel(self, self.db)
+            success, msg = delete_selected_rows(
+                self=self,
+                tableView=self.detail_tableView,
+                model=self.stock,
+                db=self.db,
+            )
+            if success:
+                QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+                data.sqlite_data.get_stock_in_detail_model(self)
+                self.detail_tableView.clearSelection()
+            else:
+                QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+        # if current_order_tab_index == 2:
+        #     self.stock = InventoryDatchModel(self, self.db)
+        #     success, msg = delete_selected_rows(
+        #         self=self,
+        #         tableView=self.batch_tableView,
+        #         model=self.stock,
+        #         db=self.db,
+        #     )
+        #     if success:
+        #         QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+        #         data.sqlite_data.get_inventory_datch_model(self)
+        #         self.batch_tableView.clearSelection()
+        #     else:
+        #         QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+    def stock_mod(self):
+        pass
 
     # 添加跳出子窗口事件
     def sub_window_event(self):
@@ -170,7 +259,8 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.supplier_add_btn.clicked.connect(self.supplier_add)
         self.stock_in_btn.clicked.connect(self.stock_in)
         self.drug_entry_btn.clicked.connect(self.drug_entry)
-
+        self.purchase_add_btn.clicked.connect(self.purchase_add)
+        self.add_an_order_btn.clicked.connect(self.add_an_order)
 
     # 药品添加
     def drug_adds(self):
@@ -207,13 +297,61 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
     def stock_in(self):
         self.stock_inbo = StockMedicinesPage(self)
         self.stock_inbo.exec()
-
+        data.sqlite_data.get_stock_in_main_model(self)
 
     def drug_entry(self):
         self.drug_en = DrugEntryPage(self)
         self.drug_en.exec()
+        data.sqlite_data.get_stock_in_detail_model(self)
+        # data.sqlite_data.get_inventory_datch_model(self)
+
+    def purchase_add(self):
+        self.pu = PurAddPage(self)
+        self.pu.exec()
+        data.sqlite_data.get_purchase_order_detail_model(self)
 
 
+    def add_an_order(self):
+        self.puan = AnOrderPage(self)
+        self.puan.exec()
+        data.sqlite_data.get_purchase_order_model(self)
+
+    def purchase_modify(self):
+        """修改采购订单"""
+        current_order_tab_index = self.order_tabWidget.currentIndex()
+
+        if current_order_tab_index == 0:  # 采购订单表
+            selected_rows = get_selected_logical_rows(self.purchase_order_tableView)
+            if not selected_rows:
+                QMessageBox.warning(self, "警告", "请先选择要修改的采购订单记录")
+                return
+
+            # 获取选中行的order_id
+            model = self.purchase_order_tableView.model()
+            if model and len(selected_rows) > 0:
+                order_id = model.data(model.index(selected_rows[0], 0))  # 假设ID在第一列
+
+                self.pu = AnOrderPage(self)
+                self.pu.load_order(order_id)  # 加载订单数据
+                self.pu.exec()
+
+                # 更新数据
+                data.sqlite_data.get_purchase_order_model(self)
+                data.sqlite_data.get_purchase_order_detail_model(self)
+
+        if current_order_tab_index == 1: # 采购订单明细表
+            selected_rows = get_selected_logical_rows(self.purchase_detail_tableView)
+            if not selected_rows:
+                QMessageBox.warning(self, "警告", "请先选择要修改的药品订单记录")
+                return
+            model = self.purchase_detail_tableView.model()
+            if model and len(selected_rows) > 0:
+                detail_id = model.data(model.index(selected_rows[0], 0))
+                self.pu = PurAddPage(self)
+                self.pu.load_order_data(detail_id)
+                self.pu.exec()
+                data.sqlite_data.get_purchase_order_model(self)
+                data.sqlite_data.get_purchase_order_detail_model(self)
 
     def show_page_by_name(self, page_name):
         """通过页面名称切换页面"""
@@ -230,7 +368,7 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         if page_name == PageMap.stock_in_tabWidget.value:
             data.sqlite_data.get_stock_in_main_model(self)
             data.sqlite_data.get_stock_in_detail_model(self)
-            data.sqlite_data.get_inventory_datch_model(self)
+            # data.sqlite_data.get_inventory_datch_model(self)
         if page_name == PageMap.stock_out_tabWidget.value:
             data.sqlite_data.get_stock_out_main_model(self)
             data.sqlite_data.get_stock_out_detail_model(self)
@@ -302,5 +440,3 @@ if __name__ == "__main__":
     # window.setWindowIcon(icon)
     LoginWindow.show()
     app.exec()
-
-

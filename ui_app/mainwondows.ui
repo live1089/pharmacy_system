@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1073</width>
-    <height>579</height>
+    <height>577</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -445,9 +445,16 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="drug_entry_btn">
+             <widget class="QPushButton" name="stock_del_btn">
               <property name="text">
-               <string>药品录入</string>
+               <string>删除</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_mod_btn">
+              <property name="text">
+               <string>修改</string>
               </property>
              </widget>
             </item>
@@ -505,20 +512,6 @@
                  <layout class="QGridLayout" name="gridLayout_17">
                   <item row="0" column="0">
                    <widget class="QTableView" name="detail_tableView"/>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-              <widget class="QWidget" name="inventory_batch">
-               <attribute name="title">
-                <string>入库批次表</string>
-               </attribute>
-               <layout class="QGridLayout" name="gridLayout_20">
-                <item row="0" column="0">
-                 <layout class="QGridLayout" name="gridLayout_19">
-                  <item row="0" column="0">
-                   <widget class="QTableView" name="batch_tableView"/>
                   </item>
                  </layout>
                 </item>
@@ -895,6 +888,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="add_an_order_btn">
+              <property name="text">
+               <string>添加订单</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="purchase_add_btn">
               <property name="text">
                <string>添加采购单</string>
@@ -905,6 +905,13 @@
              <widget class="QPushButton" name="purchase_del_btn">
               <property name="text">
                <string>删除采购单</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="purchase_mod_btn">
+              <property name="text">
+               <string>修改采购单</string>
               </property>
              </widget>
             </item>
