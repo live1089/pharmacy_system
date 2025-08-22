@@ -162,7 +162,7 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>9</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -780,9 +780,37 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="stock_out_btn">
+             <widget class="QPushButton" name="stock_out_query_btn">
               <property name="text">
                <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_out_add_btn">
+              <property name="text">
+               <string>添加出库单</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_out_add_drug_btn">
+              <property name="text">
+               <string>添加出库药品</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_out_del_btn">
+              <property name="text">
+               <string>删除</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_out_mod_btn">
+              <property name="text">
+               <string>修改</string>
               </property>
              </widget>
             </item>
@@ -992,6 +1020,27 @@
              <widget class="QPushButton" name="inventory_check_query_btn">
               <property name="text">
                <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inventory_check_add_btn">
+              <property name="text">
+               <string>添加</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inventory_check_del_btn">
+              <property name="text">
+               <string>删除</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inventory_check_mod_btn">
+              <property name="text">
+               <string>修改</string>
               </property>
              </widget>
             </item>

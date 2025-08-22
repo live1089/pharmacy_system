@@ -145,7 +145,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             actual_quantity INTEGER NOT NULL,           -- 实际数量
             check_date DATE NOT NULL,                   -- 盘点日期
             discrepancy_reason TEXT,                    -- 差异原因（备注）
-            FOREIGN KEY (medicine_id) REFERENCES medicine (medicine_id)
+            FOREIGN KEY (medicine_id) REFERENCES medicine_dic (dic_id)
         )
         """)
 
@@ -199,7 +199,6 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         CREATE TABLE IF NOT EXISTS stock_in_main (            -- 入库主表
                 in_id INTEGER PRIMARY KEY AUTOINCREMENT,      -- 入库单ID
                 order_id INTEGER,                             -- 关联采购订单ID
-                supplier_id INTEGER NOT NULL,                 -- 供应商ID
                 in_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 入库日期时间
                 operator_id INTEGER NOT NULL,                 -- 操作员ID
                 total_amount REAL,                            -- 入库总金额
@@ -208,7 +207,6 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 production_lot_number INTEGER NOT NULL,       -- 生产批号
                 validity DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- 有效期
                 remarks TEXT,                                 -- 备注
-                FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
                 FOREIGN KEY (operator_id) REFERENCES users(users_id)
         )
         """)
@@ -218,45 +216,22 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         CREATE TABLE IF NOT EXISTS stock_in_detail (                                   -- 入库明细表
                 detail_id INTEGER PRIMARY KEY AUTOINCREMENT,                           -- 明细ID
                 in_id INTEGER NOT NULL,                                                -- 关联入库单ID
-                medicine_id INTEGER NOT NULL,                                          -- 药品ID
-                dic_id INTEGER NOT NULL,                                               -- 销售单价
-                inventory_id INTEGER NOT NULL,                                         -- 库存id
+                inventory_id INTEGER,                                                  -- 库存id
                 purchase_detail_id INTEGER NOT NULL,                                   -- 采购明细ID
                 quantity INTEGER NOT NULL CHECK (quantity > 0),                        -- 入库数量
                 actual_quantity INTEGER NOT NULL CHECK (actual_quantity > 0),          -- 实际入库数量
                 location TEXT,                                                         -- 存放位置
                 FOREIGN KEY (in_id) REFERENCES stock_in_main(in_id),
-                FOREIGN KEY (medicine_id) REFERENCES medicine(medicine_id),
-                FOREIGN KEY (dic_id) REFERENCES medicine_dic(dic_id),
                 FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id),
                 FOREIGN KEY (purchase_detail_id) REFERENCES purchase_detail(detail_id),
                 CHECK (actual_quantity <= quantity) -- 实际入库量≤采购量
         )
         """)
 
-        # 库存批次表（核心表）
-        query.exec("""
-        CREATE TABLE IF NOT EXISTS inventory_batch (          -- 库存批次表
-                batch_id INTEGER PRIMARY KEY AUTOINCREMENT,                              -- 批次ID
-                batch_number TEXT NOT NULL,                                              -- 入库批次
-                buy_detail_id INTEGER NOT NULL,                                          -- 生产批号
-                in_detail_id INTEGER NOT NULL,                                           -- 关联入库明细ID
-                medicine_id INTEGER NOT NULL,                                            -- 药品ID
-                --expiry_date INTEGER NOT NULL,                                            -- 有效期
-                inventory_id INTEGER NOT NULL,                                           -- 当前库存
-                location TEXT,                                                           -- 存放位置
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,                           -- 创建时间
-                last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,                         -- 最后更新时间
-                FOREIGN KEY (in_detail_id) REFERENCES stock_in_detail(detail_id) ON DELETE CASCADE,
-                FOREIGN KEY (medicine_id) REFERENCES medicine(medicine_id),
-                FOREIGN KEY (buy_detail_id) REFERENCES purchase_detail(detail_id),
-                FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
-        )
-        """)
-
         query.exec("""
         CREATE TABLE IF NOT EXISTS stock_out_main (                  -- 出库主表（记录出库单头信息）
-                out_id INTEGER PRIMARY KEY AUTOINCREMENT,      -- 出库单ID
+                out_id INTEGER PRIMARY KEY AUTOINCREMENT,          -- 出库单ID
+                outbound_number TEXT NOT NULL,                     -- 出库编号
                 out_type TEXT NOT NULL CHECK (out_type IN ('销售', '调拨', '报损', '退货', '科室领用')), -- 出库类型
                 out_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 出库日期时间
                 operator_id INTEGER NOT NULL,                  -- 操作员ID（外键关联用户表）
@@ -265,23 +240,24 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 total_amount REAL,                             -- 出库总金额（销售出库有意义）
                 remarks TEXT,                                  -- 备注
                 FOREIGN KEY (operator_id) REFERENCES users(users_id),
-                FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+                FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+                FOREIGN KEY (related_id) REFERENCES sales(sales_id)
         )
         """)
 
         query.exec("""
-        CREATE TABLE IF NOT EXISTS stock_out_detail (                   -- 出库明细表（记录具体药品出库信息））
+        CREATE TABLE IF NOT EXISTS stock_out_detail (          -- 出库明细表（记录具体药品出库信息））
                 detail_id INTEGER PRIMARY KEY AUTOINCREMENT,   -- 明细ID
                 out_id INTEGER NOT NULL,                       -- 关联出库单ID
                 medicine_id INTEGER NOT NULL,                  -- 药品ID
-                batch_id INTEGER NOT NULL,                     -- 出库批次ID（关键字段）
-                quantity INTEGER NOT NULL CHECK (quantity > 0),-- 出库数量
+                quantity INTEGER NOT NULL CHECK (quantity > 0),-- 出库数量(销售数量)
+                inventory_id INTEGER NOT NULL,                 -- 剩余库存
                 sale_price REAL,                               -- 销售单价（仅销售出库有意义）
                 cost_price REAL,                               -- 成本单价（用于计算利润）
                 sub_total REAL,                                -- 小计金额（数量*单价）
                 FOREIGN KEY (out_id) REFERENCES stock_out_main(out_id),
                 FOREIGN KEY (medicine_id) REFERENCES medicine(medicine_id),
-                FOREIGN KEY (batch_id) REFERENCES inventory_batch(batch_id)
+                FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
         )
         """)
 
@@ -300,17 +276,20 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         CREATE TABLE IF NOT EXISTS inventory (                             -- 库存记录表
             inventory_id INTEGER PRIMARY KEY AUTOINCREMENT,                -- 主键ID
             medicine_id INTEGER,                                           -- 对应的药品 ID（外键）
-            current_quantity INTEGER NOT NULL CHECK (current_quantity >= 0),  -- 当前库存
+            detail_id INTEGER NOT NULL,                                    -- 入库明细表 （外键）
+            current_quantity INTEGER NOT NULL CHECK (current_quantity >= 0),  -- 当前订单药品库存
+            drug_total_quantity INTEGER NOT NULL CHECK (drug_total_quantity >= 0), -- 当前药品总库存
             quantity INTEGER,                                              -- 库存数量变化
             change_date DATE,                                              -- 库存变化日期
             change_type TEXT,                                              -- 变化类型（进货、销售等）
-            FOREIGN KEY (medicine_id) REFERENCES medicine(medicine_id)
+            FOREIGN KEY (medicine_id) REFERENCES medicine(medicine_id),
+            FOREIGN KEY (detail_id) REFERENCES stock_in_detail(detail_id)
         )
         """)
 
         query.exec("""
         CREATE TABLE IF NOT EXISTS users(                                   -- 用户信息表
-            users_id INTEGER PRIMARY KEY AUTOINCREMENT,                           -- 主键ID
+            users_id INTEGER PRIMARY KEY AUTOINCREMENT,                     -- 主键ID
             username TEXT NOT NULL,                                         -- 用户名
             password TEXT NOT NULL,                                         -- 密码
             role TEXT                                                       -- 用户角色
@@ -372,9 +351,6 @@ class BaseTableModel(QSqlTableModel):
         # 记录隐藏列
         self.hidden_columns = hidden_columns or []
 
-
-
-
     def get_primary_key_column(self):
         """获取表的主键列名（只取第一个主键）"""
         # 尝试从隐藏列中查找主键
@@ -393,9 +369,6 @@ class BaseTableModel(QSqlTableModel):
 
         # 默认返回 "id"（常见主键名称）
         return "id"
-
-
-
 
 
 # 药物模型
@@ -425,7 +398,6 @@ class MedicineModel(BaseTableModel):
             headers=self.HEADERS,
             hidden_columns=self.HIDDEN_COLUMNS,
         )
-
 
 
 # 临期模型
@@ -587,7 +559,7 @@ class StockInMainModel(BaseTableModel):
         9: "有效期",
         10: "备注"
     }
-    HIDDEN_COLUMNS = []
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
@@ -603,7 +575,7 @@ class StockInMainModel(BaseTableModel):
 class StockInDetailModel(BaseTableModel):
     HEADERS = {
         0: "ID",
-        1: "入库主表ID",
+        1: "订单号",
         2: "药品",
         3: "有效期",
         4: "采购单价",
@@ -657,12 +629,12 @@ class InventoryDatchModel(BaseTableModel):
 class StockOutMainModel(BaseTableModel):
     HEADERS = {
         0: "ID",
-        1: "出库类型",
-        2: "出库日期",
-        3: "操作员",
-        4: "关联单据",
-        5: "客户",
-        6: "出库总金额",
+        1: "出库编号",
+        2: "出库类型",
+        3: "出库日期",
+        4: "操作员",
+        5: "出库总金额",
+        6: "关联单据",
         7: "备注",
     }
     HIDDEN_COLUMNS = [0]
@@ -794,7 +766,6 @@ class SpecificationModel(BaseTableModel):
         )
 
 
-
 class DrugDicModel(BaseTableModel):
     HEADERS = {
         0: "ID",
@@ -818,6 +789,7 @@ class DrugDicModel(BaseTableModel):
             headers=self.HEADERS,
             hidden_columns=self.HIDDEN_COLUMNS
         )
+
 
 def get_medicine_dic_model(self):
     self.medicine_dic_model = DrugDicModel(self, self.db)
@@ -845,6 +817,8 @@ def get_medicine_dic_model(self):
         self.drug_dic_tableView.hideColumn(col)
 
     return self.medicine_dic_model
+
+
 # 药品
 def get_medicines_model(self):
     self.medicine_model = MedicineModel(self, self.db)
@@ -875,8 +849,8 @@ def get_stock_in_main_model(self):
     sql = f"""
         SELECT
             s.in_id,
-            p.order_id,
-            su.name,
+            p.order_number,
+            r.name,
             s.in_date,
             us.username,
             s.total_amount,
@@ -884,10 +858,10 @@ def get_stock_in_main_model(self):
             s.batch,
             s.production_lot_number,
             s.validity,
-            s.remarks
+            s.remarks as 备注
         FROM stock_in_main s
         LEFT JOIN  purchase_order p ON s.order_id = p.order_id
-        LEFT JOIN supplier su on s.supplier_id = su.supplier_id
+        Left join  supplier r ON p.supplier_id = r.supplier_id
         LEFT JOIN users us on s.operator_id = us.users_id
     """
     self.stock_in_main_model.setQuery(sql, self.db)
@@ -904,22 +878,23 @@ def get_stock_in_detail_model(self):
     sql = f"""
         SELECT
             s.detail_id,
-            s.in_id,
-            de.trade_name,
+            o.order_number,
+            dic.trade_name,
             m.validity,
             pu.purchase_price,
-            de.price,
-            s.quantity,
-            s.actual_quantity,
+            dic.price,
+            s.quantity as 入库数量,
+            s.actual_quantity as 实际入库数量,
             s.location as 库存位置,
             i.current_quantity as 库存数量,
             m.batch as 批次,
             m.production_lot_number as 生产批号
         FROM stock_in_detail s
-        LEFT JOIN  medicine_dic de ON s.dic_id = de.dic_id
         LEFT JOIN stock_in_main m ON s.in_id = m.in_id
         LEFT JOIN purchase_detail pu ON s.purchase_detail_id = pu.detail_id
-        LEFT JOIN inventory i ON s.inventory_id = i.inventory_id
+        LEFT JOIN purchase_order o ON m.order_id = o.order_id
+        LEFT JOIN medicine_dic dic ON pu.medicine_id = dic.dic_id
+        LEFT JOIN inventory i ON pu.inventory_id = i.inventory_id
     """
     self.stock_in_detail_model.setQuery(sql, self.db)
     self.detail_tableView.setModel(self.stock_in_detail_model)
@@ -929,36 +904,24 @@ def get_stock_in_detail_model(self):
     return self.stock_in_detail_model
 
 
-# 库存批次模型
-def get_inventory_datch_model(self):
-    self.inventory_datch_model = InventoryDatchModel(self, self.db)
-    sql = f"""
-        SELECT
-            s.batch_id,
-            s.batch_number,
-            st.detail_id,
-            de.trade_name,
-            i.current_quantity,
-            s.location,
-            s.created_at,
-            s.last_updated
-        FROM inventory_batch s
-        LEFT JOIN medicine_dic de ON s.medicine_id = de.dic_id
-        LEFT JOIN stock_in_detail st ON s.in_detail_id = st.detail_id
-        LEFT JOIN purchase_detail pu ON s.buy_detail_id = pu.detail_id
-        LEFT JOIN inventory i ON s.inventory_id = i.inventory_id
-    """
-    self.inventory_datch_model.setQuery(sql, self.db)
-    self.batch_tableView.setModel(self.inventory_datch_model)
-    for col in self.inventory_datch_model.hidden_columns:
-        self.batch_tableView.hideColumn(col)
-
-    return self.inventory_datch_model
-
-
 # 出库主模型
 def get_stock_out_main_model(self):
     self.stock_out_main_model = StockOutMainModel(self, self.db)
+    sql = f"""
+        SELECT
+            s.out_id,
+            s.outbound_number,
+            s.out_type,
+            s.out_date,
+            us.username,
+            s.total_amount,
+            sa.sales_id,
+            s.remarks
+        FROM stock_out_main s
+        LEFT JOIN users us on s.operator_id = us.users_id
+        LEFT JOIN sales sa on s.related_id = sa.sales_id
+        """
+    self.stock_out_main_model.setQuery(sql, self.db)
     self.stock_out_main_tableView.setModel(self.stock_out_main_model)
     for col in self.stock_out_main_model.hidden_columns:
         self.stock_out_main_tableView.hideColumn(col)

@@ -108,13 +108,6 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
-      <widget class="QComboBox" name="supplier_stock_combox">
-       <property name="editable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item row="7" column="4">
       <widget class="QLabel" name="label_3">
        <property name="text">
@@ -122,26 +115,6 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="4">
-      <widget class="QLabel" name="label_20">
-       <property name="text">
-        <string>备注</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="5">
-      <widget class="QPlainTextEdit" name="warehousing_remarks_plain_text_edit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
        </property>
       </widget>
      </item>
@@ -227,41 +200,33 @@
       </widget>
      </item>
      <item row="8" column="0">
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="label_20">
        <property name="text">
-        <string>供应商</string>
+        <string>备注</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1" colspan="5">
+      <widget class="QPlainTextEdit" name="warehousing_remarks_plain_text_edit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>70</height>
+        </size>
        </property>
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QSpinBox" name="batch_spin_box">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>999999999</number>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="2">
-      <widget class="QLabel" name="label_13">
-       <property name="text">
-        <string>入库单</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="3">
-      <widget class="QComboBox" name="in_id_combox">
-       <property name="editable">
-        <bool>true</bool>
-       </property>
-      </widget>
+      <widget class="QLineEdit" name="batch_lineEdit"/>
      </item>
     </layout>
    </item>
