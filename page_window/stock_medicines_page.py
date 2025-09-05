@@ -1,8 +1,14 @@
+import random
+
 from PySide6.QtCore import QDateTime, QDate
 from PySide6.QtSql import QSqlQuery
-from PySide6.QtWidgets import QDialog, QMessageBox
+from PySide6.QtWidgets import QDialog, QMessageBox, QVBoxLayout, QLineEdit, QDialogButtonBox
 
+from data.sqlite_data import StockLocationModel, StockAllModel
+from page_window.medicines_page import delete_selected_rows
 from ui_app.stock_in_page_ui import Ui_StockDialog
+from ui_app.stock_locaton_ui import Ui_StockLocationDialog
+from ui_app.stock_all_ui import Ui_StockInAllDialog
 
 
 class StockMedicinesPage(QDialog, Ui_StockDialog):
@@ -26,17 +32,17 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
     def create_stock_in(self):
         purchase_order = self.purchase_order_combox.itemData(self.purchase_order_combox.currentIndex())
         invoice_number = self.Invoice_line_edit.text()
-        # batch = self.batch_lineEdit.text()  # 获取批号
-        manufacturer_batch = self.Production_lot_number_line_edit.text()
-        purchase_detail_id = self.stock_drug_combox.itemData(self.stock_drug_combox.currentIndex())
-        stock_num = self.incoming_quantity_spin_box.value()
-        actual_warehousing_quantity = self.actual_incoming_quantity_spin_box.value()
+        manufacturer_batch = self.Production_lot_number_line_edit.text()  # 生产批号
+        purchase_detail_id = self.stock_drug_combox.itemData(self.stock_drug_combox.currentIndex())  # 采购明细ID
+        stock_num = self.incoming_quantity_spin_box.value()  # 获取入库数量
+        actual_warehousing_quantity = self.actual_incoming_quantity_spin_box.value()  # 获取实际入库数量
         inbound_date = self.inbound_date_time_edit.dateTime().toString("yyyy-MM-dd hh:mm:ss")  # 获取入库时间
         operator = self.operator_combox.itemData(self.operator_combox.currentIndex())  # 获取操作员
         inbound_amount = self.inbound_amount_double.value()  # 获取入库金额
         validity = self.valid_date_edit.date().toString("yyyy-MM-dd")
         remarks = self.warehousing_remarks_plain_text_edit.toPlainText()  # 入库备注
-        location = self.location_line_edit.text()
+        location = self.location_combox.itemData(self.location_combox.currentIndex())
+        batch_number = self.batch_lineEdit.text()
 
         # 输入校验
         if not all([purchase_order, invoice_number, purchase_detail_id, operator]):
@@ -61,7 +67,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             query.addBindValue(operator)
             query.addBindValue(inbound_amount)
             query.addBindValue(invoice_number)
-            batch_number = f"BN{QDate.currentDate().toString('yyyyMMdd')}{purchase_order}"
             query.addBindValue(batch_number)
             query.addBindValue(manufacturer_batch)
             query.addBindValue(validity)
@@ -72,8 +77,9 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             # 获取刚插入的入库单ID
             in_id = query.lastInsertId()
 
-            query.prepare("Insert into stock_in_detail(in_id, purchase_detail_id, quantity, actual_quantity, location) "
-                          "values (?,?,?,?,?)")
+            query.prepare(
+                "Insert into stock_in_detail(in_id, purchase_detail_id, quantity, actual_quantity,warehouse_shelf_id) "
+                "values (?,?,?,?,?)")
             query.addBindValue(in_id)
             query.addBindValue(purchase_detail_id)
             query.addBindValue(stock_num)
@@ -82,30 +88,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
 
             if not query.exec():
                 raise Exception(f"添加失败: {query.lastError().text()}")
-
-            order_id = self.purchase_order_combox.itemData(self.purchase_order_combox.currentIndex())
-            dic_id = None
-            if order_id is not None:
-                query.prepare("""
-                        SELECT pd.detail_id, md.dic_id 
-                        FROM purchase_detail pd 
-                        JOIN medicine_dic md ON md.dic_id = pd.medicine_id
-                        WHERE pd.order_id = ?
-                    """)
-                query.addBindValue(order_id)
-                if query.exec_() and query.next():
-                    dic_id = query.value(1)
-
-            if dic_id is not None:
-                query.prepare(
-                    "Insert into inventory(medicine_id, detail_id, current_quantity, quantity, change_date, change_type) "
-                    "values (?,?,?,?,?,?)")
-                query.addBindValue(dic_id)
-                query.addBindValue(purchase_detail_id)
-                query.addBindValue(stock_num)
-                query.addBindValue(actual_warehousing_quantity)
-                query.addBindValue(inbound_date)
-                query.addBindValue("入库")
 
             # 提交事务
             if not query.exec("COMMIT"):
@@ -120,6 +102,8 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             QMessageBox.critical(self, "数据库错误", str(e))
 
     def load_stock_data(self):
+        batch_number = f"IN-BN{QDate.currentDate().toString('yyyyMMdd')}-{random.Random().randint(1000, 9999)}"
+        self.batch_lineEdit.setText(batch_number)
         self.inbound_date_time_edit.setDateTime(QDateTime.currentDateTime())
         self.valid_date_edit.setDate(QDate.currentDate())
         query = QSqlQuery("SELECT order_id, order_number FROM purchase_order")
@@ -133,6 +117,12 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             operator_id = query.value(0)
             operator_name = query.value(1)
             self.operator_combox.addItem(operator_name, operator_id)
+
+        query = QSqlQuery("SELECT warehouse_shelf_id, location FROM warehouse_shelf_position")
+        while query.next():
+            location_id = query.value(0)
+            location_name = query.value(1)
+            self.location_combox.addItem(location_name, location_id)
         # 连接采购订单下拉框的信号，当选择改变时更新药品列表
         self.purchase_order_combox.currentIndexChanged.connect(self.load_drugs_by_order)
 
@@ -144,8 +134,8 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
 
         # 获取当前选择的采购订单ID
         order_id = self.purchase_order_combox.itemData(self.purchase_order_combox.currentIndex())
-        batch_number = f"BN{QDate.currentDate().toString('yyyyMMdd')}-{order_id}"
-        self.batch_lineEdit.setText(batch_number)
+        # batch_number = f"BN{QDate.currentDate().toString('yyyyMMdd')}-{order_id}"
+        # self.batch_lineEdit.setText(batch_number)
         if order_id is not None:
             try:
                 # 查询指定采购订单的明细，以及对应的药品信息
@@ -186,7 +176,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
                         print(f"数据库查询错误: {query.lastError().text()}")
             except Exception as e:
                 print(f"加载药品信息时出错: {e}")
-
 
     def load_order_data(self, stock_in_id):
         self.stock_in_id = stock_in_id
@@ -242,7 +231,7 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             else:
                 datetime_value = in_data
         self.inbound_date_time_edit.setDateTime(datetime_value)
-        self.operator_combox.setCurrentText(operator or "")
+        self.operator_combox.setCurrentText(str(operator) or "")
         self.inbound_amount_double.setValue(total_amount)
         self.Invoice_line_edit.setText(invoice_number)
         self.batch_lineEdit.setText(batch)
@@ -259,7 +248,7 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         # 查询明细表信息
         detail_query = QSqlQuery()
         detail_query.prepare("""
-            SELECT quantity, actual_quantity, location
+            SELECT quantity, actual_quantity, warehouse_shelf_id
             FROM stock_in_detail
             WHERE stock_in_detail.detail_id = ?
         """)
@@ -276,7 +265,7 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
 
         self.incoming_quantity_spin_box.setValue(quantity)
         self.actual_incoming_quantity_spin_box.setValue(actual_quant)
-        self.location_line_edit.setText(location)
+        self.location_combox.itemData(self.location_combox.currentIndex())
 
     def update_stock_in(self):
         # 获取界面输入数据
@@ -292,7 +281,7 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         inbound_amount = self.inbound_amount_double.value()  # 获取入库金额
         validity = self.valid_date_edit.date().toString("yyyy-MM-dd")
         remarks = self.warehousing_remarks_plain_text_edit.toPlainText()  # 入库备注
-        location = self.location_line_edit.text()
+        location = self.location_combox.itemData(self.location_combox.currentIndex())
 
         # 输入校验
         if not all([purchase_order, invoice_number, batch, purchase_detail_id, operator]):
@@ -347,7 +336,7 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
 
             query.prepare("""
                 UPDATE stock_in_detail 
-                SET purchase_detail_id=?, quantity=?, actual_quantity=?, location=? 
+                SET purchase_detail_id=?, quantity=?, actual_quantity=?, warehouse_shelf_id=? 
                 WHERE detail_id = ?
             """)
             query.addBindValue(purchase_detail_id)
@@ -377,3 +366,115 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             # 显式清理资源
             query.finish()
 
+
+class StockLocationPage(QDialog, Ui_StockLocationDialog):
+    def __init__(self, parent):
+        super().__init__()
+        self.setupUi(self)
+        self.ui = parent
+        self.db = parent.db
+        self.bind_event()
+        self.get_stock_location_model()
+
+    def get_stock_location_model(self):
+        self.stock_location = StockLocationModel(self, self.db)
+        self.stock_set_tableView.setModel(self.stock_location)
+        for col in self.stock_location.hidden_columns:
+            self.stock_set_tableView.hideColumn(col)
+        return self.stock_location
+
+    def bind_event(self):
+        self.add_btn.clicked.connect(self.add_location)
+        self.refresh_btn.clicked.connect(self.get_stock_location_model)
+        self.del_btn.clicked.connect(self.delete_selected_row)
+
+    def add_location(self):
+        dialog = PopupDialog(self, "输入存储位置")
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            input_text = dialog.input_lineEdit.text()
+            query = QSqlQuery()
+            query.prepare("INSERT INTO warehouse_shelf_position (location) VALUES (?)")
+            query.addBindValue(input_text)
+
+            if not query.exec():
+                QMessageBox.critical(self, "数据库错误", f"添加失败: {query.lastError().text()}")
+            else:
+                QMessageBox.information(self, "成功", "添加成功")
+                self.get_stock_location_model()
+
+    def delete_selected_row(self):
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.stock_set_tableView,
+            model=self.stock_location,  # 您的BaseTableModel实例
+            db=self.db,  # QSqlDatabase实例
+            parent=self  # 父窗口
+        )
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            self.get_stock_location_model()
+            # 可选：清除选择
+            self.stock_set_tableView.clearSelection()
+        else:
+            QMessageBox.critical(self, "错误", msg, QMessageBox.StandardButton.Ok)
+
+
+class PopupDialog(QDialog):
+    def __init__(self, parent=None, title="输入数据"):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setFixedSize(320, 188)
+
+        # 设置布局
+        layout = QVBoxLayout()
+
+        # 添加输入框
+        self.input_lineEdit = QLineEdit()
+        self.input_lineEdit.setPlaceholderText("请输入内容...")
+        layout.addWidget(self.input_lineEdit)
+
+        # 添加按钮组
+        self.buttonBox = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addWidget(self.buttonBox)
+
+        self.setLayout(layout)
+
+
+class StockInAllPage(QDialog, Ui_StockInAllDialog):
+    def __init__(self, parent):
+        super().__init__()
+        self.setupUi(self)
+        self.ui = parent
+        self.db = parent.db
+        self.bind_event()
+        self.get_stock_in_all_model()
+
+    def bind_event(self):
+        pass
+
+    def get_stock_in_all_model(self):
+        self.stock_all = StockAllModel(self, self.db)
+        sql = f"""
+            SELECT
+                s.stock_id,
+                dic.trade_name,
+                us.batch,
+                ud.location,
+                s.quantity,
+                s.last_update,
+                us.validity as 有效期,
+                us.production_lot_number as 生产批号
+            FROM stock s
+            LEFT JOIN stock_in_main us ON us.in_id = s.batch
+            LEFT JOIN warehouse_shelf_position ud ON ud.warehouse_shelf_id = s.location
+            LEFT JOIN medicine_dic dic ON dic.dic_id = s.drug_id
+        """
+        self.stock_all.setQuery(sql, self.db)
+        self.stock_all_tableView.setModel(self.stock_all)
+        for col in self.stock_all.hidden_columns:
+            self.stock_all_tableView.hideColumn(col)
+        return self.stock_all

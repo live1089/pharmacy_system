@@ -34,11 +34,6 @@ class Ui_StockDialog(object):
 
         self.gridLayout = QGridLayout()
         self.gridLayout.setObjectName(u"gridLayout")
-        self.location_line_edit = QLineEdit(StockDialog)
-        self.location_line_edit.setObjectName(u"location_line_edit")
-
-        self.gridLayout.addWidget(self.location_line_edit, 7, 3, 1, 1)
-
         self.label_12 = QLabel(StockDialog)
         self.label_12.setObjectName(u"label_12")
         self.label_12.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -188,6 +183,17 @@ class Ui_StockDialog(object):
         self.batch_lineEdit.setObjectName(u"batch_lineEdit")
 
         self.gridLayout.addWidget(self.batch_lineEdit, 4, 1, 1, 1)
+
+        self.location_combox = QComboBox(StockDialog)
+        self.location_combox.setObjectName(u"location_combox")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.location_combox.sizePolicy().hasHeightForWidth())
+        self.location_combox.setSizePolicy(sizePolicy1)
+        self.location_combox.setMinimumSize(QSize(170, 0))
+
+        self.gridLayout.addWidget(self.location_combox, 7, 3, 1, 1)
 
 
         self.gridLayout_2.addLayout(self.gridLayout, 1, 0, 1, 1)

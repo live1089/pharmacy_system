@@ -17,15 +17,17 @@ from qtmodern.styles import dark
 # 数据库
 import data.sqlite_data
 from data.sqlite_data import DrugDicModel, SupplierModel, PurchaseOrderModel, StockInMainModel, StockInDetailModel, \
-    InventoryDatchModel, StockOutMainModel
+    InventoryDatchModel, StockOutMainModel, InventoryCheckModel, ShelvesDrugModel, InventoryModel
 # 外部UI
 import ui_app.log_in_ui
 import ui_app.mainwondows_ui
+from page_window.inventory_count_page import InventoryCountPage
 from page_window.medicines_page import MedicinesPage, DrugAttributePage, DrugRormulationPage, DrugUnitPage, \
     DrugSpecificationPage, class_set_page, delete_selected_rows
 from page_window.purchase_page import PurAddPage, AnOrderPage
 from page_window.sell_medicines_page import sell_drug_ui_dialog
-from page_window.stock_medicines_page import StockMedicinesPage
+from page_window.shelves_drug_page import ShelvesDrugPage
+from page_window.stock_medicines_page import StockMedicinesPage, StockLocationPage, StockInAllPage
 from page_window.stock_out_page import StockOutPage, StockOutAddDrugPage
 from page_window.supplier_medicines_page import SupplierDrugPage, get_selected_logical_rows
 from ui_app.add_an_order_ui import Ui_AnOrderDialog
@@ -44,7 +46,7 @@ class PageMap(Enum):
     expiring_drugs_tableView = 5  # 临期
     stock_out_tabWidget = 6  # 出库
     order_tabWidget = 7  # 采购订单
-    recently_added_tableView = 8  # 最近添加
+    drugs_on_shelves_tableView = 8  # 最近添加
     inventory_check_tableView = 9  # 库存盘点
     customers_tableView = 10  # 会员客户
     user_tableWidget = 11  # 本地用户
@@ -75,11 +77,10 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         data.sqlite_data.get_purchase_order_detail_model(self)  # 采购订单明细
         data.sqlite_data.get_inventory_check(self)  # 库存盘点
         data.sqlite_data.get_medicine_dic_model(self)  # 药品字典
+        data.sqlite_data.get_shelves_drug_model(self) # 上架药品
 
         self.stock_in_tabWidget.currentChanged.connect(self.tab_changed)  # 入库标签切换时触发
 
-    # def page_switch(self, page_name):
-    #     self.medicine.clicked.connect(lambda: self.show_page_by_name(page_name))
     def tab_changed(self, index):
         """标签切换时触发"""
         print(f"已切换到标签页: {index} ({self.stock_in_tabWidget.tabText(index)})")
@@ -93,13 +94,14 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.supplier.clicked.connect(lambda: self.show_page_by_name(PageMap.supplier_tableView.value))
         self.drug_inbound.clicked.connect(lambda: self.show_page_by_name(PageMap.stock_in_tabWidget.value))
         self.drug_outbound.clicked.connect(lambda: self.show_page_by_name(PageMap.stock_out_tabWidget.value))
-        self.recently_added.clicked.connect(lambda: self.show_page_by_name(PageMap.recently_added_tableView.value))
+        self.drugs_on_shelves.clicked.connect(lambda: self.show_page_by_name(PageMap.drugs_on_shelves_tableView.value))
         self.medicine_purchase.clicked.connect(lambda: self.show_page_by_name(PageMap.order_tabWidget.value))
         self.inventory_record.clicked.connect(lambda: self.show_page_by_name(PageMap.inventory_check_tableView.value))
         self.member_customer.clicked.connect(lambda: self.show_page_by_name(PageMap.customers_tableView.value))
         self.user_information.clicked.connect(lambda: self.show_page_by_name(PageMap.user_tableWidget.value))
         self.drug_dic_btn.clicked.connect(lambda: self.show_page_by_name(PageMap.drug_dic_tableView.value))
-        # self.ref_btn.clicked.connect(self.refresh_page)
+        self.add_stock_location_btn.clicked.connect(self.add_stock_location)
+        self.stock_in_all_btn.clicked.connect(self.stock_in_all)
         self.drug_dic_del_btn.clicked.connect(self.del_dic)
         self.supplier_del_btn.clicked.connect(self.supplier_del)
         self.supplier_mod_btn.clicked.connect(self.supplier_mod)
@@ -109,7 +111,18 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.stock_mod_btn.clicked.connect(self.stock_mod)
         self.stock_out_mod_btn.clicked.connect(self.stock_out_mod)
         self.stock_out_del_btn.clicked.connect(self.stock_out_del)
+        self.inventory_check_del_btn.clicked.connect(self.inventory_check_del)
+        self.inventory_check_mod_btn.clicked.connect(self.inventory_check_mod)
+        self.shelves_del_btn.clicked.connect(self.shelves_del)
+        self.shelves_mod_btn.clicked.connect(self.shelves_mod)
+        self.inventory_del_btn.clicked.connect(self.inventory_del)
 
+    def stock_in_all(self):
+        self.stock_all = StockInAllPage(self)
+        self.stock_all.exec()
+    def add_stock_location(self):
+        self.stock_location = StockLocationPage(self)
+        self.stock_location.exec()
     def del_dic(self):
         self.dic = DrugDicModel(self, self.db)
         success, msg = delete_selected_rows(
@@ -225,17 +238,80 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
                 QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
 
     def stock_out_del(self):
-        self.stock = StockOutMainModel(self, self.db)
-        success, msg = delete_selected_rows(
+        # 获取当前出库标签页的索引
+        current_tab_index = self.stock_out_tabWidget.currentIndex()
+
+        if current_tab_index == 0:  # 出库主表
+            self.stock = StockOutMainModel(self, self.db)
+            success, msg = delete_selected_rows(
                 self=self,
                 tableView=self.stock_out_main_tableView,
                 model=self.stock,
                 db=self.db,
             )
+            if success:
+                QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+                data.sqlite_data.get_stock_out_main_model(self)
+                self.stock_out_main_tableView.clearSelection()
+            else:
+                QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+        elif current_tab_index == 1:  # 出库明细表
+            from data.sqlite_data import StockOutDetailModel
+            self.stock_detail = StockOutDetailModel(self, self.db)
+            success, msg = delete_selected_rows(
+                self=self,
+                tableView=self.stock_out_detail_tableView,
+                model=self.stock_detail,
+                db=self.db,
+            )
+            if success:
+                QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+                data.sqlite_data.get_stock_out_detail_model(self)
+                self.stock_out_detail_tableView.clearSelection()
+            else:
+                QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+    def inventory_check_del(self):
+        self.inventory_check_model = InventoryCheckModel(self, self.db)
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.inventory_check_tableView,
+            model=self.inventory_check_model,
+            db=self.db,
+        )
         if success:
             QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
-            data.sqlite_data.get_stock_out_main_model(self)
-            self.stock_out_main_tableView.clearSelection()
+            data.sqlite_data.get_inventory_check(self)
+            self.inventory_check_tableView.clearSelection()
+        else:
+            QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+    def shelves_del(self):
+        self.shelves = ShelvesDrugModel(self, self.db)
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.drugs_on_shelves_tableView,
+            model=self.shelves,
+            db=self.db,
+        )
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            data.sqlite_data.get_shelves_drug_model(self)
+        else:
+            QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+    def inventory_del(self):
+        self.inventory = InventoryModel(self, self.db)
+        success, msg = delete_selected_rows(
+            self=self,
+            tableView=self.inventory_tableView,
+            model=self.inventory,
+            db=self.db,
+        )
+        if success:
+            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+            data.sqlite_data.get_inventory_model(self)
         else:
             QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
 
@@ -254,6 +330,19 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
             if self.sup.exec() == QDialog.DialogCode.Accepted:  # 如果成功保存
                 data.sqlite_data.get_stock_in_main_model(self)
                 data.sqlite_data.get_stock_in_detail_model(self)
+
+    def shelves_mod(self):
+        selected_rows = get_selected_logical_rows(self.drugs_on_shelves_tableView)
+        if not selected_rows:
+            QMessageBox.warning(self, "警告", "请先选择要修改的记录")
+            return
+        model = self.drugs_on_shelves_tableView.model()
+        if model and len(selected_rows) > 0:
+            shelves_id = model.data(model.index(selected_rows[0], 0))
+            self.shelves = ShelvesDrugPage(self)
+            self.shelves.update_load_data(shelves_id)
+            self.shelves.exec()
+            data.sqlite_data.get_shelves_drug_model(self)
 
     def purchase_modify(self):
         """修改采购订单"""
@@ -307,6 +396,32 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
                 self.so.exec()
                 data.sqlite_data.get_stock_out_main_model(self)
                 data.sqlite_data.get_stock_out_detail_model(self)
+        if current_tab_index == 1:
+            selected_rows = get_selected_logical_rows(self.stock_out_detail_tableView)
+            if not selected_rows:
+                QMessageBox.warning(self, "警告", "请先选择要修改的出库订单记录")
+                return
+            model = self.stock_out_detail_tableView.model()
+            if model and len(selected_rows) > 0:
+                detail_id = model.data(model.index(selected_rows[0], 0))
+                self.so = StockOutAddDrugPage(self)
+                self.so.load_stock_out_update_data(detail_id)
+                self.so.exec()
+                data.sqlite_data.get_stock_out_main_model(self)
+                data.sqlite_data.get_stock_out_detail_model(self)
+
+    def inventory_check_mod(self):
+        selected_rows = get_selected_logical_rows(self.inventory_check_tableView)
+        if not selected_rows:
+            QMessageBox.warning(self, "警告", "请先选择要修改的盘点记录")
+            return
+        model = self.inventory_check_tableView.model()
+        if model and len(selected_rows) > 0:
+            check_id = model.data(model.index(selected_rows[0], 0))
+            self.ic = InventoryCountPage(self)
+            self.ic.load_check_out_data(check_id)
+            self.ic.exec()
+            data.sqlite_data.get_inventory_check(self)
 
     # 添加跳出子窗口事件
     def sub_window_event(self):
@@ -322,6 +437,14 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.add_an_order_btn.clicked.connect(self.add_an_order)
         self.stock_out_add_btn.clicked.connect(self.stock_out)
         self.stock_out_add_drug_btn.clicked.connect(self.stock_out_add_drug)
+        self.inventory_check_add_btn.clicked.connect(self.inventory_check_add)
+        self.shelves_add_btn.clicked.connect(self.shelves_add)
+
+
+    def shelves_add(self):
+        self.shelves = ShelvesDrugPage(self)
+        self.shelves.exec()
+        data.sqlite_data.get_shelves_drug_model(self)
     # 药品添加
     def drug_adds(self):
         self.drug_add = MedicinesPage(self)
@@ -358,6 +481,7 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.stock_inbo = StockMedicinesPage(self)
         self.stock_inbo.exec()
         data.sqlite_data.get_stock_in_main_model(self)
+        data.sqlite_data.get_stock_in_detail_model(self)
 
     def purchase_add(self):
         self.pu = PurAddPage(self)
@@ -380,6 +504,11 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.stock_out_add_dr.exec()
         data.sqlite_data.get_stock_out_main_model(self)
         data.sqlite_data.get_stock_out_detail_model(self)
+
+    def inventory_check_add(self):
+        self.inventory_check_add_page = InventoryCountPage(self)
+        self.inventory_check_add_page.exec()
+        data.sqlite_data.get_inventory_check(self)
 
 
 

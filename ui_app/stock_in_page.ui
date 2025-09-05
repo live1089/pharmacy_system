@@ -23,9 +23,6 @@
    </item>
    <item row="1" column="0">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="7" column="3">
-      <widget class="QLineEdit" name="location_line_edit"/>
-     </item>
      <item row="7" column="2">
       <widget class="QLabel" name="label_12">
        <property name="text">
@@ -227,6 +224,22 @@
      </item>
      <item row="4" column="1">
       <widget class="QLineEdit" name="batch_lineEdit"/>
+     </item>
+     <item row="7" column="3">
+      <widget class="QComboBox" name="location_combox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>170</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

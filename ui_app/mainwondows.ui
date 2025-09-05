@@ -55,13 +55,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pharmacy_operation_record">
-        <property name="text">
-         <string>药库操作记录</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="Line" name="line_2">
         <property name="lineWidth">
          <number>1</number>
@@ -75,6 +68,13 @@
        <widget class="QPushButton" name="supplier">
         <property name="text">
          <string>供应商</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="medicine_purchase">
+        <property name="text">
+         <string>药品采购</string>
         </property>
        </widget>
       </item>
@@ -102,9 +102,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="recently_added">
+       <widget class="QPushButton" name="drugs_on_shelves">
         <property name="text">
-         <string>最近添加</string>
+         <string>药品上架</string>
         </property>
        </widget>
       </item>
@@ -116,16 +116,16 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="medicine_purchase">
+       <widget class="QPushButton" name="inventory_record">
         <property name="text">
-         <string>药品采购</string>
+         <string>盘点记录</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="inventory_record">
+       <widget class="QPushButton" name="pharmacy_operation_record">
         <property name="text">
-         <string>盘点记录</string>
+         <string>药库操作记录</string>
         </property>
        </widget>
       </item>
@@ -438,6 +438,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="add_stock_location_btn">
+              <property name="text">
+               <string>添加存储位置</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="stock_in_btn">
               <property name="text">
                <string>入库处理</string>
@@ -565,6 +572,13 @@
              <widget class="QPushButton" name="inventory_btn">
               <property name="text">
                <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inventory_del_btn">
+              <property name="text">
+               <string>删除</string>
               </property>
              </widget>
             </item>
@@ -964,8 +978,87 @@
          <layout class="QGridLayout" name="gridLayout_23">
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_21">
+            <item row="1" column="0">
+             <widget class="QTableView" name="drugs_on_shelves_tableView"/>
+            </item>
             <item row="0" column="0">
-             <widget class="QTableView" name="recently_added_tableView"/>
+             <layout class="QHBoxLayout" name="horizontalLayout_13">
+              <item>
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>起始时间</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDateEdit" name="purchase_order_dateEdit_start_2"/>
+              </item>
+              <item>
+               <widget class="Line" name="line_15">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>截止时间</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDateEdit" name="purchase_order_dateEdit_deadline_2"/>
+              </item>
+              <item>
+               <widget class="Line" name="line_16">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="shelves_select_btn">
+                <property name="text">
+                 <string>查询</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="shelves_add_btn">
+                <property name="text">
+                 <string>添加药品</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="shelves_del_btn">
+                <property name="text">
+                 <string>删除药品</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="shelves_mod_btn">
+                <property name="text">
+                 <string>修改药品</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>
@@ -1181,9 +1274,17 @@
     </property>
     <addaction name="actionfg"/>
    </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>主题</string>
+    </property>
+    <addaction name="actiond"/>
+    <addaction name="actionlight"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
    <addaction name="menu_3"/>
+   <addaction name="menu_4"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionout">
@@ -1199,6 +1300,16 @@
   <action name="actionh">
    <property name="text">
     <string>导入报表</string>
+   </property>
+  </action>
+  <action name="actiond">
+   <property name="text">
+    <string>暗色</string>
+   </property>
+  </action>
+  <action name="actionlight">
+   <property name="text">
+    <string>浅色</string>
    </property>
   </action>
  </widget>

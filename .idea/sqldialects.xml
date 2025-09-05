@@ -4,8 +4,6 @@
     <file url="file://$PROJECT_DIR$/data/sql_data.py" dialect="SQLite" />
     <file url="file://$PROJECT_DIR$/data/sqlite_data.py" dialect="SQLite" />
     <file url="file://$PROJECT_DIR$/main.py" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/text/text7.py" dialect="SQLite" />
-    <file url="file://$PROJECT_DIR$/text/text8.py" dialect="SQLite" />
     <file url="PROJECT" dialect="SQLite" />
   </component>
 </project>
