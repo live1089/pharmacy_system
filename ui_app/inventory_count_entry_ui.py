@@ -54,6 +54,7 @@ class Ui_InventoryCountDialog(object):
 
         self.inventory_count_batch_combox = QComboBox(InventoryCountDialog)
         self.inventory_count_batch_combox.setObjectName(u"inventory_count_batch_combox")
+        self.inventory_count_batch_combox.setEditable(True)
 
         self.gridLayout.addWidget(self.inventory_count_batch_combox, 0, 1, 1, 1)
 
@@ -75,6 +76,7 @@ class Ui_InventoryCountDialog(object):
 
         self.inventory_count_drug_comboBox = QComboBox(InventoryCountDialog)
         self.inventory_count_drug_comboBox.setObjectName(u"inventory_count_drug_comboBox")
+        self.inventory_count_drug_comboBox.setEditable(True)
 
         self.gridLayout.addWidget(self.inventory_count_drug_comboBox, 1, 1, 1, 1)
 
@@ -122,6 +124,7 @@ class Ui_InventoryCountDialog(object):
 
         self.inventory_count_location_combox = QComboBox(InventoryCountDialog)
         self.inventory_count_location_combox.setObjectName(u"inventory_count_location_combox")
+        self.inventory_count_location_combox.setEditable(True)
 
         self.gridLayout.addWidget(self.inventory_count_location_combox, 0, 3, 1, 1)
 

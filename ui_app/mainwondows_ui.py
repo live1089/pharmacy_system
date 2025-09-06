@@ -104,6 +104,11 @@ class Ui_mainWindow(object):
 
         self.verticalLayout.addWidget(self.drugs_on_shelves)
 
+        self.stock_in_all_btn = QPushButton(self.centralwidget)
+        self.stock_in_all_btn.setObjectName(u"stock_in_all_btn")
+
+        self.verticalLayout.addWidget(self.stock_in_all_btn)
+
         self.line_3 = QFrame(self.centralwidget)
         self.line_3.setObjectName(u"line_3")
         self.line_3.setFrameShape(QFrame.Shape.HLine)
@@ -130,6 +135,11 @@ class Ui_mainWindow(object):
         self.user_information.setObjectName(u"user_information")
 
         self.verticalLayout.addWidget(self.user_information)
+
+        self.pushButton = QPushButton(self.centralwidget)
+        self.pushButton.setObjectName(u"pushButton")
+
+        self.verticalLayout.addWidget(self.pushButton)
 
 
         self.gridLayout_2.addLayout(self.verticalLayout, 1, 0, 1, 1)
@@ -194,10 +204,10 @@ class Ui_mainWindow(object):
         self.tab.setObjectName(u"tab")
         self.gridLayout_4 = QGridLayout(self.tab)
         self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.drug_selection_tableView = QTableView(self.tab)
-        self.drug_selection_tableView.setObjectName(u"drug_selection_tableView")
+        self.shelves_drug_tableView = QTableView(self.tab)
+        self.shelves_drug_tableView.setObjectName(u"shelves_drug_tableView")
 
-        self.gridLayout_4.addWidget(self.drug_selection_tableView, 0, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.shelves_drug_tableView, 0, 0, 1, 1)
 
         self.drug_tabWidget.addTab(self.tab, "")
         self.drug_class_pate = QWidget()
@@ -351,11 +361,6 @@ class Ui_mainWindow(object):
         self.stock_in_query_btn.setObjectName(u"stock_in_query_btn")
 
         self.horizontalLayout_11.addWidget(self.stock_in_query_btn)
-
-        self.stock_in_all_btn = QPushButton(self.page_2)
-        self.stock_in_all_btn.setObjectName(u"stock_in_all_btn")
-
-        self.horizontalLayout_11.addWidget(self.stock_in_all_btn)
 
         self.stock_in_com_btn = QPushButton(self.page_2)
         self.stock_in_com_btn.setObjectName(u"stock_in_com_btn")
@@ -1089,7 +1094,7 @@ class Ui_mainWindow(object):
 
         self.retranslateUi(mainWindow)
 
-        self.stackedWidget.setCurrentIndex(9)
+        self.stackedWidget.setCurrentIndex(5)
         self.drug_tabWidget.setCurrentIndex(0)
         self.stock_in_tabWidget.setCurrentIndex(0)
         self.stock_out_tabWidget.setCurrentIndex(0)
@@ -1114,10 +1119,12 @@ class Ui_mainWindow(object):
         self.drug_inbound.setText(QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u8bb0\u5f55", None))
         self.drug_outbound.setText(QCoreApplication.translate("mainWindow", u"\u51fa\u5e93\u8bb0\u5f55", None))
         self.drugs_on_shelves.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u4e0a\u67b6", None))
+        self.stock_in_all_btn.setText(QCoreApplication.translate("mainWindow", u"\u6240\u6709\u5e93\u5b58", None))
         self.inventory_record.setText(QCoreApplication.translate("mainWindow", u"\u76d8\u70b9\u8bb0\u5f55", None))
         self.pharmacy_operation_record.setText(QCoreApplication.translate("mainWindow", u"\u836f\u5e93\u64cd\u4f5c\u8bb0\u5f55", None))
         self.member_customer.setText(QCoreApplication.translate("mainWindow", u"\u4f1a\u5458\u5ba2\u6237", None))
         self.user_information.setText(QCoreApplication.translate("mainWindow", u"\u7528\u6237\u4fe1\u606f", None))
+        self.pushButton.setText(QCoreApplication.translate("mainWindow", u"\u6e05\u7406\u5783\u573e", None))
         self.search_le.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u641c\u7d22\u836f\u54c1", None))
         self.drug_selection_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
         self.drug_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u836f\u54c1", None))
@@ -1141,7 +1148,6 @@ class Ui_mainWindow(object):
         self.supplier_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
         self.stock_in_lineEdit.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u8f93\u5165\u5546\u54c1ID", None))
         self.stock_in_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
-        self.stock_in_all_btn.setText(QCoreApplication.translate("mainWindow", u"\u6240\u6709\u5e93\u5b58", None))
         self.stock_in_com_btn.setText(QCoreApplication.translate("mainWindow", u"\u7efc\u5408\u67e5\u8be2", None))
         self.add_stock_location_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u5b58\u50a8\u4f4d\u7f6e", None))
         self.stock_in_btn.setText(QCoreApplication.translate("mainWindow", u"\u5165\u5e93\u5904\u7406", None))
@@ -1156,7 +1162,7 @@ class Ui_mainWindow(object):
         self.label.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65e5\u671f", None))
         self.label_2.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65e5\u671f", None))
         self.sales_records_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
-        self.label_3.setText(QCoreApplication.translate("mainWindow", u"\u4e34\u671f\u63d0\u524d\u5929\u6570", None))
+        self.label_3.setText(QCoreApplication.translate("mainWindow", u"\u4e34\u671f\u63d0\u9192\u5929\u6570", None))
         self.expiring_drugs_lineEdit_day.setText(QCoreApplication.translate("mainWindow", u"360", None))
         self.expiring_drugs_save_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fdd\u5b58\u5929\u6570", None))
         self.stock_out_tabWidget.setTabText(self.stock_out_tabWidget.indexOf(self.stock_out_main), QCoreApplication.translate("mainWindow", u"\u51fa\u5e93\u4e3b\u8868", None))

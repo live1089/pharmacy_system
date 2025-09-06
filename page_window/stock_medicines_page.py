@@ -45,7 +45,7 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         batch_number = self.batch_lineEdit.text()
 
         # 输入校验
-        if not all([purchase_order, invoice_number, purchase_detail_id, operator]):
+        if not all([purchase_order, invoice_number, purchase_detail_id]):
             QMessageBox.warning(self, "输入错误", "请填写所有必填项。")
             return
 

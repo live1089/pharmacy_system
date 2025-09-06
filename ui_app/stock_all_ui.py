@@ -22,7 +22,7 @@ class Ui_StockInAllDialog(object):
     def setupUi(self, StockInAllDialog):
         if not StockInAllDialog.objectName():
             StockInAllDialog.setObjectName(u"StockInAllDialog")
-        StockInAllDialog.resize(618, 316)
+        StockInAllDialog.resize(979, 544)
         self.gridLayout_2 = QGridLayout(StockInAllDialog)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.gridLayout = QGridLayout()

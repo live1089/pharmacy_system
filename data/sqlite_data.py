@@ -43,22 +43,56 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 UNIQUE (generic_name, specification_id, manufacturer)
         )
         """)
-        # query.exec("""
-        #         CREATE TABLE IF NOT EXISTS medicine (             -- 药品信息表
-        #         medicine_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #         dic_id INTEGER NOT NULL,                     -- 引用字典表ID
-        #         batch_number TEXT,                   -- 批号
-        #         expiry_date DATE,                   -- 有效期至
-        #         purchase_date DATE,                          -- 采购日期
-        #         quantity INTEGER  CHECK (quantity >= 0),  -- 库存数量
-        #         supplier_id INTEGER NOT NULL,                 -- 供应商ID
-        #         FOREIGN KEY (dic_id) REFERENCES medicine_dic(dic_id),
-        #         FOREIGN KEY (supplier_id) REFERENCES Supplier(supplier_id),
-        #
-        #         -- 防重复批号: 同一药品不同批号
-        #         UNIQUE (dic_id, batch_number)
-        # )
-        # """)
+
+        query.exec("""
+                CREATE TABLE IF NOT EXISTS drug_information_shelves (        -- 上架药品信息表
+                drug_information_shelves_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                drug TEXT,                                                   -- 药品
+                expiration_date DATE,                                           -- 有效期至 (stock_in_main)
+                purchase_date date,                                             -- 采购日期 (purchase_order)
+                shelves_sum INTEGER,                                            -- 上架库存数量 (shelves_drug)
+                warehouse_inventory_sum INTEGER,                                -- 仓库库存数量 (warehouse_shelf_position)
+                location TEXT,                                                  -- 位置
+                approval_number TEXT,                                 -- 批准文号(国药准字)
+                manufacturer TEXT,                                    -- 生产厂家
+                batch TEXT,                                           -- 批号 (stock_in_main)
+                supplier TEXT                                         -- 供应商 (supplier)
+        )
+        """)
+
+        query.exec("""
+        CREATE TRIGGER IF NOT EXISTS update_drug_information_shelves
+            AFTER INSERT ON stock_in_detail
+            FOR EACH ROW
+            BEGIN
+                -- 当药品入库时，更新上架药品信息表
+                INSERT OR REPLACE INTO drug_information_shelves 
+                (drug_information_shelves_id, drug, expiration_date, purchase_date, shelves_sum, 
+                 warehouse_inventory_sum, location, approval_number, manufacturer, batch, supplier)
+                SELECT 
+                    md.dic_id,
+                    md.trade_name,
+                    sm.validity,
+                    po.order_date,
+                    COALESCE(SUM(sd.actual_quantity), 0),
+                    COALESCE(SUM(sd.actual_quantity), 0),
+                    COALESCE(wsp.location, ''),  -- 从warehouse_shelf_position表获取位置信息
+                    md.approval_number,
+                    md.manufacturer,
+                    sm.batch,
+                    su.name
+                FROM medicine_dic md
+                JOIN purchase_detail pd ON md.dic_id = pd.medicine_id
+                JOIN purchase_order po ON pd.order_id = po.order_id
+                JOIN stock_in_main sm ON sm.order_id = po.order_id
+                JOIN stock_in_detail sd ON sd.in_id = sm.in_id
+                JOIN supplier su ON po.supplier_id = su.supplier_id
+                LEFT JOIN warehouse_shelf_position wsp ON sd.warehouse_shelf_id = wsp.warehouse_shelf_id
+                WHERE pd.detail_id = NEW.purchase_detail_id
+                GROUP BY md.dic_id, sm.validity, po.order_date, md.approval_number, 
+                         md.manufacturer, sm.batch, po.supplier_id, wsp.location;
+            END
+        """)
 
         query.exec("""
         CREATE TABLE IF NOT EXISTS drug_formulation(
@@ -104,12 +138,18 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         query.exec(""" 
         CREATE TABLE IF NOT EXISTS inventory_check(         
             check_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            medicine_id INTEGER NOT NULL,
+            medicine_id INTEGER NOT NULL,               -- 盘点药品
+            inventory_of_batches INTEGER NOT NULL,      -- 盘点批次（库存批次）
+            inventory_of_location INTEGER NOT NULL,     -- 盘点位置
             recorded_quantity INTEGER NOT NULL,         -- 盘点数量
             actual_quantity INTEGER NOT NULL,           -- 实际数量
             check_date DATE NOT NULL,                   -- 盘点日期
             discrepancy_reason TEXT,                    -- 差异原因（备注）
-            FOREIGN KEY (medicine_id) REFERENCES medicine_dic (dic_id)
+            user_id INTEGER NOT NULL,                   -- 操作用户
+            FOREIGN KEY (medicine_id) REFERENCES medicine_dic (dic_id),
+            FOREIGN KEY (inventory_of_batches) REFERENCES stock_in_main(in_id),
+            FOREIGN KEY (inventory_of_location) REFERENCES warehouse_shelf_position(warehouse_shelf_id),
+            FOREIGN KEY (user_id) REFERENCES users(users_id)
         )
         """)
 
@@ -172,6 +212,16 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 FOREIGN KEY (operator_id) REFERENCES users(users_id)
         )
         """)
+
+        # query.exec("""
+        # CREATE TABLE IF NOT EXISTS drug_batch(
+        #         drug_batch_id INTEGER PRIMARY KEY autoincrement,
+        #         drug_id INTEGER NOT NULL,                                 -- 关联药品
+        #         batch INTEGER NOT NULL,                                   -- 批次
+        #         production_lot_number INTEGER NOT NULL,                   -- 生产批号
+        #         validity DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP      -- 有效期
+        # )
+        # """)
 
         # 入库明细表
         query.exec("""
@@ -241,7 +291,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         query.exec("""
         CREATE TABLE IF NOT EXISTS sales (                                -- 销售记录表
             sales_id INTEGER PRIMARY KEY AUTOINCREMENT,                   -- 主键ID
-            medicine_id INTEGER NOT NULL,                                 -- 对应的药品 ID（外键）
+            medicine_id INTEGER NOT NULL,                                 -- 对应的药品
             quantity INTEGER NOT NULL CHECK (quantity >= 0),              -- 销售数量
             price REAL NOT NULL CHECK (price >= 0),                       -- 销售单价
             sale_date DATE NOT NULL CHECK (sale_date <= CURRENT_DATE),    -- 销售日期
@@ -309,13 +359,64 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         query.exec("""
         CREATE TABLE IF NOT EXISTS expiring_medicines(
             expiring_medicine_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            medicine_id INTEGER,
-            expiry_date DATE,                                 -- 药品的到期时间
-            days INTEGER,                                     -- 临期天数
-            inventory_remainder TEXT,                         -- 库存剩余数量
-            days_before_expiry INTEGER,                       -- 临期提醒提前天数
-            FOREIGN KEY (medicine_id) REFERENCES medicine_dic(dic_id)
-    )
+            batch_id INTEGER NOT NULL,                                -- 批次ID
+            medicine_name TEXT NOT NULL,                              -- 药品名称
+            expiry_date DATE NOT NULL,                                -- 药品的到期时间
+            days_until_expiry INTEGER NOT NULL,                       -- 距离到期天数
+            current_stock INTEGER NOT NULL,                           -- 当前库存数量
+            alert_threshold INTEGER DEFAULT 30,                       -- 预警阈值(天)
+            status TEXT CHECK (status IN ('过期', '正常')),            -- 药品状态（过期 或 正常）
+            last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,          -- 最后更新时间
+            FOREIGN KEY (batch_id) REFERENCES stock_in_main(in_id)
+        )
+        """)
+
+        # 当药品入库时，更新有效期监控
+        query.exec("""
+        CREATE TRIGGER IF NOT EXISTS update_expiring_medicines_on_stock_in
+            AFTER INSERT ON stock_in_main
+            FOR EACH ROW
+            BEGIN
+                -- 插入或更新临期药品监控数据
+                INSERT OR REPLACE INTO expiring_medicines 
+                ( batch_id, medicine_name, expiry_date, days_until_expiry, current_stock, alert_threshold, status, last_updated)
+                SELECT 
+                    NEW.in_id,
+                    md.trade_name,
+                    NEW.validity,
+                    CAST(julianday(NEW.validity) - julianday('now') AS INTEGER),
+                    COALESCE(s.quantity, 0),
+                    30,
+                    CASE 
+                        WHEN CAST(julianday(NEW.validity) - julianday('now') AS INTEGER) < 0 THEN '过期'
+                        ELSE '正常'
+                    END,
+                    datetime('now', '+8 hours')
+                FROM medicine_dic md
+                JOIN purchase_detail pd ON md.dic_id = pd.medicine_id
+                JOIN stock_in_detail sd ON sd.in_id = NEW.in_id AND sd.purchase_detail_id = pd.detail_id
+                LEFT JOIN stock s ON s.batch = NEW.in_id
+                WHERE pd.order_id = (SELECT order_id FROM stock_in_main WHERE in_id = NEW.in_id)
+                LIMIT 1;
+            END
+        """)
+
+        # 删除重复的触发器定义，只保留一个正确的版本
+        query.exec("""
+        CREATE TRIGGER IF NOT EXISTS update_expiring_medicines_on_stock_change
+            AFTER UPDATE ON stock
+            FOR EACH ROW
+            BEGIN
+                -- 更新临期药品监控数据中的库存数量和状态
+                UPDATE expiring_medicines 
+                SET current_stock = NEW.quantity,
+                    status = CASE 
+                        WHEN days_until_expiry < 0 THEN '过期'
+                        ELSE '正常'
+                    END,
+                    last_updated = datetime('now', '+8 hours')
+                WHERE batch_id = NEW.batch;
+            END
         """)
 
         query.exec("""
@@ -344,13 +445,17 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                     );
                     
                     -- 更新或插入 stock 表中的当前库存
-                    INSERT OR REPLACE INTO stock (stock_id, batch, location, quantity, last_update)
+                    INSERT OR REPLACE INTO stock (stock_id, drug_id, batch, location, quantity, last_update)
                     VALUES (
                         COALESCE((SELECT stock_id 
                                  FROM stock 
                                  WHERE batch = NEW.in_id
                                  AND location = NEW.warehouse_shelf_id), 
                                  (SELECT IFNULL(MAX(stock_id), 0) + 1 FROM stock)),
+                        (SELECT md.dic_id 
+                         FROM purchase_detail pd 
+                         JOIN medicine_dic md ON md.dic_id = pd.medicine_id 
+                         WHERE pd.detail_id = NEW.purchase_detail_id),
                         NEW.in_id,
                         NEW.warehouse_shelf_id,
                         COALESCE((SELECT quantity FROM stock WHERE batch = NEW.in_id AND location = NEW.warehouse_shelf_id), 0) + NEW.actual_quantity,
@@ -383,13 +488,16 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 SET quantity = quantity - NEW.quantity,
                     last_update = datetime('now', '+8 hours')
                 WHERE batch = NEW.stock_batch 
-                AND location = (
-                    SELECT warehouse_shelf_id 
-                    FROM stock_out_detail sod
-                    JOIN stock_in_detail sid ON sod.stock_batch = sid.in_id
-                    WHERE sod.detail_id = NEW.detail_id
-                    LIMIT 1
+                AND drug_id = NEW.medicine_id
+                AND location IN (
+                  SELECT warehouse_shelf_id 
+                  FROM stock_in_detail 
+                  WHERE in_id = NEW.stock_batch
+                  ORDER BY detail_id DESC
+                  LIMIT 1
                 );
+
+
             END
 
         """)
@@ -420,6 +528,10 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 -- 更新 stock 表中的当前库存
                 UPDATE stock 
                 SET quantity = quantity + (NEW.actual_quantity - OLD.actual_quantity),
+                      drug_id = (SELECT md.dic_id 
+                       FROM purchase_detail pd 
+                       JOIN medicine_dic md ON md.dic_id = pd.medicine_id 
+                       WHERE pd.detail_id = NEW.purchase_detail_id),
                     last_update = datetime('now', '+8 hours')
                 WHERE batch = NEW.in_id AND location = NEW.warehouse_shelf_id;
             END
@@ -469,34 +581,31 @@ class BaseTableModel(QSqlTableModel):
         return "id"
 
 
-# 药物模型
-class MedicineModel(BaseTableModel):
+# 上架药品信息
+class ShelvesDrugsMessageModel(BaseTableModel):
     HEADERS = {
-        0: "药品ID",
+        0: "ID",
         1: "药品名称",
-        2: "通用名",
-        3: "规格",
-        4: "生产厂家",
-        5: "批号",
-        6: "有效期",
-        7: "采购日期",
-        8: "库存数量",
-        9: "单价",
-        10: "国药准字",
-        11: "分类",
-        12: "供应商",
+        2: "有效期",
+        3: "采购日期",
+        4: "上架库存数量",
+        5: "仓库库存数量",
+        6: "上架位置",
+        7: "批准文号",
+        8: "生产厂家",
+        9: "库存批号",
+        10: "供应商",
     }
-    HIDDEN_COLUMNS = []  # 隐藏的列索引
+    HIDDEN_COLUMNS = [0]
 
     def __init__(self, parent=None, db=None):
         super().__init__(
             parent=parent,
             db=db,
-            table_name="medicine",
+            table_name="drug_information_shelves",
             headers=self.HEADERS,
             hidden_columns=self.HIDDEN_COLUMNS,
         )
-
 
 class StockAllModel(BaseTableModel):
     HEADERS = {
@@ -522,11 +631,15 @@ class StockAllModel(BaseTableModel):
 # 临期模型
 class ExpiringMedicineModel(BaseTableModel):
     HEADERS = {
-        1: "药品名称",
-        2: "药品到期时间",
-        3: "剩余天数",
-        4: "剩余库存数量",
-        5: "临期提醒时间"
+        0: "ID",
+        1: "库存批次",
+        2: "药品名称",
+        3: "药品到期时间",
+        4: "距离到期天数",
+        5: "当前库存数量",
+        6: "预警阈值(天)",
+        7: "药品状态",
+        8: "最后更新时间"
     }
     HIDDEN_COLUMNS = [0]
 
@@ -790,6 +903,7 @@ class StockOutDetailModel(BaseTableModel):
             headers=self.HEADERS,
             hidden_columns=self.HIDDEN_COLUMNS
         )
+
     def get_primary_key_column(self):
         # 明确指定主键列名
         return "detail_id"
@@ -800,11 +914,13 @@ class InventoryCheckModel(BaseTableModel):
     HEADERS = {
         0: "ID",
         1: "药品名称",
-        2: "盘点数量",
-        3: "盘点日期",
-        4: "盘点人",
-        5: "盘点结果",
-        6: "备注",
+        2: "盘点的库存批次",
+        3: "盘点位置",
+        4: "盘点数量",
+        5: "库存数量",
+        6: "盘点日期",
+        7: "盘点人",
+        8: "备注说明"
     }
     HIDDEN_COLUMNS = [0]
 
@@ -1009,21 +1125,16 @@ def get_medicine_dic_model(self):
     return self.medicine_dic_model
 
 
-# 药品
-def get_medicines_model(self):
-    self.medicine_model = MedicineModel(self, self.db)
-    self.drug_selection_tableView.setModel(self.medicine_model)
-
-    # 应用隐藏列
-    for col in self.medicine_model.hidden_columns:
-        self.drug_selection_tableView.hideColumn(col)
-
-    return self.medicine_model
-
-
 # 临期
 def get_expiring_medicine_model(self):
     self.expiring_medicine_model = ExpiringMedicineModel(self, self.db)
+    # 可以添加过滤条件，只显示未过期但即将过期的药品
+    sql = """
+        SELECT * FROM expiring_medicines 
+        WHERE days_until_expiry >= -30 
+        ORDER BY days_until_expiry
+    """
+    self.expiring_medicine_model.setQuery(sql, self.db)
     self.expiring_drugs_tableView.setModel(self.expiring_medicine_model)
 
     # 应用隐藏列
@@ -1136,6 +1247,8 @@ def get_stock_out_detail_model(self):
         LEFT JOIN stock_out_main sm ON s.out_id = sm.out_id
         LEFT JOIN medicine_dic dic ON s.medicine_id = dic.dic_id
         LEFT JOIN stock_in_main st ON s.stock_batch = st.in_id
+        WHERE sm.outbound_number IS NOT NULL 
+        AND sm.outbound_number != ''
     """
     self.stock_out_detail_model.setQuery(sql, self.db)
     self.stock_out_detail_tableView.setModel(self.stock_out_detail_model)
@@ -1247,6 +1360,24 @@ def get_inventory_model(self):
 # 库存盘点
 def get_inventory_check(self):
     self.inventory_check_model = InventoryCheckModel(self, self.db)
+    sql = f"""
+        SELECT
+            inv.check_id,
+            de.trade_name,
+            sta.batch,
+            ws.location as 库存位置,
+            inv.recorded_quantity,
+            inv.actual_quantity,
+            inv.check_date,
+            u.username,
+            inv.discrepancy_reason
+        FROM inventory_check inv
+        LEFT JOIN medicine_dic de ON inv.medicine_id = de.dic_id
+        LEFT JOIN stock_in_main sta ON inv.inventory_of_batches = sta.in_id
+        LEFT JOIN warehouse_shelf_position ws ON ws.warehouse_shelf_id = inv.inventory_of_location
+        LEFT JOIN users u ON u.users_id = inv.user_id
+    """
+    self.inventory_check_model.setQuery(sql, self.db)
     self.inventory_check_tableView.setModel(self.inventory_check_model)
     for col in self.inventory_check_model.hidden_columns:
         self.inventory_check_tableView.hideColumn(col)
@@ -1254,4 +1385,27 @@ def get_inventory_check(self):
     return self.inventory_check_model
 
 
-
+# 上架药品信息
+def get_shelves_drug_message_model(self):
+    self.shelves_drug_model = ShelvesDrugsMessageModel(self, self.db)
+    sql = """
+        SELECT
+            d.drug_information_shelves_id,
+            d.drug,
+            d.expiration_date,
+            d.purchase_date,
+            d.shelves_sum,
+            d.warehouse_inventory_sum,
+            d.location,
+            d.approval_number,
+            d.manufacturer,
+            d.batch,
+            d.supplier
+        FROM drug_information_shelves d
+        ORDER BY d.drug
+        """
+    self.shelves_drug_model.setQuery(sql, self.db)
+    self.shelves_drug_tableView.setModel(self.shelves_drug_model)
+    for col in self.shelves_drug_model.hidden_columns:
+        self.shelves_drug_tableView.hideColumn(col)
+    return self.shelves_drug_model
