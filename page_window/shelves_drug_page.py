@@ -1,60 +1,10 @@
-from ui_app.shelves_drug_ui import Ui_ShelvesDialog
-from PySide6 import QtCore
-from PySide6.QtCore import QDate, QDateTime
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QDialog, QMessageBox
 
+from page_window.tools import install_enter_key_filter
+from ui_app.shelves_drug_ui import Ui_ShelvesDialog
 
-# class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
-#     def __init__(self, parent):
-#         super().__init__()
-#         self.setupUi(self)
-#         self.ui = parent
-#         self.bind_event()
-#         self.shelves_id = None
-#         self.load_data()
 
-# def bind_event(self):
-#     self.shelves_add_save_btn.clicked.connect(self.save)
-#
-# def save(self):
-#     if self.shelves_id:
-#         self.update_stock_shelves()
-#     else:
-#         self.create_stock_shelves()
-#
-# def load_data(self):
-#     query = QSqlQuery("SELECT dic_id, trade_name FROM medicine_dic")
-#     while query.next():
-#         dic_id = query.value(0)
-#         dic_name = query.value(1)
-#         self.shelves_drug_combox.addItem(dic_name, dic_id)
-#
-#     query = QSqlQuery("SELECT out_id, outbound_number FROM stock_out_main WHERE out_type = '上架'")
-#     while query.next():
-#         out_id = query.value(0)
-#         outbound_number = query.value(1)
-#         self.stock_out_list_combox.addItem(outbound_number, out_id)
-#
-#     query = QSqlQuery("""
-#         SELECT detail_id, out_batch
-#         FROM stock_out_detail
-#         WHERE out_id IN (
-#             SELECT out_id
-#             FROM stock_out_main
-#             WHERE out_type = '上架'
-#         )
-#     """)
-#     while query.next():
-#         stock_id = query.value(0)
-#         stock_name = query.value(1)
-#         self.stock_out_batch_combox.addItem(stock_name, stock_id)
-#
-#     query = QSqlQuery("SELECT warehouse_shelf_id, location FROM warehouse_shelf_position")
-#     while query.next():
-#         shelf_id = query.value(0)
-#         shelf_name = query.value(1)
-#         self.shelves_location_combox.addItem(shelf_name, shelf_id)
 class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
     def __init__(self, parent):
         super().__init__()
@@ -63,11 +13,19 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
         self.bind_events()  # 修改为 bind_events
         self.shelves_id = None
         self.load_data()
+        self.ignore_cargo_return()
+
+    def ignore_cargo_return(self):
+        install_enter_key_filter(self.stock_out_list_combox)
+        install_enter_key_filter(self.stock_out_batch_combox)
+        install_enter_key_filter(self.shelves_drug_combox)
+        install_enter_key_filter(self.shelves_number_spinBox)
+        install_enter_key_filter(self.shelves_location_combox)
 
     def bind_events(self):  # 修改方法名
         """绑定所有事件"""
         self.shelves_add_save_btn.clicked.connect(self.save)
-        # 添加出库单选择变化事件
+        # 添加上架药品出库单选择变化事件
         self.stock_out_list_combox.currentIndexChanged.connect(self.on_outbound_changed)
 
     def on_outbound_changed(self, index):
@@ -172,6 +130,7 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
             query.addBindValue(shelves_location)
             if not query.exec():
                 raise Exception(f"添加上架药品失败: {query.lastError().text()}")
+
             # 提交事务
             if not query.exec("COMMIT"):
                 raise Exception(f"无法提交事务: {query.lastError().text()}")
@@ -184,6 +143,7 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
             QMessageBox.critical(self, "数据库错误", str(e))
         finally:
             query.finish()
+
 
     def update_load_data(self, shelves_id):
         self.stock_in_id = shelves_id

@@ -4,6 +4,7 @@ from PySide6.QtCore import QDateTime
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QDialog, QMessageBox, QLineEdit, QPlainTextEdit, QDateTimeEdit
 
+from page_window.tools import install_enter_key_filter
 from ui_app.supplier_drug_ui import Ui_SupDialog
 
 
@@ -14,6 +15,19 @@ class SupplierDrugPage(QDialog, Ui_SupDialog):
         self.ui = parent
         self.supplier_id = None
         self.bind_event()
+        self.ignore_cargo_return()
+
+    def ignore_cargo_return(self):
+        install_enter_key_filter(self.supplier_line_edit)
+        install_enter_key_filter(self.update_time)
+        install_enter_key_filter(self.contact_line_edit)
+        install_enter_key_filter(self.updater_line_edit)
+        install_enter_key_filter(self.phone_line_edit)
+        install_enter_key_filter(self.create_time)
+        install_enter_key_filter(self.creator_line_edit)
+        install_enter_key_filter(self.address_line_edit)
+        install_enter_key_filter(self.email_line_edit)
+        install_enter_key_filter(self.plainTextEdit_remark)
 
     def bind_event(self):
         self.supplier_save_btn.clicked.connect(self.save)

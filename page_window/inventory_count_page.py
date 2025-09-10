@@ -1,5 +1,6 @@
 from PySide6 import QtCore
 
+from page_window.tools import install_enter_key_filter
 from ui_app.inventory_count_entry_ui import Ui_InventoryCountDialog
 from PySide6.QtCore import QDate, QDateTime
 from PySide6.QtSql import QSqlQuery
@@ -15,6 +16,16 @@ class InventoryCountPage(QDialog, Ui_InventoryCountDialog):
         self.check_id = None
         self.load_data()
         # self.inventory_count_drug_comboBox.currentIndexChanged.connect(self.update_actual_quantity)
+        self.ignore_cargo_return()
+
+    def ignore_cargo_return(self):
+        install_enter_key_filter(self.inventory_count_batch_combox)
+        install_enter_key_filter(self.inventory_count_drug_comboBox)
+        install_enter_key_filter(self.inventory_count_batch_combox)
+        install_enter_key_filter(self.inventory_count_location_combox)
+        install_enter_key_filter(self.inventory_count_number_suspinBox)
+        install_enter_key_filter(self.inventory_count_plainTextEdit)
+        install_enter_key_filter(self.inventory_count_dateTimeEdit)
 
     def bind_event(self):
         self.inventory_count_save_btn.clicked.connect(self.save)
@@ -37,7 +48,7 @@ class InventoryCountPage(QDialog, Ui_InventoryCountDialog):
             self.inventory_count_user_comboBox.addItem(operator_name, operator_id)
 
         # 加载库存批次数据（修复：应该添加到批次下拉框）
-        query = QSqlQuery("SELECT in_id, batch FROM stock_in_main")
+        query = QSqlQuery("SELECT in_id, batch FROM stock_in_main ORDER BY in_id DESC")
         while query.next():
             batch_id = query.value(0)
             batch_name = query.value(1)

@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QDialog, QMessageBox, QVBoxLayout, QLineEdit, QDia
 
 from data.sqlite_data import StockLocationModel, StockAllModel
 from page_window.medicines_page import delete_selected_rows
+from page_window.tools import install_enter_key_filter
 from ui_app.stock_in_page_ui import Ui_StockDialog
 from ui_app.stock_locaton_ui import Ui_StockLocationDialog
 from ui_app.stock_all_ui import Ui_StockInAllDialog
@@ -19,9 +20,87 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         self.stock_in_id = None
         self.bind_event()
         self.load_stock_data()
+        self.ignore_cargo_return()
+
+    def ignore_cargo_return(self):
+        install_enter_key_filter(self.purchase_order_combox)
+        install_enter_key_filter(self.Invoice_line_edit)
+        install_enter_key_filter(self.Production_lot_number_line_edit)
+        install_enter_key_filter(self.stock_drug_combox)
+        install_enter_key_filter(self.incoming_quantity_spin_box)
+        install_enter_key_filter(self.inbound_amount_double)
+        install_enter_key_filter(self.valid_date_edit)
+        install_enter_key_filter(self.actual_incoming_quantity_spin_box)
+        install_enter_key_filter(self.inbound_date_time_edit)
+        install_enter_key_filter(self.location_combox)
+        install_enter_key_filter(self.warehousing_remarks_plain_text_edit)
+        install_enter_key_filter(self.batch_lineEdit)
 
     def bind_event(self):
         self.stock_save_btn.clicked.connect(self.save)
+        self.purchase_order_combox.currentIndexChanged.connect(self.purchase_of_stock_in_drug)
+        self.stock_drug_combox.currentIndexChanged.connect(self.load_drugs_by_order)
+
+    def purchase_of_stock_in_drug(self, index):
+        if index >= 0:
+            purchase_order_id = self.purchase_order_combox.itemData(index)
+            self.load_stock_in_drug(purchase_order_id)
+
+    def load_stock_in_drug(self, purchase_order_id):
+        self.stock_drug_combox.clear()
+
+        # 如果采购订单ID有效，则查询对应的药品信息
+        if purchase_order_id is not None:
+            query = QSqlQuery()
+            query.prepare("""
+                SELECT pd.detail_id, md.trade_name
+                FROM purchase_detail pd
+                JOIN medicine_dic md ON md.dic_id = pd.medicine_id
+                WHERE pd.order_id = ?
+            """)
+            query.addBindValue(purchase_order_id)
+
+            if query.exec():
+                while query.next():
+                    detail_id = query.value(0)
+                    drug_name = query.value(1)
+                    self.stock_drug_combox.addItem(drug_name, detail_id)
+            else:
+                print(f"数据库查询错误: {query.lastError().text()}")
+
+    def load_drugs_by_order(self, index):
+        if index >= 0:
+            detail_id = self.stock_drug_combox.itemData(index)
+            self.incoming_quantity(detail_id)
+
+    def incoming_quantity(self, detail_id):
+        """
+        根据采购明细ID获取采购数量和总价，并更新界面控件
+        """
+        if detail_id is not None:
+            query = QSqlQuery()
+            query.prepare("""
+                SELECT pd.quantity, pd.purchase_total_price
+                FROM purchase_detail pd
+                WHERE pd.detail_id = ?
+            """)
+            query.addBindValue(detail_id)
+
+            if query.exec() and query.next():
+                quantity = query.value(0) or 0
+                total_price = query.value(1) or 0.0
+
+                # 更新入库数量为采购数量
+                self.incoming_quantity_spin_box.setValue(quantity)
+
+                # 更新入库金额为采购总价
+                self.inbound_amount_double.setValue(total_price)
+            else:
+                # 如果查询失败或无结果，重置为默认值
+                self.incoming_quantity_spin_box.setValue(0)
+                self.inbound_amount_double.setValue(0.0)
+                if not query.exec():
+                    print(f"数据库查询错误: {query.lastError().text()}")
 
     def save(self):
         if self.stock_in_id:  # 编辑模式
@@ -30,8 +109,8 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             self.create_stock_in()
 
     def create_stock_in(self):
-        purchase_order = self.purchase_order_combox.itemData(self.purchase_order_combox.currentIndex())
-        invoice_number = self.Invoice_line_edit.text()
+        purchase_order = self.purchase_order_combox.itemData(self.purchase_order_combox.currentIndex())  # 采购订单ID
+        invoice_number = self.Invoice_line_edit.text()  # 发票号
         manufacturer_batch = self.Production_lot_number_line_edit.text()  # 生产批号
         purchase_detail_id = self.stock_drug_combox.itemData(self.stock_drug_combox.currentIndex())  # 采购明细ID
         stock_num = self.incoming_quantity_spin_box.value()  # 获取入库数量
@@ -42,15 +121,15 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         validity = self.valid_date_edit.date().toString("yyyy-MM-dd")
         remarks = self.warehousing_remarks_plain_text_edit.toPlainText()  # 入库备注
         location = self.location_combox.itemData(self.location_combox.currentIndex())
-        batch_number = self.batch_lineEdit.text()
+        batch_number = self.batch_lineEdit.text()  # 批次
 
         # 输入校验
         if not all([purchase_order, invoice_number, purchase_detail_id]):
             QMessageBox.warning(self, "输入错误", "请填写所有必填项。")
             return
 
-        if stock_num < 0 or actual_warehousing_quantity < 0 or inbound_amount < 0:
-            QMessageBox.warning(self, "输入错误", "数量和金额必须大于等于0。")
+        if stock_num <= 0 or actual_warehousing_quantity < 0 or inbound_amount <= 0:
+            QMessageBox.warning(self, "输入错误", "数量和金额必须大于0。")
             return
 
         query = QSqlQuery()
@@ -106,7 +185,7 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         self.batch_lineEdit.setText(batch_number)
         self.inbound_date_time_edit.setDateTime(QDateTime.currentDateTime())
         self.valid_date_edit.setDate(QDate.currentDate())
-        query = QSqlQuery("SELECT order_id, order_number FROM purchase_order")
+        query = QSqlQuery("SELECT order_id, order_number FROM purchase_order ORDER BY order_id DESC")
         while query.next():
             order_id = query.value(0)
             order_number = query.value(1)
@@ -123,59 +202,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             location_id = query.value(0)
             location_name = query.value(1)
             self.location_combox.addItem(location_name, location_id)
-        # 连接采购订单下拉框的信号，当选择改变时更新药品列表
-        self.purchase_order_combox.currentIndexChanged.connect(self.load_drugs_by_order)
-
-        # 加载默认的药品信息（如果已有选中的采购订单）
-        self.load_drugs_by_order()
-
-    def load_drugs_by_order(self):
-        self.stock_drug_combox.clear()
-
-        # 获取当前选择的采购订单ID
-        order_id = self.purchase_order_combox.itemData(self.purchase_order_combox.currentIndex())
-        # batch_number = f"BN{QDate.currentDate().toString('yyyyMMdd')}-{order_id}"
-        # self.batch_lineEdit.setText(batch_number)
-        if order_id is not None:
-            try:
-                # 查询指定采购订单的明细，以及对应的药品信息
-                query = QSqlQuery()
-                query.prepare("""
-                    SELECT pd.detail_id, md.trade_name
-                    FROM purchase_detail pd 
-                    JOIN medicine_dic md ON md.dic_id = pd.medicine_id
-                    WHERE pd.order_id = ?
-                """)
-                query.addBindValue(order_id)
-
-                if query.exec():
-                    while query.next():
-                        detail_id = query.value(0)
-                        drug_name = query.value(1)
-                        self.stock_drug_combox.addItem(drug_name, detail_id)
-                else:
-                    print(f"数据库查询错误: {query.lastError().text()}")
-
-                # 获取药品ID
-                drug_id = self.stock_drug_combox.itemData(self.stock_drug_combox.currentIndex())
-                if order_id is not None:
-                    query.prepare("""
-                        SELECT pd.quantity
-                        FROM purchase_detail pd
-                        WHERE pd.detail_id = ?
-                    """)
-                    query.addBindValue(drug_id)
-
-                    if query.exec():
-                        if query.next():  # 检查是否有返回记录
-                            self.incoming_quantity_spin_box.setValue(query.value(0))
-                        else:
-                            # 处理无记录返回的情况
-                            self.incoming_quantity_spin_box.setValue(0)
-                    else:
-                        print(f"数据库查询错误: {query.lastError().text()}")
-            except Exception as e:
-                print(f"加载药品信息时出错: {e}")
 
     def load_order_data(self, stock_in_id):
         self.stock_in_id = stock_in_id

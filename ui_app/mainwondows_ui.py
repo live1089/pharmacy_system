@@ -173,127 +173,23 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout_6.addWidget(self.drug_selection_query_btn)
 
-        self.drug_add_btn = QPushButton(self.page)
-        self.drug_add_btn.setObjectName(u"drug_add_btn")
+        self.drug_ref_btn = QPushButton(self.page)
+        self.drug_ref_btn.setObjectName(u"drug_ref_btn")
+        sizePolicy.setHeightForWidth(self.drug_ref_btn.sizePolicy().hasHeightForWidth())
+        self.drug_ref_btn.setSizePolicy(sizePolicy)
 
-        self.horizontalLayout_6.addWidget(self.drug_add_btn)
-
-        self.drug_revise_btn = QPushButton(self.page)
-        self.drug_revise_btn.setObjectName(u"drug_revise_btn")
-
-        self.horizontalLayout_6.addWidget(self.drug_revise_btn)
-
-        self.drug_del_btn = QPushButton(self.page)
-        self.drug_del_btn.setObjectName(u"drug_del_btn")
-
-        self.horizontalLayout_6.addWidget(self.drug_del_btn)
-
-        self.ref_btn = QPushButton(self.page)
-        self.ref_btn.setObjectName(u"ref_btn")
-        sizePolicy.setHeightForWidth(self.ref_btn.sizePolicy().hasHeightForWidth())
-        self.ref_btn.setSizePolicy(sizePolicy)
-
-        self.horizontalLayout_6.addWidget(self.ref_btn)
+        self.horizontalLayout_6.addWidget(self.drug_ref_btn)
 
 
         self.gridLayout_3.addLayout(self.horizontalLayout_6, 0, 0, 1, 1)
 
-        self.drug_tabWidget = QTabWidget(self.page)
-        self.drug_tabWidget.setObjectName(u"drug_tabWidget")
-        self.tab = QWidget()
-        self.tab.setObjectName(u"tab")
-        self.gridLayout_4 = QGridLayout(self.tab)
-        self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.shelves_drug_tableView = QTableView(self.tab)
-        self.shelves_drug_tableView.setObjectName(u"shelves_drug_tableView")
-
-        self.gridLayout_4.addWidget(self.shelves_drug_tableView, 0, 0, 1, 1)
-
-        self.drug_tabWidget.addTab(self.tab, "")
-        self.drug_class_pate = QWidget()
-        self.drug_class_pate.setObjectName(u"drug_class_pate")
-        self.gridLayout_42 = QGridLayout(self.drug_class_pate)
-        self.gridLayout_42.setObjectName(u"gridLayout_42")
-        self.gridLayout_41 = QGridLayout()
-        self.gridLayout_41.setObjectName(u"gridLayout_41")
-        self.label_10 = QLabel(self.drug_class_pate)
-        self.label_10.setObjectName(u"label_10")
-        self.label_10.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_41.addWidget(self.label_10, 2, 2, 1, 1)
-
-        self.verticalSpacer = QSpacerItem(20, 9, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-
-        self.gridLayout_41.addItem(self.verticalSpacer, 1, 0, 1, 1)
-
-        self.label_8 = QLabel(self.drug_class_pate)
-        self.label_8.setObjectName(u"label_8")
-        self.label_8.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_41.addWidget(self.label_8, 2, 0, 1, 1)
-
-        self.label_9 = QLabel(self.drug_class_pate)
-        self.label_9.setObjectName(u"label_9")
-        self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_41.addWidget(self.label_9, 2, 3, 1, 1)
-
-        self.label_11 = QLabel(self.drug_class_pate)
-        self.label_11.setObjectName(u"label_11")
-        self.label_11.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.label_11.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_41.addWidget(self.label_11, 2, 1, 1, 1)
-
-        self.drugs_set_btn = QPushButton(self.drug_class_pate)
-        self.drugs_set_btn.setObjectName(u"drugs_set_btn")
-
-        self.gridLayout_41.addWidget(self.drugs_set_btn, 0, 0, 1, 1)
-
-        self.specifications_set_btn = QPushButton(self.drug_class_pate)
-        self.specifications_set_btn.setObjectName(u"specifications_set_btn")
-
-        self.gridLayout_41.addWidget(self.specifications_set_btn, 0, 1, 1, 1)
-
-        self.dosage_set_btn = QPushButton(self.drug_class_pate)
-        self.dosage_set_btn.setObjectName(u"dosage_set_btn")
-
-        self.gridLayout_41.addWidget(self.dosage_set_btn, 0, 2, 1, 1)
-
-        self.unit_set_btn = QPushButton(self.drug_class_pate)
-        self.unit_set_btn.setObjectName(u"unit_set_btn")
-
-        self.gridLayout_41.addWidget(self.unit_set_btn, 0, 3, 1, 1)
-
-        self.drug_attr_table_view = QTableView(self.drug_class_pate)
-        self.drug_attr_table_view.setObjectName(u"drug_attr_table_view")
-
-        self.gridLayout_41.addWidget(self.drug_attr_table_view, 3, 0, 1, 1)
-
-        self.spec_table_view = QTableView(self.drug_class_pate)
-        self.spec_table_view.setObjectName(u"spec_table_view")
-
-        self.gridLayout_41.addWidget(self.spec_table_view, 3, 1, 1, 1)
-
-        self.dosage_table_view = QTableView(self.drug_class_pate)
-        self.dosage_table_view.setObjectName(u"dosage_table_view")
-
-        self.gridLayout_41.addWidget(self.dosage_table_view, 3, 2, 1, 1)
-
-        self.unit_table_view = QTableView(self.drug_class_pate)
-        self.unit_table_view.setObjectName(u"unit_table_view")
-
-        self.gridLayout_41.addWidget(self.unit_table_view, 3, 3, 1, 1)
-
-
-        self.gridLayout_42.addLayout(self.gridLayout_41, 0, 0, 1, 1)
-
-        self.drug_tabWidget.addTab(self.drug_class_pate, "")
-
-        self.gridLayout_3.addWidget(self.drug_tabWidget, 1, 0, 1, 1)
-
 
         self.verticalLayout_2.addLayout(self.gridLayout_3)
+
+        self.shelves_drug_tableView = QTableView(self.page)
+        self.shelves_drug_tableView.setObjectName(u"shelves_drug_tableView")
+
+        self.verticalLayout_2.addWidget(self.shelves_drug_tableView)
 
         self.stackedWidget.addWidget(self.page)
         self.page_1 = QWidget()
@@ -591,6 +487,11 @@ class Ui_mainWindow(object):
         self.expiring_drugs_save_btn.setObjectName(u"expiring_drugs_save_btn")
 
         self.horizontalLayout_8.addWidget(self.expiring_drugs_save_btn)
+
+        self.ex_ref_btn = QPushButton(self.page_5)
+        self.ex_ref_btn.setObjectName(u"ex_ref_btn")
+
+        self.horizontalLayout_8.addWidget(self.ex_ref_btn)
 
 
         self.gridLayout_8.addLayout(self.horizontalLayout_8, 0, 0, 1, 1)
@@ -1034,18 +935,122 @@ class Ui_mainWindow(object):
         self.gridLayout_44.setObjectName(u"gridLayout_44")
         self.gridLayout_43 = QGridLayout()
         self.gridLayout_43.setObjectName(u"gridLayout_43")
-        self.drug_dic_tableView = QTableView(self.page_12)
+        self.drug_tabWidget = QTabWidget(self.page_12)
+        self.drug_tabWidget.setObjectName(u"drug_tabWidget")
+        self.tab = QWidget()
+        self.tab.setObjectName(u"tab")
+        self.gridLayout_4 = QGridLayout(self.tab)
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.drug_dic_tableView = QTableView(self.tab)
         self.drug_dic_tableView.setObjectName(u"drug_dic_tableView")
 
-        self.gridLayout_43.addWidget(self.drug_dic_tableView, 0, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.drug_dic_tableView, 0, 0, 1, 1)
 
+        self.drug_tabWidget.addTab(self.tab, "")
+        self.drug_class_pate = QWidget()
+        self.drug_class_pate.setObjectName(u"drug_class_pate")
+        self.gridLayout_42 = QGridLayout(self.drug_class_pate)
+        self.gridLayout_42.setObjectName(u"gridLayout_42")
+        self.gridLayout_41 = QGridLayout()
+        self.gridLayout_41.setObjectName(u"gridLayout_41")
+        self.label_10 = QLabel(self.drug_class_pate)
+        self.label_10.setObjectName(u"label_10")
+        self.label_10.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_41.addWidget(self.label_10, 2, 2, 1, 1)
+
+        self.verticalSpacer = QSpacerItem(20, 9, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+
+        self.gridLayout_41.addItem(self.verticalSpacer, 1, 0, 1, 1)
+
+        self.label_8 = QLabel(self.drug_class_pate)
+        self.label_8.setObjectName(u"label_8")
+        self.label_8.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_41.addWidget(self.label_8, 2, 0, 1, 1)
+
+        self.label_9 = QLabel(self.drug_class_pate)
+        self.label_9.setObjectName(u"label_9")
+        self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_41.addWidget(self.label_9, 2, 3, 1, 1)
+
+        self.label_11 = QLabel(self.drug_class_pate)
+        self.label_11.setObjectName(u"label_11")
+        self.label_11.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.label_11.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_41.addWidget(self.label_11, 2, 1, 1, 1)
+
+        self.drugs_set_btn = QPushButton(self.drug_class_pate)
+        self.drugs_set_btn.setObjectName(u"drugs_set_btn")
+
+        self.gridLayout_41.addWidget(self.drugs_set_btn, 0, 0, 1, 1)
+
+        self.specifications_set_btn = QPushButton(self.drug_class_pate)
+        self.specifications_set_btn.setObjectName(u"specifications_set_btn")
+
+        self.gridLayout_41.addWidget(self.specifications_set_btn, 0, 1, 1, 1)
+
+        self.dosage_set_btn = QPushButton(self.drug_class_pate)
+        self.dosage_set_btn.setObjectName(u"dosage_set_btn")
+
+        self.gridLayout_41.addWidget(self.dosage_set_btn, 0, 2, 1, 1)
+
+        self.unit_set_btn = QPushButton(self.drug_class_pate)
+        self.unit_set_btn.setObjectName(u"unit_set_btn")
+
+        self.gridLayout_41.addWidget(self.unit_set_btn, 0, 3, 1, 1)
+
+        self.drug_attr_table_view = QTableView(self.drug_class_pate)
+        self.drug_attr_table_view.setObjectName(u"drug_attr_table_view")
+
+        self.gridLayout_41.addWidget(self.drug_attr_table_view, 3, 0, 1, 1)
+
+        self.spec_table_view = QTableView(self.drug_class_pate)
+        self.spec_table_view.setObjectName(u"spec_table_view")
+
+        self.gridLayout_41.addWidget(self.spec_table_view, 3, 1, 1, 1)
+
+        self.dosage_table_view = QTableView(self.drug_class_pate)
+        self.dosage_table_view.setObjectName(u"dosage_table_view")
+
+        self.gridLayout_41.addWidget(self.dosage_table_view, 3, 2, 1, 1)
+
+        self.unit_table_view = QTableView(self.drug_class_pate)
+        self.unit_table_view.setObjectName(u"unit_table_view")
+
+        self.gridLayout_41.addWidget(self.unit_table_view, 3, 3, 1, 1)
+
+
+        self.gridLayout_42.addLayout(self.gridLayout_41, 0, 0, 1, 1)
+
+        self.drug_tabWidget.addTab(self.drug_class_pate, "")
+
+        self.gridLayout_43.addWidget(self.drug_tabWidget, 1, 0, 1, 1)
+
+
+        self.gridLayout_44.addLayout(self.gridLayout_43, 2, 0, 1, 1)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.drug_dic_del_btn = QPushButton(self.page_12)
         self.drug_dic_del_btn.setObjectName(u"drug_dic_del_btn")
 
-        self.gridLayout_43.addWidget(self.drug_dic_del_btn, 1, 0, 1, 1)
+        self.horizontalLayout_3.addWidget(self.drug_dic_del_btn)
+
+        self.drug_revise_btn = QPushButton(self.page_12)
+        self.drug_revise_btn.setObjectName(u"drug_revise_btn")
+
+        self.horizontalLayout_3.addWidget(self.drug_revise_btn)
+
+        self.drug_add_btn = QPushButton(self.page_12)
+        self.drug_add_btn.setObjectName(u"drug_add_btn")
+
+        self.horizontalLayout_3.addWidget(self.drug_add_btn)
 
 
-        self.gridLayout_44.addLayout(self.gridLayout_43, 1, 0, 1, 1)
+        self.gridLayout_44.addLayout(self.horizontalLayout_3, 3, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.page_12)
 
@@ -1094,11 +1099,11 @@ class Ui_mainWindow(object):
 
         self.retranslateUi(mainWindow)
 
-        self.stackedWidget.setCurrentIndex(5)
-        self.drug_tabWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(7)
         self.stock_in_tabWidget.setCurrentIndex(0)
         self.stock_out_tabWidget.setCurrentIndex(0)
         self.order_tabWidget.setCurrentIndex(0)
+        self.drug_tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(mainWindow)
@@ -1127,20 +1132,7 @@ class Ui_mainWindow(object):
         self.pushButton.setText(QCoreApplication.translate("mainWindow", u"\u6e05\u7406\u5783\u573e", None))
         self.search_le.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u641c\u7d22\u836f\u54c1", None))
         self.drug_selection_query_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
-        self.drug_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u836f\u54c1", None))
-        self.drug_revise_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u836f\u54c1", None))
-        self.drug_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u836f\u54c1", None))
-        self.ref_btn.setText(QCoreApplication.translate("mainWindow", u"\u5237\u65b0\u754c\u9762", None))
-        self.drug_tabWidget.setTabText(self.drug_tabWidget.indexOf(self.tab), QCoreApplication.translate("mainWindow", u"\u57fa\u672c\u4fe1\u606f", None))
-        self.label_10.setText(QCoreApplication.translate("mainWindow", u"\u5242\u578b", None))
-        self.label_8.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u5c5e\u6027", None))
-        self.label_9.setText(QCoreApplication.translate("mainWindow", u"\u6700\u5c0f\u5355\u4f4d", None))
-        self.label_11.setText(QCoreApplication.translate("mainWindow", u"\u89c4\u683c", None))
-        self.drugs_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u8bbe\u7f6e", None))
-        self.specifications_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u89c4\u683c\u8bbe\u7f6e", None))
-        self.dosage_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u5242\u578b\u8bbe\u7f6e", None))
-        self.unit_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u5355\u4f4d\u8bbe\u7f6e", None))
-        self.drug_tabWidget.setTabText(self.drug_tabWidget.indexOf(self.drug_class_pate), QCoreApplication.translate("mainWindow", u"\u5206\u7c7b\u8bbe\u7f6e", None))
+        self.drug_ref_btn.setText(QCoreApplication.translate("mainWindow", u"\u5237\u65b0\u754c\u9762", None))
         self.supplier_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0", None))
         self.supplier_mod_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539", None))
         self.supplier_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664", None))
@@ -1163,8 +1155,9 @@ class Ui_mainWindow(object):
         self.label_2.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65e5\u671f", None))
         self.sales_records_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
         self.label_3.setText(QCoreApplication.translate("mainWindow", u"\u4e34\u671f\u63d0\u9192\u5929\u6570", None))
-        self.expiring_drugs_lineEdit_day.setText(QCoreApplication.translate("mainWindow", u"360", None))
+        self.expiring_drugs_lineEdit_day.setText(QCoreApplication.translate("mainWindow", u"60", None))
         self.expiring_drugs_save_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fdd\u5b58\u5929\u6570", None))
+        self.ex_ref_btn.setText(QCoreApplication.translate("mainWindow", u"\u5237\u65b0\u6570\u636e", None))
         self.stock_out_tabWidget.setTabText(self.stock_out_tabWidget.indexOf(self.stock_out_main), QCoreApplication.translate("mainWindow", u"\u51fa\u5e93\u4e3b\u8868", None))
         self.stock_out_tabWidget.setTabText(self.stock_out_tabWidget.indexOf(self.stock_out_detail), QCoreApplication.translate("mainWindow", u"\u51fa\u5e93\u660e\u7ec6", None))
         self.label_6.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
@@ -1180,9 +1173,9 @@ class Ui_mainWindow(object):
         self.label_13.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
         self.purchase_order_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
         self.add_an_order_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u8ba2\u5355", None))
-        self.purchase_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u91c7\u8d2d\u5355", None))
-        self.purchase_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u91c7\u8d2d\u5355", None))
-        self.purchase_mod_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u91c7\u8d2d\u5355", None))
+        self.purchase_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u91c7\u8d2d\u836f\u54c1", None))
+        self.purchase_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u8ba2\u5355", None))
+        self.purchase_mod_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u8ba2\u5355", None))
         self.label_16.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65f6\u95f4", None))
         self.label_17.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65f6\u95f4", None))
         self.shelves_select_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
@@ -1203,7 +1196,19 @@ class Ui_mainWindow(object):
         ___qtablewidgetitem2 = self.user_tableWidget.horizontalHeaderItem(2)
         ___qtablewidgetitem2.setText(QCoreApplication.translate("mainWindow", u"\u90ae\u7bb1", None));
         self.delete_user_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664\u7528\u6237", None))
+        self.drug_tabWidget.setTabText(self.drug_tabWidget.indexOf(self.tab), QCoreApplication.translate("mainWindow", u"\u57fa\u672c\u4fe1\u606f", None))
+        self.label_10.setText(QCoreApplication.translate("mainWindow", u"\u5242\u578b", None))
+        self.label_8.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u5c5e\u6027", None))
+        self.label_9.setText(QCoreApplication.translate("mainWindow", u"\u6700\u5c0f\u5355\u4f4d", None))
+        self.label_11.setText(QCoreApplication.translate("mainWindow", u"\u89c4\u683c", None))
+        self.drugs_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u8bbe\u7f6e", None))
+        self.specifications_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u89c4\u683c\u8bbe\u7f6e", None))
+        self.dosage_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u5242\u578b\u8bbe\u7f6e", None))
+        self.unit_set_btn.setText(QCoreApplication.translate("mainWindow", u"\u5355\u4f4d\u8bbe\u7f6e", None))
+        self.drug_tabWidget.setTabText(self.drug_tabWidget.indexOf(self.drug_class_pate), QCoreApplication.translate("mainWindow", u"\u5206\u7c7b\u8bbe\u7f6e", None))
         self.drug_dic_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664", None))
+        self.drug_revise_btn.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u836f\u54c1", None))
+        self.drug_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u836f\u54c1", None))
         self.drug_dic_btn.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u8bcd\u5178", None))
         self.sell_drug_dtn.setText(QCoreApplication.translate("mainWindow", u"\u9500\u552e", None))
         self.menu.setTitle(QCoreApplication.translate("mainWindow", u"\u6587\u4ef6", None))

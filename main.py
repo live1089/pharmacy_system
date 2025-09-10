@@ -90,138 +90,57 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         # 检查 drug_information_shelves 表是否为空
         query.exec("SELECT COUNT(*) FROM drug_information_shelves")
         if query.next() and query.value(0) == 0:
-            # 如果上架信息表为空，则初始化所有已有的库存数据
-            query.exec("""
+            print("drug_information_shelves 表为空，开始初始化数据...")
+            # 如果上架信息表为空，则初始化所有已有的上架数据
+            sql = """
                 INSERT OR REPLACE INTO drug_information_shelves 
                 (drug_information_shelves_id, drug, expiration_date, purchase_date, shelves_sum, 
-                 warehouse_inventory_sum, location, approval_number, manufacturer, batch, supplier)
+                 warehouse_inventory_sum, shelves_location, warehouse_inventory_location, approval_number, manufacturer, batch, supplier)
                 SELECT 
                     md.dic_id,
                     md.trade_name,
                     sm.validity,
                     po.order_date,
-                    COALESCE(SUM(sd.actual_quantity), 0),
-                    COALESCE(SUM(sd.actual_quantity), 0),
+                    COALESCE(SUM(sd.shelves_number), 0),
+                    COALESCE((SELECT SUM(s.quantity) 
+                             FROM stock s 
+                             WHERE s.drug_id = md.dic_id), 0),
                     COALESCE(wsp.location, ''),
+                    COALESCE((SELECT GROUP_CONCAT(wsp2.location, ', ') 
+                    FROM warehouse_shelf_position wsp2 
+                    JOIN stock s ON s.location = wsp2.warehouse_shelf_id 
+                    WHERE s.drug_id = md.dic_id), ''),
                     md.approval_number,
                     md.manufacturer,
                     sm.batch,
                     su.name
                 FROM medicine_dic md
-                JOIN purchase_detail pd ON md.dic_id = pd.medicine_id
-                JOIN purchase_order po ON pd.order_id = po.order_id
-                JOIN stock_in_main sm ON sm.order_id = po.order_id
-                JOIN stock_in_detail sd ON sd.in_id = sm.in_id
+                JOIN stock_out_detail sod ON md.dic_id = sod.medicine_id
+                JOIN stock_out_main som ON sod.out_id = som.out_id
+                JOIN shelves_drug sd ON sd.out_batch = sod.detail_id
+                JOIN stock_in_main sm ON sod.stock_batch = sm.in_id
+                JOIN purchase_order po ON sm.order_id = po.order_id
                 JOIN supplier su ON po.supplier_id = su.supplier_id
-                LEFT JOIN warehouse_shelf_position wsp ON sd.warehouse_shelf_id = wsp.warehouse_shelf_id
+                LEFT JOIN warehouse_shelf_position wsp ON sd.location_id = wsp.warehouse_shelf_id
                 GROUP BY md.dic_id, sm.validity, po.order_date, md.approval_number, 
                          md.manufacturer, sm.batch, po.supplier_id, wsp.location
-            """)
+            """
+
+            query.exec(sql)
 
             if query.lastError().isValid():
                 print(f"初始化上架药品信息失败: {query.lastError().text()}")
             else:
                 print("已初始化上架药品信息数据")
 
-    # 手动刷新上架药品信息的方
-    def refresh_shelves_drug_information(self):
-        """手动刷新上架药品信息数据"""
-        reply = QMessageBox.question(
-            self,
-            "确认操作",
-            "确定要重新初始化所有上架药品信息数据吗？这将覆盖现有的上架信息。",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
+            # 调试信息
+            query.exec("SELECT drug, warehouse_inventory_sum FROM drug_information_shelves")
+            while query.next():
+                print(f"药品: {query.value(0)}, 仓库库存: {query.value(1)}")
 
-        if reply == QMessageBox.StandardButton.Yes:
-            query = QSqlQuery(self.db)
+    # -------------------------------------------------------------------------------------------------------------------------------
 
-            # 清空现有上架信息数据
-            query.exec("DELETE FROM drug_information_shelves")
-
-            # 重新初始化所有库存数据
-            query.exec("""
-                INSERT OR REPLACE INTO drug_information_shelves 
-                (drug_information_shelves_id, drug, expiration_date, purchase_date, shelves_sum, 
-                 warehouse_inventory_sum, location, approval_number, manufacturer, batch, supplier)
-                SELECT 
-                    md.dic_id,
-                    md.trade_name,
-                    sm.validity,
-                    po.order_date,
-                    COALESCE(SUM(sd.actual_quantity), 0),
-                    COALESCE(SUM(sd.actual_quantity), 0),
-                    COALESCE(wsp.location, ''),
-                    md.approval_number,
-                    md.manufacturer,
-                    sm.batch,
-                    su.name
-                FROM medicine_dic md
-                JOIN purchase_detail pd ON md.dic_id = pd.medicine_id
-                JOIN purchase_order po ON pd.order_id = po.order_id
-                JOIN stock_in_main sm ON sm.order_id = po.order_id
-                JOIN stock_in_detail sd ON sd.in_id = sm.in_id
-                JOIN supplier su ON po.supplier_id = su.supplier_id
-                LEFT JOIN warehouse_shelf_position wsp ON sd.warehouse_shelf_id = wsp.warehouse_shelf_id
-                GROUP BY md.dic_id, sm.validity, po.order_date, md.approval_number, 
-                         md.manufacturer, sm.batch, po.supplier_id, wsp.location
-            """)
-
-            if query.lastError().isValid():
-                QMessageBox.critical(self, "错误", f"刷新上架药品信息失败: {query.lastError().text()}")
-            else:
-                QMessageBox.information(self, "成功", "已重新初始化上架药品信息数据")
-                # 重新加载上架药品信息数据
-                data.sqlite_data.get_shelves_drug_message_model(self)
-
-    def refresh_expiring_medicines_data(self):
-        """手动刷新所有药品的有效期监控数据"""
-        reply = QMessageBox.question(
-            self,
-            "确认操作",
-            "确定要重新初始化所有药品的有效期监控数据吗？这将覆盖现有的监控设置。",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-
-        if reply == QMessageBox.StandardButton.Yes:
-            query = QSqlQuery(self.db)
-
-            # 清空现有监控数据
-            query.exec("DELETE FROM expiring_medicines")
-
-            # 重新初始化所有库存数据
-            query.exec("""
-                INSERT OR REPLACE INTO expiring_medicines 
-                (batch_id, medicine_name, expiry_date, days_until_expiry, current_stock, alert_threshold, status, last_updated)
-                SELECT 
-                    sm.in_id,
-                    md.trade_name,
-                    sm.validity,
-                    CAST(julianday(sm.validity) - julianday('now') AS INTEGER),
-                    COALESCE(s.quantity, 0),
-                    30,
-                    CASE 
-                        WHEN CAST(julianday(sm.validity) - julianday('now') AS INTEGER) < 0 THEN '过期'
-                        ELSE '正常'
-                    END,
-                    datetime('now', '+8 hours')
-                FROM stock_in_main sm
-                JOIN stock_in_detail sd ON sm.in_id = sd.in_id
-                JOIN purchase_detail pd ON sd.purchase_detail_id = pd.detail_id
-                JOIN medicine_dic md ON pd.medicine_id = md.dic_id
-                LEFT JOIN stock s ON s.batch = sm.in_id
-                WHERE sm.validity IS NOT NULL
-            """)
-
-            if query.lastError().isValid():
-                QMessageBox.critical(self, "错误", f"刷新监控数据失败: {query.lastError().text()}")
-            else:
-                QMessageBox.information(self, "成功", "已重新初始化药品有效期监控数据")
-                # 重新加载临期药品数据
-                data.sqlite_data.get_expiring_medicine_model(self)
-
-    def initialize_expiring_medicines_monitor(self):
-        """初始化已有的药品数据到有效期监控表"""
+    def initialize_expiring_medicines_monitor(self):  # 初始化已有的药品数据到有效期监控表
         query = QSqlQuery(self.db)
 
         # 检查 expiring_medicines 表是否为空
@@ -256,8 +175,7 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
             else:
                 print("已初始化药品有效期监控数据")
 
-    def load_expiry_threshold_from_db(self):
-        """从数据库加载临期提醒阈值"""
+    def load_expiry_threshold_from_db(self):  # 从数据库加载临期提醒阈值
         query = QSqlQuery(self.db)
         # 获取第一个记录的预警阈值作为默认值
         query.exec("SELECT alert_threshold FROM expiring_medicines LIMIT 1")
@@ -266,6 +184,126 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
             threshold = query.value(0)
             if threshold is not None:
                 self.expiring_drugs_lineEdit_day.setText(str(threshold))
+
+    def update_medicine_status(self):  # 更新所有药品的状态
+        query = QSqlQuery(self.db)
+
+        # 更新 expiring_medicines 表中的 status 字段
+        query.exec("""
+            UPDATE expiring_medicines
+            SET status = CASE
+                WHEN days_until_expiry < 0 THEN '过期'
+                ELSE '正常'
+            END,
+            last_updated = datetime('now', '+8 hours')
+        """)
+
+        print("药品状态更新完成")
+
+    def update_expiry_days(self):  # 更新所有药品的有效期天数和状态
+        query = QSqlQuery(self.db)
+
+        # 更新 expiring_medicines 表中的 days_until_expiry 字段和状态
+        query.exec("""
+            UPDATE expiring_medicines 
+            SET days_until_expiry = CAST(julianday(expiry_date) - julianday('now') AS INTEGER),
+                status = CASE 
+                    WHEN CAST(julianday(expiry_date) - julianday('now') AS INTEGER) < 0 THEN '过期'
+                    ELSE '正常'
+                END,
+                last_updated = datetime('now', '+8 hours')
+        """)
+
+        # 删除已经过期很久的记录(过期超过30天)
+        query.exec("""
+            DELETE FROM expiring_medicines 
+            WHERE days_until_expiry < -30
+        """)
+
+        print("有效期天数和状态更新完成")
+
+        # 检查是否有即将过期的药品
+        self.check_expiring_soon_medicines()
+
+    def check_expiring_soon_medicines(self):  # 检查即将过期的药品并提醒
+        # 首先从界面获取当前设置的阈值
+        try:
+            default_threshold = int(self.expiring_drugs_lineEdit_day.text())
+        except ValueError:
+            default_threshold = 60  # 默认值
+
+        query = QSqlQuery(self.db)
+        query.prepare("""
+            SELECT medicine_name, expiry_date, days_until_expiry, current_stock, alert_threshold
+            FROM expiring_medicines 
+            WHERE days_until_expiry <= COALESCE(alert_threshold, ?)
+            AND days_until_expiry >= -30  -- 仍然显示过期不超过30天的药品
+            ORDER BY days_until_expiry ASC
+        """)
+        query.addBindValue(default_threshold)
+
+        if query.exec():
+            expiring_soon_medicines = []
+            while query.next():
+                medicine_name = query.value(0)
+                expiry_date = query.value(1)
+                days_until_expiry = query.value(2)
+                current_stock = query.value(3)
+                alert_threshold = query.value(4) or default_threshold
+
+                expiring_soon_medicines.append({
+                    'name': medicine_name,
+                    'expiry_date': expiry_date,
+                    'days_until_expiry': days_until_expiry,
+                    'current_stock': current_stock,
+                    'alert_threshold': alert_threshold
+                })
+
+            # 如果有即将过期的药品，显示提醒
+            if expiring_soon_medicines:
+                self.show_expiry_warning(expiring_soon_medicines)
+
+    def save_expiry_threshold(self):  # 保存临期提醒阈值
+        try:
+            threshold_days = int(self.expiring_drugs_lineEdit_day.text())
+            if threshold_days < 0:
+                QMessageBox.warning(self, "输入错误", "临期提醒天数不能为负数")
+                return
+
+            # 更新数据库中所有记录的预警阈值
+            query = QSqlQuery(self.db)
+            query.prepare("UPDATE expiring_medicines SET alert_threshold = ?")
+            query.addBindValue(threshold_days)
+
+            if query.exec():
+                QMessageBox.information(self, "成功", f"已将临期提醒阈值设置为{threshold_days}天")
+                # 重新加载临期药品数据
+                data.sqlite_data.get_expiring_medicine_model(self)
+            else:
+                QMessageBox.critical(self, "数据库错误", f"更新失败: {query.lastError().text()}")
+
+        except ValueError:
+            QMessageBox.warning(self, "输入错误", "请输入有效的数字")
+
+    def show_expiry_warning(self, medicines):  # 显示药品即将过期的警告
+        if len(medicines) > 0:
+            warning_msg = "以下药品即将过期，请及时处理：\n\n"
+            for med in medicines:
+                warning_msg += f"• {med['name']} - 剩余{med['days_until_expiry']}天 - 库存:{med['current_stock']}\n"
+
+            # 可以使用状态栏显示或者弹出消息框
+            self.statusbar.showMessage(warning_msg, 20000)  # 显示20秒
+
+            # 对于紧急情况(7天内过期)，可以弹出消息框
+            urgent_medicines = [med for med in medicines if med['days_until_expiry'] <= 7]
+            if urgent_medicines:
+                urgent_msg = "紧急提醒：以下药品将在7天内过期！\n\n"
+                for med in urgent_medicines:
+                    urgent_msg += f"• {med['name']} - 剩余{med['days_until_expiry']}天 - 库存:{med['current_stock']}\n"
+
+                QMessageBox.warning(self, "药品临期紧急提醒", urgent_msg)
+
+    # ------------------------------------------------------------------------------------------------------------
 
     def sqlite_data(self):
         # data.sqlite_data.get_medicines_model(self)  # 药品
@@ -300,68 +338,6 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         """设置浅色主题"""
         QApplication.instance().setStyleSheet(light(QApplication.instance()))
 
-    def update_medicine_status(self):
-        """更新所有药品的状态"""
-        query = QSqlQuery(self.db)
-
-        # 更新 expiring_medicines 表中的 status 字段
-        query.exec("""
-            UPDATE expiring_medicines 
-            SET status = CASE 
-                WHEN days_until_expiry < 0 THEN '过期'
-                ELSE '正常'
-            END,
-            last_updated = datetime('now', '+8 hours')
-        """)
-
-        print("药品状态更新完成")
-
-    def update_expiry_days(self):
-        """更新所有药品的有效期天数和状态"""
-        query = QSqlQuery(self.db)
-
-        # 更新 expiring_medicines 表中的 days_until_expiry 字段和状态
-        query.exec("""
-            UPDATE expiring_medicines 
-            SET days_until_expiry = CAST(julianday(expiry_date) - julianday('now') AS INTEGER),
-                status = CASE 
-                    WHEN CAST(julianday(expiry_date) - julianday('now') AS INTEGER) < 0 THEN '过期'
-                    ELSE '正常'
-                END,
-                last_updated = datetime('now', '+8 hours')
-        """)
-
-        # 删除已经过期很久的记录(过期超过30天)
-        query.exec("""
-            DELETE FROM expiring_medicines 
-            WHERE days_until_expiry < -30
-        """)
-
-        print("有效期天数和状态更新完成")
-
-        # 检查是否有即将过期的药品
-        self.check_expiring_soon_medicines()
-
-    def show_expiry_warning(self, medicines):
-        """显示药品即将过期的警告"""
-        if len(medicines) > 0:
-            warning_msg = "以下药品即将过期，请及时处理：\n\n"
-            for med in medicines:
-                warning_msg += f"• {med['name']} - 剩余{med['days_until_expiry']}天 - 库存:{med['current_stock']}\n"
-
-            # 可以使用状态栏显示或者弹出消息框
-            self.statusbar.showMessage(warning_msg, 10000)  # 显示10秒
-
-            # 对于紧急情况(7天内过期)，可以弹出消息框
-            urgent_medicines = [med for med in medicines if med['days_until_expiry'] <= 7]
-            if urgent_medicines:
-                urgent_msg = "紧急提醒：以下药品将在7天内过期！\n\n"
-                for med in urgent_medicines:
-                    urgent_msg += f"• {med['name']} - 剩余{med['days_until_expiry']}天 - 库存:{med['current_stock']}\n"
-
-                QMessageBox.warning(self, "药品临期紧急提醒", urgent_msg)
-
-
     def bind_event(self):
         self.medicine.clicked.connect(lambda: self.show_page_by_name(PageMap.shelves_drug_tableView.value))
         self.sales_records.clicked.connect(lambda: self.show_page_by_name(PageMap.sales_records_tableView.value))
@@ -395,67 +371,14 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.inventory_del_btn.clicked.connect(self.inventory_del)
         self.expiring_drugs_save_btn.clicked.connect(self.save_expiry_threshold)
 
-    def save_expiry_threshold(self):
-        """保存临期提醒阈值"""
-        try:
-            threshold_days = int(self.expiring_drugs_lineEdit_day.text())
-            if threshold_days < 0:
-                QMessageBox.warning(self, "输入错误", "临期提醒天数不能为负数")
-                return
+        self.drug_ref_btn.clicked.connect(self.drug_ref)
+        self.ex_ref_btn.clicked.connect(self.ex_ref)
 
-            # 更新数据库中所有记录的预警阈值
-            query = QSqlQuery(self.db)
-            query.prepare("UPDATE expiring_medicines SET alert_threshold = ?")
-            query.addBindValue(threshold_days)
+    def drug_ref(self):
+        data.sqlite_data.get_shelves_drug_message_model(self)
 
-            if query.exec():
-                QMessageBox.information(self, "成功", f"已将临期提醒阈值设置为{threshold_days}天")
-                # 重新加载临期药品数据
-                data.sqlite_data.get_expiring_medicine_model(self)
-            else:
-                QMessageBox.critical(self, "数据库错误", f"更新失败: {query.lastError().text()}")
-
-        except ValueError:
-            QMessageBox.warning(self, "输入错误", "请输入有效的数字")
-
-    def check_expiring_soon_medicines(self):
-        """检查即将过期的药品并提醒"""
-        # 首先从界面获取当前设置的阈值
-        try:
-            default_threshold = int(self.expiring_drugs_lineEdit_day.text())
-        except ValueError:
-            default_threshold = 360  # 默认值
-
-        query = QSqlQuery(self.db)
-        query.prepare("""
-            SELECT medicine_name, expiry_date, days_until_expiry, current_stock, alert_threshold
-            FROM expiring_medicines 
-            WHERE days_until_expiry <= COALESCE(alert_threshold, ?)
-            AND days_until_expiry >= -30  -- 仍然显示过期不超过30天的药品
-            ORDER BY days_until_expiry ASC
-        """)
-        query.addBindValue(default_threshold)
-
-        if query.exec():
-            expiring_soon_medicines = []
-            while query.next():
-                medicine_name = query.value(0)
-                expiry_date = query.value(1)
-                days_until_expiry = query.value(2)
-                current_stock = query.value(3)
-                alert_threshold = query.value(4) or default_threshold
-
-                expiring_soon_medicines.append({
-                    'name': medicine_name,
-                    'expiry_date': expiry_date,
-                    'days_until_expiry': days_until_expiry,
-                    'current_stock': current_stock,
-                    'alert_threshold': alert_threshold
-                })
-
-            # 如果有即将过期的药品，显示提醒
-            if expiring_soon_medicines:
-                self.show_expiry_warning(expiring_soon_medicines)
+    def ex_ref(self):
+        data.sqlite_data.get_expiring_medicine_model(self)
 
     def stock_in_all(self):
         self.stock_all = StockInAllPage(self)
@@ -765,6 +688,7 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
             self.ic.exec()
             data.sqlite_data.get_inventory_check(self)
 
+    # -------------------------------------------------------------------------------------------------------------------------------
     # 添加跳出子窗口事件
     def sub_window_event(self):
         self.drug_add_btn.clicked.connect(self.drug_adds)

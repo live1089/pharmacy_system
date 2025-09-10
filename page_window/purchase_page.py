@@ -4,6 +4,7 @@ from PySide6.QtCore import QDate, QDateTime
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QDialog, QMessageBox
 
+from page_window.tools import install_enter_key_filter
 from ui_app.drug_purchase_add_ui import Ui_PurchaseDialog
 from ui_app.add_an_order_ui import Ui_AnOrderDialog
 
@@ -16,17 +17,33 @@ class PurAddPage(QDialog, Ui_PurchaseDialog):
         self.detail_id = None  # 用于存储编辑模式下的订单ID
         self.bind_event()
         self.load_purchase_data()
+        self.ignore_cargo_return()
+
+    def ignore_cargo_return(self):
+        install_enter_key_filter(self.drug_purchase_combox)
+        install_enter_key_filter(self.order_number_combox)
+        install_enter_key_filter(self.quantity_purchased_spin_box)
+        install_enter_key_filter(self.purchase_unit_price_double)
+        install_enter_key_filter(self.total_amount_order_double)
+        install_enter_key_filter(self.purchase_notes_plain_text)
 
     def bind_event(self):
         self.purchase_save_btn.clicked.connect(self.save)
+        self.quantity_purchased_spin_box.valueChanged.connect(self.calculate_total_amount)
+        self.purchase_unit_price_double.valueChanged.connect(self.calculate_total_amount)
 
+    def calculate_total_amount(self):
+        """计算采购总价"""
+        quantity_purchased = self.quantity_purchased_spin_box.value()
+        purchase_unit_price = self.purchase_unit_price_double.value()
+        self.total_amount_order_double.setValue(quantity_purchased * purchase_unit_price)
     def load_purchase_data(self):
         query = QSqlQuery("SELECT dic_id, trade_name FROM medicine_dic")
         while query.next():
             drug_id = query.value(0)
             drug_name = query.value(1)
             self.drug_purchase_combox.addItem(drug_name, drug_id)
-        query = QSqlQuery("SELECT order_id, order_number FROM purchase_order")
+        query = QSqlQuery("SELECT order_id, order_number FROM purchase_order ORDER BY order_id DESC")
         while query.next():
             order_id = query.value(0)
             order_number = query.value(1)
@@ -69,10 +86,10 @@ class PurAddPage(QDialog, Ui_PurchaseDialog):
             index = self.drug_purchase_combox.findData(medicine_id)
             if index >= 0:
                 self.drug_purchase_combox.setCurrentIndex(index)
-            self.quantity_purchased_spin_box.setValue(quantity)
-            self.total_amount_order_double.setValue(purchase_total_price)
-            self.purchase_unit_price_double.setValue(purchase_price)
-            self.purchase_notes_plain_text.setPlainText(remarks if remarks is not None else "")
+                self.quantity_purchased_spin_box.setValue(quantity)
+                self.total_amount_order_double.setValue(purchase_total_price)
+                self.purchase_unit_price_double.setValue(purchase_price)
+                self.purchase_notes_plain_text.setPlainText(remarks if remarks is not None else "")
 
     def save(self):
         if self.detail_id:  # 编辑模式
@@ -176,9 +193,19 @@ class AnOrderPage(QDialog, Ui_AnOrderDialog):
         self.order_id = None
         self.bind_event()
         self.load_an_order_data()
+        self.ignore_cargo_return()
+
+    def ignore_cargo_return(self):
+        install_enter_key_filter(self.lineEdit)
+        install_enter_key_filter(self.down_order_dateEdit)
+        install_enter_key_filter(self.supplier_order_comboBox)
+        install_enter_key_filter(self.up_googs_dateEdit)
+        install_enter_key_filter(self.doubleSpinBox)
+        install_enter_key_filter(self.plainTextEdit)
 
     def bind_event(self):
         self.order_save_btn.clicked.connect(self.save)
+
 
     # 加载要更新的订单信息
     def load_order(self, order_id):

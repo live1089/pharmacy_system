@@ -1,3 +1,4 @@
+from PySide6.QtCore import QEvent, Qt, QObject
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QMessageBox, QLineEdit, QDialog, QDialogButtonBox, QVBoxLayout
 
@@ -414,5 +415,6 @@ def class_set_page(self):
         self.dosage_table_view.hideColumn(col)
 
     return self.drug_spec, self.drug_attr, self.drug_units, self.drug_ror
+
 
 

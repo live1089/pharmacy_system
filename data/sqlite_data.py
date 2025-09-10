@@ -52,7 +52,8 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 purchase_date date,                                             -- 采购日期 (purchase_order)
                 shelves_sum INTEGER,                                            -- 上架库存数量 (shelves_drug)
                 warehouse_inventory_sum INTEGER,                                -- 仓库库存数量 (warehouse_shelf_position)
-                location TEXT,                                                  -- 位置
+                shelves_location TEXT,                                          -- 上架位置
+                warehouse_inventory_location TEXT,                              -- 库存位置
                 approval_number TEXT,                                 -- 批准文号(国药准字)
                 manufacturer TEXT,                                    -- 生产厂家
                 batch TEXT,                                           -- 批号 (stock_in_main)
@@ -61,36 +62,159 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         """)
 
         query.exec("""
-        CREATE TRIGGER IF NOT EXISTS update_drug_information_shelves
-            AFTER INSERT ON stock_in_detail
+        CREATE TRIGGER IF NOT EXISTS update_drug_information_shelves_on_shelf_insert
+            AFTER INSERT ON shelves_drug
             FOR EACH ROW
             BEGIN
-                -- 当药品入库时，更新上架药品信息表
                 INSERT OR REPLACE INTO drug_information_shelves 
                 (drug_information_shelves_id, drug, expiration_date, purchase_date, shelves_sum, 
-                 warehouse_inventory_sum, location, approval_number, manufacturer, batch, supplier)
+                 warehouse_inventory_sum, shelves_location, warehouse_inventory_location, approval_number, manufacturer, batch, supplier)
                 SELECT 
                     md.dic_id,
                     md.trade_name,
                     sm.validity,
                     po.order_date,
-                    COALESCE(SUM(sd.actual_quantity), 0),
-                    COALESCE(SUM(sd.actual_quantity), 0),
-                    COALESCE(wsp.location, ''),  -- 从warehouse_shelf_position表获取位置信息
+                    COALESCE((SELECT SUM(shelves_number) 
+                             FROM shelves_drug 
+                             WHERE drug = NEW.drug), 0),
+                    COALESCE((SELECT SUM(quantity) 
+                             FROM stock 
+                             WHERE drug_id = NEW.drug), 0),
+                    COALESCE(wsp.location, ''),
+                    COALESCE((SELECT GROUP_CONCAT(wsp2.location, ', ') 
+                    FROM warehouse_shelf_position wsp2 
+                    JOIN stock s ON s.location = wsp2.warehouse_shelf_id 
+                    WHERE s.drug_id = NEW.drug), ''),
                     md.approval_number,
                     md.manufacturer,
                     sm.batch,
                     su.name
                 FROM medicine_dic md
-                JOIN purchase_detail pd ON md.dic_id = pd.medicine_id
-                JOIN purchase_order po ON pd.order_id = po.order_id
-                JOIN stock_in_main sm ON sm.order_id = po.order_id
-                JOIN stock_in_detail sd ON sd.in_id = sm.in_id
+                JOIN stock_out_detail sod ON md.dic_id = sod.medicine_id
+                JOIN stock_in_main sm ON sod.stock_batch = sm.in_id
+                JOIN purchase_order po ON sm.order_id = po.order_id
                 JOIN supplier su ON po.supplier_id = su.supplier_id
-                LEFT JOIN warehouse_shelf_position wsp ON sd.warehouse_shelf_id = wsp.warehouse_shelf_id
-                WHERE pd.detail_id = NEW.purchase_detail_id
-                GROUP BY md.dic_id, sm.validity, po.order_date, md.approval_number, 
-                         md.manufacturer, sm.batch, po.supplier_id, wsp.location;
+                LEFT JOIN warehouse_shelf_position wsp ON NEW.location_id = wsp.warehouse_shelf_id
+                WHERE sod.detail_id = NEW.out_batch
+                AND md.dic_id = NEW.drug
+                LIMIT 1;
+            END
+        """)
+
+        # 添加更新触发器
+        query.exec("""
+        CREATE TRIGGER IF NOT EXISTS update_drug_information_shelves_on_shelf_update
+            AFTER UPDATE ON shelves_drug
+            FOR EACH ROW
+            BEGIN
+                -- 更新新药品的信息
+                INSERT OR REPLACE INTO drug_information_shelves 
+                (drug_information_shelves_id, drug, expiration_date, purchase_date, shelves_sum, 
+                 warehouse_inventory_sum, shelves_location, warehouse_inventory_location, approval_number, manufacturer, batch, supplier)
+                SELECT 
+                    md.dic_id,
+                    md.trade_name,
+                    sm.validity,
+                    po.order_date,
+                    COALESCE((SELECT SUM(shelves_number) 
+                             FROM shelves_drug 
+                             WHERE drug = NEW.drug), 0),
+                    COALESCE((SELECT SUM(quantity) 
+                             FROM stock 
+                             WHERE drug_id = NEW.drug), 0),
+                    COALESCE(wsp.location, ''),
+                    COALESCE((SELECT GROUP_CONCAT(wsp2.location, ', ') 
+                    FROM warehouse_shelf_position wsp2 
+                    JOIN stock s ON s.location = wsp2.warehouse_shelf_id 
+                    WHERE s.drug_id = NEW.drug), ''),
+                    md.approval_number,
+                    md.manufacturer,
+                    sm.batch,
+                    su.name
+                FROM medicine_dic md
+                JOIN stock_out_detail sod ON md.dic_id = sod.medicine_id
+                JOIN stock_in_main sm ON sod.stock_batch = sm.in_id
+                JOIN purchase_order po ON sm.order_id = po.order_id
+                JOIN supplier su ON po.supplier_id = su.supplier_id
+                LEFT JOIN warehouse_shelf_position wsp ON NEW.location_id = wsp.warehouse_shelf_id
+                WHERE sod.detail_id = NEW.out_batch
+                AND md.dic_id = NEW.drug
+                LIMIT 1;
+
+                -- 如果药品发生变化，也需要更新旧药品的信息
+                INSERT OR REPLACE INTO drug_information_shelves 
+                (drug_information_shelves_id, drug, expiration_date, purchase_date, shelves_sum, 
+                 warehouse_inventory_sum, shelves_location, warehouse_inventory_location, approval_number, manufacturer, batch, supplier)
+                SELECT 
+                    md.dic_id,
+                    md.trade_name,
+                    sm.validity,
+                    po.order_date,
+                    COALESCE((SELECT SUM(shelves_number) 
+                             FROM shelves_drug 
+                             WHERE drug = OLD.drug), 0),
+                    COALESCE((SELECT SUM(quantity) 
+                             FROM stock 
+                             WHERE drug_id = OLD.drug), 0),
+                    COALESCE(wsp.location, ''),
+                    COALESCE((SELECT GROUP_CONCAT(wsp2.location, ', ') 
+                    FROM warehouse_shelf_position wsp2 
+                    JOIN stock s ON s.location = wsp2.warehouse_shelf_id 
+                    WHERE s.drug_id = OLD.drug), ''),
+                    md.approval_number,
+                    md.manufacturer,
+                    sm.batch,
+                    su.name
+                FROM medicine_dic md
+                JOIN stock_out_detail sod ON md.dic_id = sod.medicine_id
+                JOIN stock_in_main sm ON sod.stock_batch = sm.in_id
+                JOIN purchase_order po ON sm.order_id = po.order_id
+                JOIN supplier su ON po.supplier_id = su.supplier_id
+                LEFT JOIN warehouse_shelf_position wsp ON OLD.location_id = wsp.warehouse_shelf_id
+                WHERE sod.detail_id = OLD.out_batch
+                AND md.dic_id = OLD.drug
+                LIMIT 1;
+            END
+        """)
+
+        # 添加删除触发器
+        query.exec("""
+        CREATE TRIGGER IF NOT EXISTS update_drug_information_shelves_on_shelf_delete
+            AFTER DELETE ON shelves_drug
+            FOR EACH ROW
+            BEGIN
+                INSERT OR REPLACE INTO drug_information_shelves 
+                (drug_information_shelves_id, drug, expiration_date, purchase_date, shelves_sum, 
+                 warehouse_inventory_sum, shelves_location, warehouse_inventory_location, approval_number, manufacturer, batch, supplier)
+                SELECT 
+                    md.dic_id,
+                    md.trade_name,
+                    sm.validity,
+                    po.order_date,
+                    COALESCE((SELECT SUM(shelves_number) 
+                             FROM shelves_drug 
+                             WHERE drug = OLD.drug), 0),
+                    COALESCE((SELECT SUM(quantity) 
+                             FROM stock 
+                             WHERE drug_id = OLD.drug), 0),
+                    COALESCE(wsp.location, ''),
+                    COALESCE((SELECT GROUP_CONCAT(wsp2.location, ', ') 
+                    FROM warehouse_shelf_position wsp2 
+                    JOIN stock s ON s.location = wsp2.warehouse_shelf_id 
+                    WHERE s.drug_id = OLD.drug), ''),
+                    md.approval_number,
+                    md.manufacturer,
+                    sm.batch,
+                    su.name
+                FROM medicine_dic md
+                JOIN stock_out_detail sod ON md.dic_id = sod.medicine_id
+                JOIN stock_in_main sm ON sod.stock_batch = sm.in_id
+                JOIN purchase_order po ON sm.order_id = po.order_id
+                JOIN supplier su ON po.supplier_id = su.supplier_id
+                LEFT JOIN warehouse_shelf_position wsp ON OLD.location_id = wsp.warehouse_shelf_id
+                WHERE sod.detail_id = OLD.out_batch
+                AND md.dic_id = OLD.drug
+                LIMIT 1;
             END
         """)
 
@@ -212,16 +336,6 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 FOREIGN KEY (operator_id) REFERENCES users(users_id)
         )
         """)
-
-        # query.exec("""
-        # CREATE TABLE IF NOT EXISTS drug_batch(
-        #         drug_batch_id INTEGER PRIMARY KEY autoincrement,
-        #         drug_id INTEGER NOT NULL,                                 -- 关联药品
-        #         batch INTEGER NOT NULL,                                   -- 批次
-        #         production_lot_number INTEGER NOT NULL,                   -- 生产批号
-        #         validity DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP      -- 有效期
-        # )
-        # """)
 
         # 入库明细表
         query.exec("""
@@ -373,35 +487,52 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
 
         # 当药品入库时，更新有效期监控
         query.exec("""
-        CREATE TRIGGER IF NOT EXISTS update_expiring_medicines_on_stock_in
-            AFTER INSERT ON stock_in_main
+        CREATE TRIGGER update_expiring_medicines_on_stock_in
+            AFTER INSERT ON stock_in_detail
             FOR EACH ROW
             BEGIN
                 -- 插入或更新临期药品监控数据
                 INSERT OR REPLACE INTO expiring_medicines 
-                ( batch_id, medicine_name, expiry_date, days_until_expiry, current_stock, alert_threshold, status, last_updated)
+                (batch_id, medicine_name, expiry_date, days_until_expiry, current_stock, alert_threshold, status, last_updated)
                 SELECT 
                     NEW.in_id,
                     md.trade_name,
-                    NEW.validity,
-                    CAST(julianday(NEW.validity) - julianday('now') AS INTEGER),
-                    COALESCE(s.quantity, 0),
+                    sm.validity,
+                    CAST(julianday(sm.validity) - julianday('now') AS INTEGER),
+                    NEW.actual_quantity,
                     30,
                     CASE 
-                        WHEN CAST(julianday(NEW.validity) - julianday('now') AS INTEGER) < 0 THEN '过期'
+                        WHEN CAST(julianday(sm.validity) - julianday('now') AS INTEGER) < 0 THEN '过期'
                         ELSE '正常'
                     END,
                     datetime('now', '+8 hours')
                 FROM medicine_dic md
                 JOIN purchase_detail pd ON md.dic_id = pd.medicine_id
-                JOIN stock_in_detail sd ON sd.in_id = NEW.in_id AND sd.purchase_detail_id = pd.detail_id
-                LEFT JOIN stock s ON s.batch = NEW.in_id
-                WHERE pd.order_id = (SELECT order_id FROM stock_in_main WHERE in_id = NEW.in_id)
+                JOIN stock_in_main sm ON sm.in_id = NEW.in_id
+                WHERE pd.detail_id = NEW.purchase_detail_id
                 LIMIT 1;
-            END
+            END;
         """)
 
-        # 删除重复的触发器定义，只保留一个正确的版本
+        query.exec("""
+        -- 创建新的库存变化触发器
+        CREATE TRIGGER update_expiring_medicines_on_stock_change
+            AFTER UPDATE ON stock
+            FOR EACH ROW
+            BEGIN
+                -- 更新临期药品监控数据中的库存数量和状态
+                UPDATE expiring_medicines 
+                SET current_stock = NEW.quantity,
+                    status = CASE 
+                        WHEN days_until_expiry < 0 THEN '过期'
+                        ELSE '正常'
+                    END,
+                    last_updated = datetime('now', '+8 hours')
+                WHERE batch_id = NEW.batch;
+            END;
+        """)
+
+    # 库存变动时更新即将过期的药品
         query.exec("""
         CREATE TRIGGER IF NOT EXISTS update_expiring_medicines_on_stock_change
             AFTER UPDATE ON stock
@@ -419,6 +550,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             END
         """)
 
+    # 入库后更新库存
         query.exec("""
             CREATE TRIGGER update_inventory_after_stock_in
                 AFTER INSERT ON stock_in_detail
@@ -447,11 +579,11 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                     -- 更新或插入 stock 表中的当前库存
                     INSERT OR REPLACE INTO stock (stock_id, drug_id, batch, location, quantity, last_update)
                     VALUES (
-                        COALESCE((SELECT stock_id 
+                        (SELECT stock_id 
                                  FROM stock 
                                  WHERE batch = NEW.in_id
                                  AND location = NEW.warehouse_shelf_id), 
-                                 (SELECT IFNULL(MAX(stock_id), 0) + 1 FROM stock)),
+ --                                (SELECT IFNULL(MAX(stock_id), 0) + 1 FROM stock)),
                         (SELECT md.dic_id 
                          FROM purchase_detail pd 
                          JOIN medicine_dic md ON md.dic_id = pd.medicine_id 
@@ -465,6 +597,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
 
         """)
 
+    # 创建出库触发器
         query.exec("""
         -- 创建出库触发器
         CREATE TRIGGER stock_out_trigger
@@ -496,12 +629,11 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                   ORDER BY detail_id DESC
                   LIMIT 1
                 );
-
-
             END
 
         """)
 
+    # 库存更新后更新库存
         query.exec("""
         CREATE TRIGGER update_inventory_after_stock_update
             AFTER UPDATE ON stock_in_detail
@@ -591,10 +723,11 @@ class ShelvesDrugsMessageModel(BaseTableModel):
         4: "上架库存数量",
         5: "仓库库存数量",
         6: "上架位置",
-        7: "批准文号",
-        8: "生产厂家",
-        9: "库存批号",
-        10: "供应商",
+        7: "库存位置",
+        8: "批准文号",
+        9: "生产厂家",
+        10: "库存批号",
+        11: "供应商",
     }
     HIDDEN_COLUMNS = [0]
 
@@ -606,6 +739,7 @@ class ShelvesDrugsMessageModel(BaseTableModel):
             headers=self.HEADERS,
             hidden_columns=self.HIDDEN_COLUMNS,
         )
+
 
 class StockAllModel(BaseTableModel):
     HEADERS = {
@@ -1072,7 +1206,7 @@ class ShelvesDrugModel(BaseTableModel):
 
 def get_shelves_drug_model(self):
     self.shelves_model = ShelvesDrugModel(self, self.db)
-    sql = f"""
+    sql = """
         SELECT
             e.shelves_id,
             sm.outbound_number,
@@ -1130,8 +1264,19 @@ def get_expiring_medicine_model(self):
     self.expiring_medicine_model = ExpiringMedicineModel(self, self.db)
     # 可以添加过滤条件，只显示未过期但即将过期的药品
     sql = """
-        SELECT * FROM expiring_medicines 
-        WHERE days_until_expiry >= -30 
+        SELECT
+            e.expiring_medicine_id,
+            st.batch,
+            e.medicine_name,
+            e.expiry_date,
+            e.days_until_expiry,
+            e.current_stock,
+            e.alert_threshold,
+            e.status,
+            e.last_updated
+        FROM expiring_medicines e
+        LEFT JOIN stock_in_main st ON e.batch_id = st.in_id
+        WHERE days_until_expiry <= 60 
         ORDER BY days_until_expiry
     """
     self.expiring_medicine_model.setQuery(sql, self.db)
@@ -1396,7 +1541,8 @@ def get_shelves_drug_message_model(self):
             d.purchase_date,
             d.shelves_sum,
             d.warehouse_inventory_sum,
-            d.location,
+            d.shelves_location,
+            d.warehouse_inventory_location,
             d.approval_number,
             d.manufacturer,
             d.batch,
