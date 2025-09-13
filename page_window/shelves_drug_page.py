@@ -27,12 +27,21 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
         self.shelves_add_save_btn.clicked.connect(self.save)
         # 添加上架药品出库单选择变化事件
         self.stock_out_list_combox.currentIndexChanged.connect(self.on_outbound_changed)
+        # 添加出库批次选择变化事件
+        self.stock_out_batch_combox.currentIndexChanged.connect(self.on_batch_changed)
 
     def on_outbound_changed(self, index):
-        """当出库单选择变化时，更新药品列表"""
+        """当出库单选择变化时，更新药品列表和批次列表"""
         if index >= 0:
             out_id = self.stock_out_list_combox.itemData(index)
             self.load_drugs_by_outbound(out_id)
+            self.load_batches_by_outbound(out_id)
+
+    def on_batch_changed(self, index):
+        """当出库批次选择变化时，自动加载对应的药品信息"""
+        if index >= 0:
+            detail_id = self.stock_out_batch_combox.itemData(index)
+            self.load_drug_by_batch(detail_id)
 
     def load_drugs_by_outbound(self, out_id):
         """根据出库单ID加载对应的药品"""
@@ -57,13 +66,11 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
         else:
             print(f"查询药品失败: {query.lastError().text()}")
 
-        # 同时更新出库批次列表
-        self.load_batches_by_outbound(out_id)
-
     def load_batches_by_outbound(self, out_id):
         """根据出库单ID加载对应的出库批次"""
         # 清空当前批次列表
         self.stock_out_batch_combox.clear()
+        self.shelves_number_spinBox.clear()
 
         # 查询该出库单对应的批次
         query = QSqlQuery()
@@ -82,6 +89,34 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
         else:
             print(f"查询批次失败: {query.lastError().text()}")
 
+    def load_drug_by_batch(self, detail_id):
+        """根据出库批次ID加载对应的药品信息和数量"""
+        if detail_id is not None:
+            # 查询该批次对应的药品信息
+            query = QSqlQuery()
+            query.prepare("""
+                SELECT md.dic_id, md.trade_name, sod.quantity
+                FROM stock_out_detail sod
+                JOIN medicine_dic md ON sod.medicine_id = md.dic_id
+                WHERE sod.detail_id = ?
+            """)
+            query.addBindValue(detail_id)
+
+            if query.exec() and query.next():
+                medicine_id = query.value(0)
+                medicine_name = query.value(1)
+                quantity = query.value(2)
+
+                # 设置药品下拉框
+                index = self.shelves_drug_combox.findData(medicine_id)
+                if index >= 0:
+                    self.shelves_drug_combox.setCurrentIndex(index)
+
+                # 设置数量
+                self.shelves_number_spinBox.setValue(quantity or 0)
+            else:
+                print(f"查询批次对应的药品信息失败: {query.lastError().text()}")
+
     def load_data(self):
         """加载初始数据"""
         # 加载出库单列表（上架类型）
@@ -98,9 +133,6 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
             shelf_name = query.value(1)
             self.shelves_location_combox.addItem(shelf_name, shelf_id)
 
-        # 默认不加载药品和批次，等用户选择出库单后再加载
-
-    # ... 其他方法保持不变 ...
     def save(self):
         if self.shelves_id:
             self.update_stock_shelves()
@@ -144,14 +176,16 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
         finally:
             query.finish()
 
-
     def update_load_data(self, shelves_id):
         self.stock_in_id = shelves_id
         self.shelves_add_save_btn.setText("更新")
-        query = QSqlQuery(f"SELECT outbound_number, out_batch, drug, shelves_number, location_id "
-                          f"FROM shelves_drug WHERE shelves_id = {shelves_id}")
-
+        query = QSqlQuery()
+        query.prepare("SELECT outbound_number, out_batch, drug, shelves_number, location_id "
+                      "FROM shelves_drug "
+                      "WHERE shelves_drug.shelves_id = ?")
+        query.addBindValue(shelves_id)
         while query.next():
+            query.first()
             outbound_number = query.value(0)
             out_batch = query.value(1)
             drug = query.value(2)

@@ -137,13 +137,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="member_customer">
-        <property name="text">
-         <string>会员客户</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="user_information">
         <property name="text">
          <string>用户信息</string>
@@ -176,7 +169,7 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>7</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -466,7 +459,39 @@
           <item row="1" column="1">
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="0" column="0">
-             <widget class="QTableView" name="sales_records_tableView"/>
+             <widget class="QTabWidget" name="tabWidget">
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="tab_2">
+               <attribute name="title">
+                <string> 销售单</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_38">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_37">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="sales_lists_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="tab_3">
+               <attribute name="title">
+                <string>销售详情</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_20">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_19">
+                  <item row="0" column="0">
+                   <widget class="QTableView" name="sales_records_tableView"/>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </widget>
             </item>
            </layout>
           </item>
@@ -503,6 +528,34 @@
              <widget class="QPushButton" name="sales_records_btn">
               <property name="text">
                <string>查询</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="add_sell_list_btn">
+              <property name="text">
+               <string>添加销售单</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="sell_drug_btn">
+              <property name="text">
+               <string>加入销售药品</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="sell_del_btn">
+              <property name="text">
+               <string>删除</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="sell_mod_btn">
+              <property name="text">
+               <string>修改销售药品</string>
               </property>
              </widget>
             </item>
@@ -1023,17 +1076,6 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="page_10">
-         <layout class="QGridLayout" name="gridLayout_38">
-          <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout_37">
-            <item row="0" column="0">
-             <widget class="QTableView" name="customers_tableView"/>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
         <widget class="QWidget" name="page_11">
          <layout class="QGridLayout" name="gridLayout_40">
           <item row="0" column="0">
@@ -1245,13 +1287,6 @@
      <widget class="QPushButton" name="drug_dic_btn">
       <property name="text">
        <string>药品词典</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QPushButton" name="sell_drug_dtn">
-      <property name="text">
-       <string>销售</string>
       </property>
      </widget>
     </item>

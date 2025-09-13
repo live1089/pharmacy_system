@@ -4,7 +4,7 @@ from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QDialog, QMessageBox, QLineEdit
 import random
 
-from page_window.tools import install_enter_key_filter
+from page_window.tools import install_enter_key_filter, safe_set_datetime
 from ui_app.stock_out_warehouse_ui import Ui_OutWarehouseMTDialog
 from ui_app.stock_out_warehouse_drug_ui import Ui_OutWarehouseDrugDialog
 
@@ -62,6 +62,7 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
             self.stock_out_operator_combox.addItem(operator_name, operator_id)
 
     def load_stock_out_data(self, out_id):
+        self.out_id = out_id
         self.out_warehouse_save_btn.setText("更新出库")
         query = QSqlQuery()
         query.prepare("SELECT outbound_number, out_type, out_date, operator_id, total_amount, remarks "
@@ -117,6 +118,7 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
             query.addBindValue(stock_out_operator)
             query.addBindValue(stock_out_total_amount)
             query.addBindValue(stock_out_remark)
+            query.addBindValue(self.out_id)
             if not query.exec():
                 raise Exception(f"更新出库单失败: {query.lastError().text()}")
         except Exception as e:
@@ -234,6 +236,7 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
         else:
             self.create_stock_out_drug()
 
+
     def load_data(self):
         self.stock_out_dateTimeEdit.setDateTime(QDateTime.currentDateTime())
         query = QSqlQuery("SELECT out_id, outbound_number FROM stock_out_main ORDER BY out_id DESC")
@@ -256,12 +259,21 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
         self.outbatch_lineEdit.setText(out_batch)
 
     def create_stock_out_drug(self):
+        print(f"当前 detail_id: {self.detail_id}")
         stock_out_list = self.stock_out_list_combox.itemData(self.stock_out_list_combox.currentIndex())
         stock_out_drug = self.stock_out_drug_combox.itemData(self.stock_out_drug_combox.currentIndex())
         stock_batch = self.stock_batch_combox.itemData(self.stock_batch_combox.currentIndex())
         out_batch = self.outbatch_lineEdit.text()
         stock_out_number = self.stock_out_number_spinBox.value()
         stock_out_date = self.stock_out_dateTimeEdit.dateTime().toString("yyyy-MM-dd hh:mm:ss")
+        if stock_out_number <= 0:
+            QMessageBox.warning(self, "输入错误", "出库数量必须大于0")
+            return
+        # 额外安全检查：防止空值或非法字符
+        if not stock_out_list or not stock_out_drug or not stock_batch or not out_batch:
+            QMessageBox.warning(self, "输入错误", "请填写所有必填项。")
+            return
+        print(f"准备插入: quantity={stock_out_number}, out_batch={out_batch}")
 
         query = QSqlQuery()
         try:
@@ -305,13 +317,17 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
         if not self.detail_id:
             QMessageBox.critical(self, "错误", "无法找到要修改的出库单")
             return
+        print(f"当前 detail_id: {self.detail_id}")
         stock_out_list = self.stock_out_list_combox.itemData(self.stock_out_list_combox.currentIndex())
         stock_out_drug = self.stock_out_drug_combox.itemData(self.stock_out_drug_combox.currentIndex())
         stock_batch = self.stock_batch_combox.itemData(self.stock_batch_combox.currentIndex())
         out_batch = self.outbatch_lineEdit.text()
         stock_out_number = self.stock_out_number_spinBox.value()
         stock_out_date = self.stock_out_dateTimeEdit.dateTime().toString("yyyy-MM-dd hh:mm:ss")
-
+        # 添加验证
+        if stock_out_number <= 0:
+            QMessageBox.warning(self, "输入错误", "出库数量必须大于0")
+            return
         # 开始事务以确保数据一致性
         query = QSqlQuery()
         try:
@@ -320,8 +336,8 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
 
             query.prepare(
                 "UPDATE stock_out_detail "
-                "SET out_id=?, medicine_id=?,stock_batch=?, out_batch=?, quantity=?, time=?"
-                "WHERE detail_id = ?")
+                "SET out_id=?, medicine_id=?, stock_batch=?, out_batch=?, quantity=?, time=? "
+                "WHERE stock_out_detail.detail_id=? ")
             query.addBindValue(stock_out_list)
             query.addBindValue(stock_out_drug)
             query.addBindValue(stock_batch)
@@ -329,8 +345,17 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
             query.addBindValue(stock_out_number)
             query.addBindValue(stock_out_date)
             query.addBindValue(self.detail_id)
+
             if not query.exec():
-                raise Exception(f"更新出库单失败: {query.lastError().text()}")
+                raise Exception(f"更新失败: {query.lastError().text()}")
+
+            # 提交事务
+            if not query.exec("COMMIT"):
+                raise Exception(f"无法提交事务: {query.lastError().text()}")
+
+            QMessageBox.information(self, "成功", "更新成功")
+            self.accept()  # 关闭对话框
+
         except Exception as e:
             # 回滚事务
             query.exec("ROLLBACK")
@@ -340,6 +365,7 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
             query.finish()
 
     def load_stock_out_update_data(self, detail_id):
+        self.detail_id = detail_id
         self.stock_out_warehouse_drug_save_btn.setText("更新出库")
         query = QSqlQuery()
         query.prepare("SELECT out_id, medicine_id, stock_batch, out_batch, quantity ,time "
@@ -353,9 +379,11 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
             stock_batch = query.value(2)
             out_batch = query.value(3)
             quantity = query.value(4)
+            time = query.value(5)
             self.stock_out_list_combox.setCurrentIndex(self.stock_out_list_combox.findData(out_id))
             self.stock_out_drug_combox.setCurrentIndex(self.stock_out_drug_combox.findData(medicine_id))
             self.stock_batch_combox.setCurrentIndex(self.stock_batch_combox.findData(stock_batch))
             self.outbatch_lineEdit.setText(out_batch)
-            self.stock_out_number_spinBox.setValue(quantity)
-            self.stock_out_dateTimeEdit.setDateTime(QDateTime.fromString(query.value(5), "yyyy-MM-dd hh:mm:ss"))
+            self.stock_out_number_spinBox.setValue(int(quantity) if quantity is not None else 0)
+            # self.stock_out_dateTimeEdit.setDateTime(QDateTime.fromString(query.value(5), "yyyy-MM-dd hh:mm:ss"))
+            safe_set_datetime(self.stock_out_dateTimeEdit, time)

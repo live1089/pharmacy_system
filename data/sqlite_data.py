@@ -2,7 +2,7 @@ import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import Qt
-from PySide6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
+from PySide6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel, QSqlQueryModel
 from PySide6.QtWidgets import QMessageBox
 
 
@@ -61,6 +61,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         )
         """)
 
+        # 更新药品信息货架上的上架插入
         query.exec("""
         CREATE TRIGGER IF NOT EXISTS update_drug_information_shelves_on_shelf_insert
             AFTER INSERT ON shelves_drug
@@ -177,7 +178,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             END
         """)
 
-        # 添加删除触发器
+        # 添加上架药品删除触发器
         query.exec("""
         CREATE TRIGGER IF NOT EXISTS update_drug_information_shelves_on_shelf_delete
             AFTER DELETE ON shelves_drug
@@ -284,10 +285,10 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             contact_person TEXT,                                -- 联系人
             phone TEXT,                                         -- 联系电话
             address TEXT,                                       -- 地址
-            email TEXT,                                        -- 邮箱
-            remarks TEXT,                                      -- 备注
-            update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- 更新时间
-            update_by TEXT,                                    -- 更新人
+            email TEXT,                                         -- 邮箱
+            remarks TEXT,                                       -- 备注
+            update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,      -- 更新时间
+            update_by TEXT,                                     -- 更新人
             create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,      -- 创建时间
             created_by TEXT                                     -- 创建人
         )
@@ -296,12 +297,12 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         query.exec("""
         CREATE TABLE IF NOT EXISTS purchase_order (                   -- 采购主表
                 order_id INTEGER PRIMARY KEY AUTOINCREMENT,      -- 订单ID
-                order_number TEXT NOT NULL,                    -- 订单号
-                supplier_id INTEGER NOT NULL,                   -- 供应商ID
-                order_date DATE NOT NULL DEFAULT CURRENT_DATE,  -- 下单日期
-                expected_delivery_date DATE,                   -- 交货日期
-                total_amount REAL,                             -- 订单总价
-                remarks TEXT,                                  -- 备注
+                order_number TEXT NOT NULL,                      -- 订单号
+                supplier_id INTEGER NOT NULL,                    -- 供应商ID
+                order_date DATE NOT NULL DEFAULT CURRENT_DATE,   -- 下单日期
+                expected_delivery_date DATE,                     -- 交货日期
+                total_amount REAL,                               -- 订单总价
+                remarks TEXT,                                    -- 备注
                 FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
         )
         """)
@@ -392,10 +393,10 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 detail_id INTEGER PRIMARY KEY AUTOINCREMENT,   -- 明细ID
                 out_id INTEGER NOT NULL,                       -- 关联出库单ID
                 medicine_id INTEGER NOT NULL,                  -- 药品ID
-                stock_batch INTEGER NOT NULL,                 -- 入库批次（库存批次）
-                out_batch TEXT not null,                      -- 出库批次
-                quantity INTEGER NOT NULL CHECK (quantity > 0),-- 出库数量(销售数量)
-                time Date NOT NULL,                          -- 出库时间
+                stock_batch INTEGER NOT NULL,                  -- 入库批次（库存批次）
+                out_batch TEXT not null,                       -- 出库批次
+                quantity INTEGER NOT NULL,                     -- 出库数量
+                time Date NOT NULL,                            -- 出库时间
                 FOREIGN KEY (out_id) REFERENCES stock_out_main(out_id),
                 FOREIGN KEY (medicine_id) REFERENCES medicine_dic(dic_id),
                 FOREIGN KEY (stock_batch) REFERENCES stock_in_main(in_id)
@@ -405,12 +406,24 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         query.exec("""
         CREATE TABLE IF NOT EXISTS sales (                                -- 销售记录表
             sales_id INTEGER PRIMARY KEY AUTOINCREMENT,                   -- 主键ID
-            medicine_id INTEGER NOT NULL,                                 -- 对应的药品
+            sale_no TEXT UNIQUE NOT NULL,                                 -- 销售单号
+            cashier_id INTEGER NOT NULL,                                  -- 收银员
+            sale_date DATETIME DEFAULT CURRENT_TIMESTAMP,                 -- 销售日期
+            FOREIGN KEY (cashier_id) REFERENCES users (users_id)
+        )
+        """)
+
+        query.exec("""
+            CREATE TABLE sale_details (
+            detail_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sales_id INTEGER NOT NULL,                                    -- 关联销售单
+            medicine_id INTEGER NOT NULL,                                 -- 药品
             quantity INTEGER NOT NULL CHECK (quantity >= 0),              -- 销售数量
             price REAL NOT NULL CHECK (price >= 0),                       -- 销售单价
-            sale_date DATE NOT NULL CHECK (sale_date <= CURRENT_DATE),    -- 销售日期
-            FOREIGN KEY (medicine_id) REFERENCES medicine_dic(dic_id)   -- 定义medicine_id为外键，引用medicine表中的id字段
-        )
+            total_amount DECIMAL(10,2) NOT NULL,                          -- 总金额
+            FOREIGN KEY (sales_id) REFERENCES sales(sales_id),
+            FOREIGN KEY (medicine_id) REFERENCES medicine_dic(dic_id)
+        );
         """)
 
         query.exec("""
@@ -431,7 +444,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         query.exec("""
         CREATE TABLE IF NOT EXISTS stock(                    -- 库存表
             stock_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            drug_id  INTEGER,                               -- 药品
+            drug_id  INTEGER,                                -- 药品
             batch INTEGER NOT NULL,                          -- 药品批次
             location INT NOT NULL,                           -- 存储位置
             quantity INT NOT NULL CHECK (quantity >= 0),     -- 库存
@@ -442,6 +455,15 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         )
         """)
 
+        # query.exec("""
+        # CREATE TABLE IF NOT EXISTS shelves_stock(
+        #     shelves_stock_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #     drug TEXT NOT NULL,
+        #     outbound_number TEXT,
+        #
+        # )
+        # """)
+
         query.exec("""
         CREATE TABLE IF NOT EXISTS users(                                   -- 用户信息表
             users_id INTEGER PRIMARY KEY AUTOINCREMENT,                     -- 主键ID
@@ -451,14 +473,14 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         )
         """)
 
-        query.exec("""
-        CREATE TABLE IF NOT EXISTS customers(                                   -- 客户信息表
-            customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            customer_name TEXT NOT NULL,
-            customer_phone TEXT,
-            role TEXT
-        )
-        """)
+        # query.exec("""
+        # CREATE TABLE IF NOT EXISTS customers(                                   -- 客户信息表
+        #     customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #     customer_name TEXT NOT NULL,
+        #     customer_phone TEXT,
+        #     role TEXT
+        # )
+        # """)
 
         query.exec("""
         CREATE TABLE IF NOT EXISTS logs(
@@ -514,25 +536,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             END;
         """)
 
-        query.exec("""
-        -- 创建新的库存变化触发器
-        CREATE TRIGGER update_expiring_medicines_on_stock_change
-            AFTER UPDATE ON stock
-            FOR EACH ROW
-            BEGIN
-                -- 更新临期药品监控数据中的库存数量和状态
-                UPDATE expiring_medicines 
-                SET current_stock = NEW.quantity,
-                    status = CASE 
-                        WHEN days_until_expiry < 0 THEN '过期'
-                        ELSE '正常'
-                    END,
-                    last_updated = datetime('now', '+8 hours')
-                WHERE batch_id = NEW.batch;
-            END;
-        """)
-
-    # 库存变动时更新即将过期的药品
+        # 库存变动时更新即将过期的药品
         query.exec("""
         CREATE TRIGGER IF NOT EXISTS update_expiring_medicines_on_stock_change
             AFTER UPDATE ON stock
@@ -550,7 +554,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             END
         """)
 
-    # 入库后更新库存
+        # 入库后更新库存
         query.exec("""
             CREATE TRIGGER update_inventory_after_stock_in
                 AFTER INSERT ON stock_in_detail
@@ -597,7 +601,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
 
         """)
 
-    # 创建出库触发器
+        # 创建出库触发器
         query.exec("""
         -- 创建出库触发器
         CREATE TRIGGER stock_out_trigger
@@ -612,8 +616,8 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                     -NEW.quantity,
                     datetime('now', '+8 hours'),
                     '出库',
-                (SELECT batch FROM stock_in_main WHERE in_id = NEW.stock_batch),
-                (SELECT production_lot_number FROM stock_in_main WHERE in_id = NEW.stock_batch)
+                (SELECT batch FROM stock_in_main WHERE stock_in_main.in_id = NEW.stock_batch),
+                (SELECT production_lot_number FROM stock_in_main WHERE stock_in_main.in_id = NEW.stock_batch)
                 );
                 
                 -- 更新 stock 表中的库存数量
@@ -625,7 +629,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 AND location IN (
                   SELECT warehouse_shelf_id 
                   FROM stock_in_detail 
-                  WHERE in_id = NEW.stock_batch
+                  WHERE stock_in_detail.in_id = NEW.stock_batch
                   ORDER BY detail_id DESC
                   LIMIT 1
                 );
@@ -633,7 +637,76 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
 
         """)
 
-    # 库存更新后更新库存
+        # 创建出库修改更新触发器
+        # 创建出库修改更新触发器
+        query.exec("""
+        CREATE TRIGGER IF NOT EXISTS update_inventory_after_stock_out_update
+            AFTER UPDATE ON stock_out_detail
+            FOR EACH ROW
+            BEGIN
+                -- 更新库存变化历史（记录修改前后的差值）
+                INSERT INTO inventory (medicine_id, detail_id, quantity, change_date, change_type, batch_number, production_lot)
+                VALUES (
+                    NEW.medicine_id,
+                    NEW.detail_id,
+                    (OLD.quantity - NEW.quantity),  -- 记录数量变化（负值表示出库增加，正值表示出库减少）
+                    datetime('now', '+8 hours'),
+                    '出库修改',
+                    (SELECT batch FROM stock_in_main WHERE in_id = NEW.stock_batch),
+                    (SELECT production_lot_number FROM stock_in_main WHERE in_id = NEW.stock_batch)
+                );
+
+                -- 更新 stock 表中的库存数量（根据修改前后的差值调整）
+                UPDATE stock 
+                SET quantity = quantity + (OLD.quantity - NEW.quantity),
+                    last_update = datetime('now', '+8 hours')
+                WHERE batch = NEW.stock_batch 
+                AND drug_id = NEW.medicine_id
+                AND location IN (
+                  SELECT warehouse_shelf_id 
+                  FROM stock_in_detail 
+                  WHERE in_id = NEW.stock_batch
+                  ORDER BY detail_id DESC
+                  LIMIT 1
+                );
+            END
+        """)
+
+        # 删除出库记录的触发器
+        query.exec("""
+        CREATE TRIGGER IF NOT EXISTS update_inventory_after_stock_out_delete
+            AFTER DELETE ON stock_out_detail
+            FOR EACH ROW
+            BEGIN
+                -- 记录库存变化历史（删除出库记录，相当于减少出库量）
+                INSERT INTO inventory (medicine_id, detail_id, quantity, change_date, change_type, batch_number, production_lot)
+                VALUES (
+                    OLD.medicine_id,
+                    OLD.detail_id,
+                    OLD.quantity,  -- 正数表示库存增加（因为删除了出库记录）
+                    datetime('now', '+8 hours'),
+                    '出库删除',
+                    (SELECT batch FROM stock_in_main WHERE in_id = OLD.stock_batch),
+                    (SELECT production_lot_number FROM stock_in_main WHERE in_id = OLD.stock_batch)
+                );
+
+                -- 更新 stock 表中的库存数量（增加库存，因为删除了出库记录）
+                UPDATE stock 
+                SET quantity = quantity + OLD.quantity,
+                    last_update = datetime('now', '+8 hours')
+                WHERE batch = OLD.stock_batch 
+                AND drug_id = OLD.medicine_id
+                AND location IN (
+                  SELECT warehouse_shelf_id 
+                  FROM stock_in_detail 
+                  WHERE in_id = OLD.stock_batch
+                  ORDER BY detail_id DESC
+                  LIMIT 1
+                );
+            END
+        """)
+
+        # 库存更新后更新库存
         query.exec("""
         CREATE TRIGGER update_inventory_after_stock_update
             AFTER UPDATE ON stock_in_detail
@@ -850,11 +923,10 @@ class PurchaseDetailModel(BaseTableModel):
         1: "订单编号",
         2: "药品",
         3: "采购数量",
-        4: "当前库存",
-        5: "药品采购总价",
-        6: "药品采购单价",
-        7: "售价",
-        8: "备注"
+        4: "药品采购总价",
+        5: "药品采购单价",
+        6: "售价",
+        7: "备注"
     }
     HIDDEN_COLUMNS = [0]  # 隐藏的列索引
 
@@ -868,14 +940,12 @@ class PurchaseDetailModel(BaseTableModel):
         )
 
 
-# 销售模式
-class SalesModel(BaseTableModel):
+class SalesListsModel(BaseTableModel):
     HEADERS = {
         0: "ID",
-        1: "药品名称",
-        2: "销售数量",
-        3: "销售单价",
-        4: "销售日期",
+        1: "销售单号",
+        2: "用户",
+        3: "销售日期",
     }
     HIDDEN_COLUMNS = [0]
 
@@ -884,6 +954,29 @@ class SalesModel(BaseTableModel):
             parent=parent,
             db=db,
             table_name="sales",
+            headers=self.HEADERS,
+            hidden_columns=self.HIDDEN_COLUMNS
+        )
+
+
+# 销售模式
+class SalesModel(BaseTableModel):
+    HEADERS = {
+        0: "ID",
+        1: "销售单号",
+        2: "药品名称",
+        3: "销售数量",
+        4: "销售单价",
+        5: "销售总价",
+        6: "销售日期",
+    }
+    HIDDEN_COLUMNS = [0]
+
+    def __init__(self, parent=None, db=None):
+        super().__init__(
+            parent=parent,
+            db=db,
+            table_name="sale_details",
             headers=self.HEADERS,
             hidden_columns=self.HIDDEN_COLUMNS
         )
@@ -1204,6 +1297,31 @@ class ShelvesDrugModel(BaseTableModel):
         )
 
 
+def shelves_stock_model(self):
+    """获取上架药品库存模型"""
+    sql = """
+        SELECT
+            e.shelves_id,
+            sm.outbound_number,
+            sd.out_batch,
+            md.trade_name,
+            e.shelves_number,
+            wsp.location,
+            sma.batch as 批次,
+            sma.validity as 有效期
+        FROM shelves_drug e
+        LEFT JOIN stock_out_detail sd ON e.out_batch = sd.detail_id
+        LEFT JOIN stock_out_main sm ON sd.out_id = sm.out_id
+        LEFT JOIN medicine_dic md ON e.drug = md.dic_id
+        LEFT JOIN stock_in_main sma ON sd.stock_batch = sma.in_id
+        LEFT JOIN warehouse_shelf_position wsp ON e.location_id = wsp.warehouse_shelf_id
+    """
+    # 创建模型并设置查询
+    model = QSqlQueryModel(self)
+    model.setQuery(sql, self.db)
+    return model
+
+
 def get_shelves_drug_model(self):
     self.shelves_model = ShelvesDrugModel(self, self.db)
     sql = """
@@ -1449,7 +1567,6 @@ def get_purchase_order_detail_model(self):
             ord.order_number,
             de.trade_name,
             pur.quantity,
-            i.quantity,
             pur.purchase_total_price,
             pur.purchase_price,
             de.price as 售价,
@@ -1457,7 +1574,6 @@ def get_purchase_order_detail_model(self):
         FROM purchase_detail pur
         LEFT JOIN medicine_dic de ON pur.medicine_id = de.dic_id
         LEFT JOIN purchase_order ord ON pur.order_id = ord.order_id
-        LEFT JOIN stock i ON pur.quantity  = i.stock_id
     """
     self.purchase_order_detail_model.setQuery(sql, self.db)
     self.purchase_detail_tableView.setModel(self.purchase_order_detail_model)
@@ -1469,11 +1585,43 @@ def get_purchase_order_detail_model(self):
 # 销售
 def get_sales_model(self):
     self.sales_model = SalesModel(self, self.db)
+    sql = f"""
+        SELECT
+            s.sales_id,
+            m.sale_no,
+            dic.trade_name,
+            s.quantity,
+            dic.price,
+            s.total_amount,
+            m.sale_date
+        FROM sale_details s
+        LEFT JOIN sales m ON s.sales_id = m.sales_id
+        LEFT JOIN medicine_dic dic ON s.medicine_id = dic.dic_id
+    """
+    self.sales_model.setQuery(sql, self.db)
     self.sales_records_tableView.setModel(self.sales_model)
     for col in self.sales_model.hidden_columns:
         self.sales_records_tableView.hideColumn(col)
 
     return self.sales_model
+
+
+def get_sales_lists_model(self):
+    self.sales_lists_model = SalesListsModel(self, self.db)
+    sql = f"""
+        SELECT
+            s.sales_id,
+            s.sale_no,
+            m.username,
+            s.sale_date
+        FROM sales s
+        LEFT JOIN users m ON s.cashier_id = m.users_id
+    """
+    self.sales_lists_model.setQuery(sql, self.db)
+    self.sales_lists_tableView.setModel(self.sales_lists_model)
+    for col in self.sales_lists_model.hidden_columns:
+        self.sales_lists_tableView.hideColumn(col)
+    return self.sales_lists_model
 
 
 # 库存记录
@@ -1486,13 +1634,10 @@ def get_inventory_model(self):
             inv.quantity,
             inv.change_date,
             inv.change_type,
-            ma.batch,
-            ma.production_lot_number as 生产批号,
-            ma.in_date as 入库时间
+            inv.batch_number,
+            inv.production_lot as 生产批号
         FROM inventory inv
         LEFT JOIN medicine_dic de ON inv.medicine_id = de.dic_id
-        LEFT JOIN stock_in_detail ord ON inv.detail_id = ord.detail_id
-        Left join stock_in_main ma ON ord.in_id = ma.in_id
     """
     self.inventory_model.setQuery(sql, self.db)
     self.inventory_tableView.setModel(self.inventory_model)

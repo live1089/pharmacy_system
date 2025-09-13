@@ -37,6 +37,7 @@ class PurAddPage(QDialog, Ui_PurchaseDialog):
         quantity_purchased = self.quantity_purchased_spin_box.value()
         purchase_unit_price = self.purchase_unit_price_double.value()
         self.total_amount_order_double.setValue(quantity_purchased * purchase_unit_price)
+
     def load_purchase_data(self):
         query = QSqlQuery("SELECT dic_id, trade_name FROM medicine_dic")
         while query.next():
@@ -206,7 +207,6 @@ class AnOrderPage(QDialog, Ui_AnOrderDialog):
     def bind_event(self):
         self.order_save_btn.clicked.connect(self.save)
 
-
     # 加载要更新的订单信息
     def load_order(self, order_id):
         self.order_id = order_id
@@ -228,15 +228,6 @@ class AnOrderPage(QDialog, Ui_AnOrderDialog):
             total_amount = query.value(4)
             remarks = query.value(5)
 
-            # 设置界面数据
-            # self.lineEdit.setText(order_number)
-            # self.supplier_order_comboBox.setCurrentText(str(supplier))
-            # date_obj = QDate.fromString(order_date, "yyyy-MM-dd")
-            # self.down_order_dateEdit.setDate(date_obj)
-            # date_obj = QDate.fromString(expected_delivery_date, "yyyy-MM-dd")
-            # self.up_googs_dateEdit.setDate(date_obj)
-            # self.doubleSpinBox.setValue(total_amount)
-            # self.plainTextEdit.setPlainText(remarks)
             # 设置界面数据
             self.lineEdit.setText(order_number if order_number is not None else "")
             self.supplier_order_comboBox.setCurrentText(str(supplier) if supplier is not None else "")
@@ -272,8 +263,8 @@ class AnOrderPage(QDialog, Ui_AnOrderDialog):
         order_date = self.down_order_dateEdit.dateTime().toString("yyyy-MM-dd")  # 下单日期
         estimated_delivery_date = self.up_googs_dateEdit.dateTime().toString("yyyy-MM-dd")  # 交货日期
         supplier = self.supplier_order_comboBox.itemData(self.supplier_order_comboBox.currentIndex())  # 供应商
-        order_number = self.lineEdit.text() # 订单编号
-        total_purchase_price = self.doubleSpinBox.value() # 采购总价
+        order_number = self.lineEdit.text()  # 订单编号
+        total_purchase_price = self.doubleSpinBox.value()  # 采购总价
         remarks = self.plainTextEdit.toPlainText()  # 备注
 
         query = QSqlQuery()
@@ -309,8 +300,8 @@ class AnOrderPage(QDialog, Ui_AnOrderDialog):
         order_date = self.down_order_dateEdit.dateTime().toString("yyyy-MM-dd")  # 下单日期
         estimated_delivery_date = self.up_googs_dateEdit.dateTime().toString("yyyy-MM-dd")  # 交货日期
         supplier = self.supplier_order_comboBox.itemData(self.supplier_order_comboBox.currentIndex())  # 供应商
-        order_number = self.lineEdit.text() # 订单编号
-        total_purchase_price = self.doubleSpinBox.value() # 采购总价
+        order_number = self.lineEdit.text()  # 订单编号
+        total_purchase_price = self.doubleSpinBox.value()  # 采购总价
         remarks = self.plainTextEdit.toPlainText()  # 备注
 
         query = QSqlQuery()

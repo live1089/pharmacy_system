@@ -17,7 +17,7 @@ from qtmodern.styles import light
 # 数据库
 import data.sqlite_data
 from data.sqlite_data import DrugDicModel, SupplierModel, PurchaseOrderModel, StockInMainModel, StockInDetailModel, \
-    InventoryDatchModel, StockOutMainModel, InventoryCheckModel, ShelvesDrugModel, InventoryModel
+    InventoryDatchModel, StockOutMainModel, InventoryCheckModel, ShelvesDrugModel, InventoryModel, SalesListsModel, SalesModel
 # 外部UI
 import ui_app.log_in_ui
 import ui_app.mainwondows_ui
@@ -25,7 +25,7 @@ from page_window.inventory_count_page import InventoryCountPage
 from page_window.medicines_page import MedicinesPage, DrugAttributePage, DrugRormulationPage, DrugUnitPage, \
     DrugSpecificationPage, class_set_page, delete_selected_rows
 from page_window.purchase_page import PurAddPage, AnOrderPage
-from page_window.sell_medicines_page import sell_drug_ui_dialog
+from page_window.sell_medicines_page import SellDrugUiDialog, SellListDialog
 from page_window.shelves_drug_page import ShelvesDrugPage
 from page_window.stock_medicines_page import StockMedicinesPage, StockLocationPage, StockInAllPage
 from page_window.stock_out_page import StockOutPage, StockOutAddDrugPage
@@ -42,15 +42,14 @@ class PageMap(Enum):
     supplier_tableView = 1  # 供应商
     stock_in_tabWidget = 2  # 入库
     inventory_tableView = 3  # 库存
-    sales_records_tableView = 4  # 销售
+    tabWidget = 4  # 销售
     expiring_drugs_tableView = 5  # 临期
     stock_out_tabWidget = 6  # 出库
     order_tabWidget = 7  # 采购订单
     drugs_on_shelves_tableView = 8  # 最近添加
     inventory_check_tableView = 9  # 库存盘点
-    customers_tableView = 10  # 会员客户
-    user_tableWidget = 11  # 本地用户
-    drug_dic_tableView = 12  # 药品字典
+    user_tableWidget = 10  # 本地用户
+    drug_dic_tableView = 11  # 药品字典
 
 
 class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
@@ -308,6 +307,7 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
     def sqlite_data(self):
         # data.sqlite_data.get_medicines_model(self)  # 药品
         data.sqlite_data.get_sales_model(self)  # 销售
+        data.sqlite_data.get_sales_lists_model(self)
         data.sqlite_data.get_expiring_medicine_model(self)  # 临期
         data.sqlite_data.get_supplier_model(self)  # 供应商
         data.sqlite_data.get_inventory_model(self)  # 库存
@@ -340,7 +340,7 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
 
     def bind_event(self):
         self.medicine.clicked.connect(lambda: self.show_page_by_name(PageMap.shelves_drug_tableView.value))
-        self.sales_records.clicked.connect(lambda: self.show_page_by_name(PageMap.sales_records_tableView.value))
+        self.sales_records.clicked.connect(lambda: self.show_page_by_name(PageMap.tabWidget.value))
         self.expiring_medicine.clicked.connect(lambda: self.show_page_by_name(PageMap.expiring_drugs_tableView.value))
         self.pharmacy_operation_record.clicked.connect(
             lambda: self.show_page_by_name(PageMap.inventory_tableView.value))
@@ -350,7 +350,6 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.drugs_on_shelves.clicked.connect(lambda: self.show_page_by_name(PageMap.drugs_on_shelves_tableView.value))
         self.medicine_purchase.clicked.connect(lambda: self.show_page_by_name(PageMap.order_tabWidget.value))
         self.inventory_record.clicked.connect(lambda: self.show_page_by_name(PageMap.inventory_check_tableView.value))
-        self.member_customer.clicked.connect(lambda: self.show_page_by_name(PageMap.customers_tableView.value))
         self.user_information.clicked.connect(lambda: self.show_page_by_name(PageMap.user_tableWidget.value))
         self.drug_dic_btn.clicked.connect(lambda: self.show_page_by_name(PageMap.drug_dic_tableView.value))
         self.add_stock_location_btn.clicked.connect(self.add_stock_location)
@@ -370,9 +369,10 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.shelves_mod_btn.clicked.connect(self.shelves_mod)
         self.inventory_del_btn.clicked.connect(self.inventory_del)
         self.expiring_drugs_save_btn.clicked.connect(self.save_expiry_threshold)
-
         self.drug_ref_btn.clicked.connect(self.drug_ref)
         self.ex_ref_btn.clicked.connect(self.ex_ref)
+        self.sell_del_btn.clicked.connect(self.del_sell)
+        self.sell_mod_btn.clicked.connect(self.sell_mod)
 
     def drug_ref(self):
         data.sqlite_data.get_shelves_drug_message_model(self)
@@ -403,6 +403,38 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         else:
             QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
 
+    def del_sell(self):
+        current_tab_index = self.tabWidget.currentIndex()
+        if current_tab_index == 0:
+            self.sell_li = SalesListsModel(self, self.db)
+            success, msg = delete_selected_rows(
+                self=self,
+                tableView=self.sales_lists_tableView,
+                model=self.sell_li,
+                db=self.db,
+            )
+            if success:
+                QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+                data.sqlite_data.get_sales_lists_model(self)
+                self.sales_lists_tableView.clearSelection()
+            else:
+                QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+        elif current_tab_index == 1:
+            self.sell_sa = SalesModel(self, self.db)
+            success, msg = delete_selected_rows(
+                self=self,
+                tableView=self.sales_records_tableView,
+                model=self.sell_sa,
+                db=self.db,
+            )
+            if success:
+                QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
+                data.sqlite_data.get_sales_model(self)
+                self.sales_records_tableView.clearSelection()
+            else:
+                QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
+
+
     def supplier_mod(self):
         selected_rows = get_selected_logical_rows(self.supplier_tableView)
         if not selected_rows:
@@ -419,6 +451,20 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
             self.sup.show_mod_supplier_data(supplier_id)  # 先填充数据
             if self.sup.exec() == QDialog.DialogCode.Accepted:  # 如果成功保存
                 data.sqlite_data.get_supplier_model(self)  # 刷新供应商列表
+
+    def sell_mod(self):
+        selected_rows = get_selected_logical_rows(self.sales_records_tableView)
+        if not selected_rows:
+            QMessageBox.warning(self, "警告", "请先选择要修改的订单记录")
+            return
+        model = self.sales_records_tableView.model()
+        if model and len(selected_rows) > 0:
+            # 假设sales_id在第一列（索引为0）
+            sales_id = model.data(model.index(selected_rows[0], 0))
+            self.sell = SellDrugUiDialog(self)
+            self.sell.show_mod_sell_data(sales_id)
+            if self.sell.exec() == QDialog.DialogCode.Accepted:  # 如果成功保存
+                data.sqlite_data.get_sales_model(self)
 
     def supplier_del(self):
         self.supp = SupplierModel(self, self.db)
@@ -664,11 +710,12 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         if current_tab_index == 1:
             selected_rows = get_selected_logical_rows(self.stock_out_detail_tableView)
             if not selected_rows:
-                QMessageBox.warning(self, "警告", "请先选择要修改的出库订单记录")
+                QMessageBox.warning(self, "警告", "请先选择要修改的记录")
                 return
             model = self.stock_out_detail_tableView.model()
             if model and len(selected_rows) > 0:
                 detail_id = model.data(model.index(selected_rows[0], 0))
+                print(detail_id)
                 self.so = StockOutAddDrugPage(self)
                 self.so.load_stock_out_update_data(detail_id)
                 self.so.exec()
@@ -696,7 +743,8 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.dosage_set_btn.clicked.connect(self.drug_rormulation)
         self.unit_set_btn.clicked.connect(self.drug_unit)
         self.specifications_set_btn.clicked.connect(self.drug_specification)
-        self.sell_drug_dtn.clicked.connect(self.sell_drug_func)
+        self.sell_drug_btn.clicked.connect(self.sell_drug_func)
+        self.add_sell_list_btn.clicked.connect(self.sell_list_func)
         self.supplier_add_btn.clicked.connect(self.supplier_add)
         self.stock_in_btn.clicked.connect(self.stock_in)
         self.purchase_add_btn.clicked.connect(self.purchase_add)
@@ -734,8 +782,15 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
         self.drug_sp.exec()
 
     def sell_drug_func(self):
-        self.sell_d = sell_drug_ui_dialog(self)
+        self.sell_d = SellDrugUiDialog(self)
         self.sell_d.show()
+
+
+    def sell_list_func(self):
+        self.sell_list = SellListDialog(self)
+        self.sell_list.show()
+
+
 
     def supplier_add(self):
         self.sup = SupplierDrugPage(self)
@@ -805,8 +860,9 @@ class MainWindow(QMainWindow, ui_app.mainwondows_ui.Ui_mainWindow):
             class_set_page(self)
         if page_name == PageMap.inventory_tableView.value:
             data.sqlite_data.get_inventory_model(self)
-        if page_name == PageMap.sales_records_tableView.value:
+        if page_name == PageMap.tabWidget.value:
             data.sqlite_data.get_sales_model(self)
+            data.sqlite_data.get_sales_lists_model(self)
         if page_name == PageMap.expiring_drugs_tableView.value:
             data.sqlite_data.get_expiring_medicine_model(self)
         if page_name == PageMap.supplier_tableView.value:

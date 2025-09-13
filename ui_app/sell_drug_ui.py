@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QDateTimeEdit, QDialog,
-    QGridLayout, QLabel, QLineEdit, QPushButton,
-    QSizePolicy, QSpacerItem, QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QDoubleSpinBox,
+    QGridLayout, QLabel, QPushButton, QSizePolicy,
+    QSpacerItem, QSpinBox, QWidget)
 
 class Ui_SellDialog(object):
     def setupUi(self, SellDialog):
@@ -40,52 +40,72 @@ class Ui_SellDialog(object):
 
         self.gridLayout = QGridLayout()
         self.gridLayout.setObjectName(u"gridLayout")
-        self.label_4 = QLabel(SellDialog)
-        self.label_4.setObjectName(u"label_4")
-        self.label_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_2 = QLabel(SellDialog)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_4, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_2, 3, 0, 1, 1)
 
-        self.sell_drug_time = QDateTimeEdit(SellDialog)
-        self.sell_drug_time.setObjectName(u"sell_drug_time")
-        self.sell_drug_time.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.sell_drug_time.setReadOnly(True)
+        self.lump_sum_doubleSpinBox = QDoubleSpinBox(SellDialog)
+        self.lump_sum_doubleSpinBox.setObjectName(u"lump_sum_doubleSpinBox")
+        self.lump_sum_doubleSpinBox.setReadOnly(True)
+        self.lump_sum_doubleSpinBox.setMaximum(9999999999.989999771118164)
 
-        self.gridLayout.addWidget(self.sell_drug_time, 3, 1, 1, 1)
+        self.gridLayout.addWidget(self.lump_sum_doubleSpinBox, 5, 1, 1, 1)
 
         self.label_3 = QLabel(SellDialog)
         self.label_3.setObjectName(u"label_3")
         self.label_3.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_3, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_3, 4, 0, 1, 1)
 
-        self.customer_line_edit = QLineEdit(SellDialog)
-        self.customer_line_edit.setObjectName(u"customer_line_edit")
+        self.price_doubleSpinBox = QDoubleSpinBox(SellDialog)
+        self.price_doubleSpinBox.setObjectName(u"price_doubleSpinBox")
+        self.price_doubleSpinBox.setReadOnly(True)
+        self.price_doubleSpinBox.setMaximum(9999999999.989999771118164)
 
-        self.gridLayout.addWidget(self.customer_line_edit, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.price_doubleSpinBox, 4, 1, 1, 1)
 
-        self.label_2 = QLabel(SellDialog)
-        self.label_2.setObjectName(u"label_2")
-        self.label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_5 = QLabel(SellDialog)
+        self.label_5.setObjectName(u"label_5")
+        self.label_5.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_5, 5, 0, 1, 1)
 
         self.sell_drug_combox = QComboBox(SellDialog)
         self.sell_drug_combox.setObjectName(u"sell_drug_combox")
         self.sell_drug_combox.setEditable(True)
 
-        self.gridLayout.addWidget(self.sell_drug_combox, 0, 1, 1, 1)
-
-        self.number_lineEdit = QLineEdit(SellDialog)
-        self.number_lineEdit.setObjectName(u"number_lineEdit")
-
-        self.gridLayout.addWidget(self.number_lineEdit, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.sell_drug_combox, 1, 1, 1, 1)
 
         self.label = QLabel(SellDialog)
         self.label.setObjectName(u"label")
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
+
+        self.label_4 = QLabel(SellDialog)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout.addWidget(self.label_4, 0, 0, 1, 1)
+
+        self.sell_list_combox = QComboBox(SellDialog)
+        self.sell_list_combox.setObjectName(u"sell_list_combox")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sell_list_combox.sizePolicy().hasHeightForWidth())
+        self.sell_list_combox.setSizePolicy(sizePolicy)
+        self.sell_list_combox.setMinimumSize(QSize(380, 0))
+        self.sell_list_combox.setEditable(True)
+
+        self.gridLayout.addWidget(self.sell_list_combox, 0, 1, 1, 1)
+
+        self.number_spinBox = QSpinBox(SellDialog)
+        self.number_spinBox.setObjectName(u"number_spinBox")
+
+        self.gridLayout.addWidget(self.number_spinBox, 3, 1, 1, 1)
 
 
         self.gridLayout_2.addLayout(self.gridLayout, 1, 1, 1, 1)
@@ -107,10 +127,11 @@ class Ui_SellDialog(object):
 
     def retranslateUi(self, SellDialog):
         SellDialog.setWindowTitle(QCoreApplication.translate("SellDialog", u"Dialog", None))
-        self.label_4.setText(QCoreApplication.translate("SellDialog", u"\u9500\u552e\u65f6\u95f4", None))
-        self.label_3.setText(QCoreApplication.translate("SellDialog", u"\u987e\u5ba2", None))
         self.label_2.setText(QCoreApplication.translate("SellDialog", u"\u6570\u91cf", None))
+        self.label_3.setText(QCoreApplication.translate("SellDialog", u"\u5355\u4ef7", None))
+        self.label_5.setText(QCoreApplication.translate("SellDialog", u"\u603b\u4ef7", None))
         self.label.setText(QCoreApplication.translate("SellDialog", u"\u836f\u54c1", None))
+        self.label_4.setText(QCoreApplication.translate("SellDialog", u"\u9500\u552e\u5355", None))
         self.sell_sure_btn.setText(QCoreApplication.translate("SellDialog", u"\u786e\u8ba4", None))
     # retranslateUi
 
