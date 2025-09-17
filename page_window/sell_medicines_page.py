@@ -120,11 +120,9 @@ class SellDrugUiDialog(QDialog, Ui_SellDialog):
         price = self.price_doubleSpinBox.value()
         number = self.number_spinBox.value()
         self.lump_sum_doubleSpinBox.setValue(price * number)
+
     def save(self):
-        if self.detail_id:
-            self.update_sell_drug()
-        else:
-            self.create_sell_drug()
+        self.create_sell_drug()
 
     def load_data(self):
         query = QSqlQuery("SELECT dic_id, trade_name FROM medicine_dic")
@@ -170,63 +168,4 @@ class SellDrugUiDialog(QDialog, Ui_SellDialog):
             query.exec("ROLLBACK")
             QMessageBox.critical(self, "数据库错误", str(e))
 
-    def show_mod_sell_data(self, detail_id):
-        self.detail_id = detail_id
-        self.sell_sure_btn.setText("更新药品")
-        detail_query = QSqlQuery()
-        detail_query.prepare("""
-                SELECT sales_id, medicine_id, quantity, price, total_amount 
-                FROM sale_details 
-                WHERE detail_id = ?
-        """)
-        detail_query.addBindValue(detail_id)
-        if detail_query.exec() and detail_query.next():
-            sell_list = detail_query.value(0)
-            drug_id = detail_query.value(1)
-            number = detail_query.value(2)
-            price = detail_query.value(3)
-            lump_sum = detail_query.value(4)
 
-            self.sell_list_combox.setCurrentIndex(self.sell_list_combox.findData(sell_list))
-            self.sell_drug_combox.setCurrentIndex(self.sell_drug_combox.findData(drug_id))
-            self.number_spinBox.setValue(number)
-            self.price_doubleSpinBox.setValue(price)
-            self.lump_sum_doubleSpinBox.setValue(lump_sum)
-
-    def update_sell_drug(self):
-        sell_list = self.sell_list_combox.itemData(self.sell_list_combox.currentIndex())
-        drug_id = self.sell_drug_combox.itemData(self.sell_drug_combox.currentIndex())
-        number = self.number_spinBox.value()
-        price = self.price_doubleSpinBox.value()
-        lump_sum = self.lump_sum_doubleSpinBox.value()
-
-        query = QSqlQuery()
-        if not query.exec("BEGIN"):
-            QMessageBox.critical(self, "数据库错误", f"无法开始事务: {query.lastError().text()}")
-            return
-
-        try:
-            query.prepare(
-                "UPDATE sale_details "
-                "SET  sales_id=?, medicine_id=?, quantity=?, price=?, total_amount=?"
-                "WHERE sale_details.detail_id=?")
-
-            query.addBindValue(sell_list)
-            query.addBindValue(drug_id)
-            query.addBindValue(number)
-            query.addBindValue(price)
-            query.addBindValue(lump_sum)
-            query.addBindValue(self.detail_id)
-
-            if not query.exec():
-                raise Exception(f"更新失败: {query.lastError().text()}")
-            # 提交事务
-            if not query.exec("COMMIT"):
-                raise Exception(f"无法提交事务: {query.lastError().text()}")
-            QMessageBox.information(self, "成功", "更新成功")
-            self.accept()  # 关闭对话框
-
-        except Exception as e:
-            # 回滚事务
-            query.exec("ROLLBACK")
-            QMessageBox.critical(self, "数据库错误", str(e))

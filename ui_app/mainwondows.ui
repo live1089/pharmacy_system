@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1073</width>
-    <height>577</height>
+    <width>1116</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -169,7 +169,7 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>8</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -272,23 +272,43 @@
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
-             <widget class="QLineEdit" name="stock_in_lineEdit">
-              <property name="placeholderText">
-               <string>输入商品ID</string>
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>起始日期</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="stock_in_query_btn">
+             <widget class="QDateEdit" name="storage_dateEdit_start"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_19">
+              <property name="text">
+               <string>截止日期</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDateEdit" name="storage_dateEdit_deadline_end"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="storage_btn">
               <property name="text">
                <string>查询</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="stock_in_com_btn">
+             <widget class="QLineEdit" name="stock_in_lineEdit">
+              <property name="placeholderText">
+               <string>输入商品订单号</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="stock_in_query_btn">
               <property name="text">
-               <string>综合查询</string>
+               <string>查询订单</string>
               </property>
              </widget>
             </item>
@@ -549,13 +569,6 @@
              <widget class="QPushButton" name="sell_del_btn">
               <property name="text">
                <string>删除</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="sell_mod_btn">
-              <property name="text">
-               <string>修改销售药品</string>
               </property>
              </widget>
             </item>
@@ -906,16 +919,6 @@
             <item row="0" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout_13">
               <item>
-               <widget class="QLabel" name="label_16">
-                <property name="text">
-                 <string>起始时间</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QDateEdit" name="purchase_order_dateEdit_start_2"/>
-              </item>
-              <item>
                <widget class="Line" name="line_15">
                 <property name="orientation">
                  <enum>Qt::Orientation::Vertical</enum>
@@ -923,14 +926,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_17">
-                <property name="text">
-                 <string>截止时间</string>
+               <widget class="QLineEdit" name="shelves_select_lineEdit">
+                <property name="placeholderText">
+                 <string>输入单号</string>
                 </property>
                </widget>
-              </item>
-              <item>
-               <widget class="QDateEdit" name="purchase_order_dateEdit_deadline_2"/>
               </item>
               <item>
                <widget class="Line" name="line_16">
@@ -1297,7 +1297,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1073</width>
+     <width>1116</width>
      <height>33</height>
     </rect>
    </property>

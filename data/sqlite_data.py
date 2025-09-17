@@ -742,6 +742,106 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             END
         """)
 
+        # 销售创建上架库存触发器
+        query.exec("""
+        CREATE TRIGGER sales_listing_inventory_triggers
+            AFTER INSERT ON sale_details
+            FOR EACH ROW
+            BEGIN
+                -- 记录库存变化历史（销售为负数）
+                INSERT INTO inventory (medicine_id, detail_id, quantity, change_date, change_type)
+                VALUES (
+                    NEW.medicine_id,
+                    NEW.detail_id,
+                    -NEW.quantity,
+                    datetime('now', '+8 hours'),
+                    '销售'
+                );
+
+                -- 更新上架药品信息表中的上架库存数量
+                UPDATE drug_information_shelves
+                SET shelves_sum = shelves_sum - NEW.quantity
+                WHERE drug_information_shelves_id = NEW.medicine_id
+                AND shelves_sum >= NEW.quantity;
+
+                -- 可选：更新临期药品监控数据中的库存数量
+                UPDATE expiring_medicines 
+                SET current_stock = current_stock - NEW.quantity,
+                    status = CASE 
+                        WHEN days_until_expiry < 0 THEN '过期'
+                        ELSE '正常'
+                    END,
+                    last_updated = datetime('now', '+8 hours')
+                WHERE medicine_name = (
+                    SELECT trade_name 
+                    FROM medicine_dic 
+                    WHERE dic_id = NEW.medicine_id
+                )
+                AND current_stock >= NEW.quantity;
+            END
+        """)
+
+        # 销售删除上架库存触发器
+        query.exec("""
+        CREATE TRIGGER sales_delete_inventory_triggers
+            AFTER DELETE ON sale_details
+            FOR EACH ROW
+            BEGIN
+                -- 记录库存变化历史（删除销售为正数，表示库存增加）
+                INSERT INTO inventory (medicine_id, detail_id, quantity, change_date, change_type)
+                VALUES (
+                    OLD.medicine_id,
+                    OLD.detail_id,
+                    OLD.quantity,
+                    datetime('now', '+8 hours'),
+                    '销售删除'
+                );
+
+                -- 更新上架药品信息表中的上架库存数量
+                UPDATE drug_information_shelves
+                SET shelves_sum = shelves_sum + OLD.quantity
+                WHERE drug_information_shelves_id = OLD.medicine_id;
+
+                -- 可选：更新临期药品监控数据中的库存数量
+                UPDATE expiring_medicines 
+                SET current_stock = current_stock + OLD.quantity,
+                    status = CASE 
+                        WHEN days_until_expiry < 0 THEN '过期'
+                        ELSE '正常'
+                    END,
+                    last_updated = datetime('now', '+8 hours')
+                WHERE medicine_name = (
+                    SELECT trade_name 
+                    FROM medicine_dic 
+                    WHERE dic_id = OLD.medicine_id
+                );
+            END
+        """)
+
+        # # 销售库存触发器
+        # query.exec("""
+        # CREATE TRIGGER sales_listing_inventory_triggers
+        #     AFTER INSERT ON sale_details
+        #     FOR EACH ROW
+        #     BEGIN
+        #         -- 记录库存变化历史（销售为负数）
+        #         INSERT INTO inventory (medicine_id, detail_id, quantity, change_date, change_type)
+        #         VALUES (
+        #             NEW.medicine_id,
+        #             NEW.detail_id,
+        #             -NEW.quantity,
+        #             datetime('now', '+8 hours'),
+        #             '销售'
+        #         );
+        #
+        #         -- 更新上架药品信息表中的上架库存数量
+        #         UPDATE drug_information_shelves
+        #         SET shelves_sum = shelves_sum - NEW.quantity
+        #         WHERE drug = NEW.medicine_id
+        #         AND shelves_sum >= NEW.quantity;
+        #     END
+        # """)
+
 
 # 基表模型
 class BaseTableModel(QSqlTableModel):
@@ -926,7 +1026,8 @@ class PurchaseDetailModel(BaseTableModel):
         4: "药品采购总价",
         5: "药品采购单价",
         6: "售价",
-        7: "备注"
+        7: "下单时间",
+        8: "备注"
     }
     HIDDEN_COLUMNS = [0]  # 隐藏的列索引
 
@@ -1408,7 +1509,7 @@ def get_expiring_medicine_model(self):
 
 
 # 入库主模型
-def get_stock_in_main_model(self):
+def get_stock_in_main_model(self, storage_start_date, storage_end_date):
     self.stock_in_main_model = StockInMainModel(self, self.db)
     sql = f"""
         SELECT
@@ -1427,6 +1528,8 @@ def get_stock_in_main_model(self):
         LEFT JOIN  purchase_order p ON s.order_id = p.order_id
         Left join  supplier r ON p.supplier_id = r.supplier_id
         LEFT JOIN users us on s.operator_id = us.users_id
+        WHERE s.in_date BETWEEN '{storage_start_date}' AND '{storage_end_date}'
+        ORDER BY s.in_date DESC
     """
     self.stock_in_main_model.setQuery(sql, self.db)
     self.main_tableView.setModel(self.stock_in_main_model)
@@ -1437,7 +1540,7 @@ def get_stock_in_main_model(self):
 
 
 # 入库明细模型
-def get_stock_in_detail_model(self):
+def get_stock_in_detail_model(self, storage_start_date, storage_end_date):
     self.stock_in_detail_model = StockInDetailModel(self, self.db)
     sql = f"""
         SELECT
@@ -1461,6 +1564,8 @@ def get_stock_in_detail_model(self):
         LEFT JOIN medicine_dic dic ON pu.medicine_id = dic.dic_id
         LEFT JOIN warehouse_shelf_position i ON s.warehouse_shelf_id = i.warehouse_shelf_id
         LEFT JOIN stock st ON st.batch = s.in_id AND st.location = s.warehouse_shelf_id
+        WHERE m.in_date BETWEEN '{storage_start_date}' AND '{storage_end_date}'
+        ORDER BY m.in_date DESC
     """
     self.stock_in_detail_model.setQuery(sql, self.db)
     self.detail_tableView.setModel(self.stock_in_detail_model)
@@ -1471,7 +1576,7 @@ def get_stock_in_detail_model(self):
 
 
 # 出库主模型
-def get_stock_out_main_model(self):
+def get_stock_out_main_model(self, start_date, end_date):
     self.stock_out_main_model = StockOutMainModel(self, self.db)
     sql = f"""
         SELECT
@@ -1484,6 +1589,8 @@ def get_stock_out_main_model(self):
             s.remarks
         FROM stock_out_main s
         LEFT JOIN users us on s.operator_id = us.users_id
+        WHERE s.out_date BETWEEN '{start_date}' AND '{end_date}'
+        ORDER BY s.out_date DESC
         """
     self.stock_out_main_model.setQuery(sql, self.db)
     self.stock_out_main_tableView.setModel(self.stock_out_main_model)
@@ -1494,7 +1601,7 @@ def get_stock_out_main_model(self):
 
 
 # 出库明细模型
-def get_stock_out_detail_model(self):
+def get_stock_out_detail_model(self, start_date, end_date):
     self.stock_out_detail_model = StockOutDetailModel(self, self.db)
     sql = f"""
         SELECT
@@ -1512,6 +1619,8 @@ def get_stock_out_detail_model(self):
         LEFT JOIN stock_in_main st ON s.stock_batch = st.in_id
         WHERE sm.outbound_number IS NOT NULL 
         AND sm.outbound_number != ''
+        AND sm.out_date BETWEEN '{start_date}' AND '{end_date}'
+        ORDER BY sm.out_date DESC
     """
     self.stock_out_detail_model.setQuery(sql, self.db)
     self.stock_out_detail_tableView.setModel(self.stock_out_detail_model)
@@ -1534,7 +1643,7 @@ def get_supplier_model(self):
 
 
 # 采购订单
-def get_purchase_order_model(self):
+def get_purchase_order_model(self, pur_start_date, pur_end_date):
     self.purchase_order_model = PurchaseOrderModel(self, self.db)
     sql = f"""
         SELECT
@@ -1548,7 +1657,8 @@ def get_purchase_order_model(self):
         FROM purchase_order pur
         LEFT JOIN supplier de ON pur.supplier_id = de.supplier_id
         LEFT JOIN purchase_order ord ON pur.order_id = ord.order_id
-        
+        WHERE pur.order_date BETWEEN '{pur_start_date}' AND '{pur_end_date}'
+        ORDER BY pur.order_date DESC
     """
     self.purchase_order_model.setQuery(sql, self.db)
     self.purchase_order_tableView.setModel(self.purchase_order_model)
@@ -1559,7 +1669,7 @@ def get_purchase_order_model(self):
 
 
 # 采购订单明细
-def get_purchase_order_detail_model(self):
+def get_purchase_order_detail_model(self, pur_start_date, pur_end_date):
     self.purchase_order_detail_model = PurchaseDetailModel(self, self.db)
     sql = f"""
         SELECT
@@ -1570,10 +1680,13 @@ def get_purchase_order_detail_model(self):
             pur.purchase_total_price,
             pur.purchase_price,
             de.price as 售价,
+            ord.order_date as 下单时间,
             pur.remarks as 备注  
         FROM purchase_detail pur
         LEFT JOIN medicine_dic de ON pur.medicine_id = de.dic_id
         LEFT JOIN purchase_order ord ON pur.order_id = ord.order_id
+        WHERE ord.order_date BETWEEN '{pur_start_date}' AND '{pur_end_date}'
+        ORDER BY ord.order_date DESC
     """
     self.purchase_order_detail_model.setQuery(sql, self.db)
     self.purchase_detail_tableView.setModel(self.purchase_order_detail_model)
@@ -1583,30 +1696,32 @@ def get_purchase_order_detail_model(self):
 
 
 # 销售
-def get_sales_model(self):
+def get_sales_model(self, sale_start_date, sale_end_date):
     self.sales_model = SalesModel(self, self.db)
     sql = f"""
         SELECT
-            s.sales_id,
+            s.detail_id,
             m.sale_no,
             dic.trade_name,
             s.quantity,
             dic.price,
             s.total_amount,
-            m.sale_date
+            m.sale_date as 销售时间
         FROM sale_details s
         LEFT JOIN sales m ON s.sales_id = m.sales_id
         LEFT JOIN medicine_dic dic ON s.medicine_id = dic.dic_id
+        WHERE m.sale_date BETWEEN '{sale_start_date}' AND '{sale_end_date}'
+        ORDER BY m.sale_date DESC
     """
+
     self.sales_model.setQuery(sql, self.db)
     self.sales_records_tableView.setModel(self.sales_model)
     for col in self.sales_model.hidden_columns:
         self.sales_records_tableView.hideColumn(col)
-
     return self.sales_model
 
 
-def get_sales_lists_model(self):
+def get_sales_lists_model(self, sale_start_date, sale_end_date):
     self.sales_lists_model = SalesListsModel(self, self.db)
     sql = f"""
         SELECT
@@ -1616,6 +1731,8 @@ def get_sales_lists_model(self):
             s.sale_date
         FROM sales s
         LEFT JOIN users m ON s.cashier_id = m.users_id
+        WHERE s.sale_date BETWEEN '{sale_start_date}' AND '{sale_end_date}'
+        ORDER BY s.sale_date DESC
     """
     self.sales_lists_model.setQuery(sql, self.db)
     self.sales_lists_tableView.setModel(self.sales_lists_model)
@@ -1625,7 +1742,7 @@ def get_sales_lists_model(self):
 
 
 # 库存记录
-def get_inventory_model(self):
+def get_inventory_model(self, start_date, end_date):
     self.inventory_model = InventoryModel(self, self.db)
     sql = f"""
         SELECT
@@ -1638,6 +1755,8 @@ def get_inventory_model(self):
             inv.production_lot as 生产批号
         FROM inventory inv
         LEFT JOIN medicine_dic de ON inv.medicine_id = de.dic_id
+        WHERE inv.change_date BETWEEN '{start_date}' AND '{end_date}'
+        ORDER BY inv.change_date DESC
     """
     self.inventory_model.setQuery(sql, self.db)
     self.inventory_tableView.setModel(self.inventory_model)
@@ -1648,7 +1767,7 @@ def get_inventory_model(self):
 
 
 # 库存盘点
-def get_inventory_check(self):
+def get_inventory_check(self, start_date, end_date):
     self.inventory_check_model = InventoryCheckModel(self, self.db)
     sql = f"""
         SELECT
@@ -1666,6 +1785,8 @@ def get_inventory_check(self):
         LEFT JOIN stock_in_main sta ON inv.inventory_of_batches = sta.in_id
         LEFT JOIN warehouse_shelf_position ws ON ws.warehouse_shelf_id = inv.inventory_of_location
         LEFT JOIN users u ON u.users_id = inv.user_id
+        WHERE inv.check_date BETWEEN '{start_date}' AND '{end_date}'
+        ORDER BY inv.check_date DESC
     """
     self.inventory_check_model.setQuery(sql, self.db)
     self.inventory_check_tableView.setModel(self.inventory_check_model)

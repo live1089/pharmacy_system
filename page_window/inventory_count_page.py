@@ -21,7 +21,6 @@ class InventoryCountPage(QDialog, Ui_InventoryCountDialog):
     def ignore_cargo_return(self):
         install_enter_key_filter(self.inventory_count_batch_combox)
         install_enter_key_filter(self.inventory_count_drug_comboBox)
-        install_enter_key_filter(self.inventory_count_batch_combox)
         install_enter_key_filter(self.inventory_count_location_combox)
         install_enter_key_filter(self.inventory_count_number_suspinBox)
         install_enter_key_filter(self.inventory_count_plainTextEdit)
@@ -29,6 +28,8 @@ class InventoryCountPage(QDialog, Ui_InventoryCountDialog):
 
     def bind_event(self):
         self.inventory_count_save_btn.clicked.connect(self.save)
+        # 连接批次选择变化信号
+        self.inventory_count_batch_combox.currentIndexChanged.connect(self.update_drug_info_from_batch)
 
     def load_data(self):
         self.inventory_count_dateTimeEdit.setDateTime(QtCore.QDateTime.currentDateTime())
@@ -61,8 +62,6 @@ class InventoryCountPage(QDialog, Ui_InventoryCountDialog):
             shelf_name = query.value(1)
             self.inventory_count_location_combox.addItem(shelf_name, shelf_id)
 
-        # 连接批次选择变化信号
-        self.inventory_count_batch_combox.currentIndexChanged.connect(self.update_drug_info_from_batch)
 
     def update_drug_info_from_batch(self, index):
         """
@@ -184,8 +183,14 @@ class InventoryCountPage(QDialog, Ui_InventoryCountDialog):
             query.addBindValue(inventory_count)
             query.addBindValue(user_id)
             query.addBindValue(discrepancy_reason)
+            query.addBindValue(self.check_id)
             if not query.exec():
                 raise Exception(f"更新出库单失败: {query.lastError().text()}")
+
+            query.exec("COMMIT")
+            QMessageBox.information(self, "成功", "更新出库单成功")
+            self.accept()
+
         except Exception as e:
             # 回滚事务
             query.exec("ROLLBACK")

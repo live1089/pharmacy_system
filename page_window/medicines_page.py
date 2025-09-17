@@ -117,6 +117,7 @@ class MedicinesPage(QDialog, Ui_Dialog):
         self.ui = parent
         self.bind_event()
         self.load_medicine_combo()
+        self.dic_id = None
 
     def bind_event(self):
         self.drug_add_save_btn.clicked.connect(self.save)
@@ -128,31 +129,164 @@ class MedicinesPage(QDialog, Ui_Dialog):
         self.drug_unit_combox.clear()
         self.dosage_combox.clear()
 
+        # 加载药品分类
         query = QSqlQuery("SELECT category_id, category_name FROM MedicineCategories")
         while query.next():
             drug_classify_id = query.value(0)
             drug_classify_name = query.value(1)
             self.drug_classify_combox.addItem(drug_classify_name, drug_classify_id)
 
+        # 加载剂型
         query = QSqlQuery("SELECT formulation_id, formulation_name FROM drug_formulation")
         while query.next():
             drug_dosage_id = query.value(0)
             drug_dosage_name = query.value(1)
             self.dosage_combox.addItem(drug_dosage_name, drug_dosage_id)
 
+        # 加载单位
         query = QSqlQuery("SELECT unit_id, unit_name FROM drug_unit")
         while query.next():
-            drug_dosage_id = query.value(0)
-            drug_dosage_name = query.value(1)
-            self.drug_unit_combox.addItem(drug_dosage_name, drug_dosage_id)
+            drug_unit_id = query.value(0)
+            drug_unit_name = query.value(1)
+            self.drug_unit_combox.addItem(drug_unit_name, drug_unit_id)
 
+        # 加载规格
         query = QSqlQuery("SELECT specification_id, packaging_specifications FROM Specification")
         while query.next():
-            drug_dosage_id = query.value(0)
-            drug_dosage_name = query.value(1)
-            self.pack_combox.addItem(drug_dosage_name, drug_dosage_id)
+            spec_id = query.value(0)
+            spec_name = query.value(1)
+            self.pack_combox.addItem(spec_name, spec_id)
 
     def save(self):
+        if self.dic_id:
+            self.update_drug()
+        else:
+            self.create_drug()
+
+    def load_update_drug_data(self, dic_id):
+        self.dic_id = dic_id
+        """加载药品信息用于更新"""
+        query = QSqlQuery()
+        query.prepare("SELECT trade_name, generic_name, specification_id, manufacturer, formulation_id, "
+                      "approval_number, category_id, unit_id, price "
+                      "FROM medicine_dic "
+                      "WHERE dic_id = ?")
+        query.addBindValue(dic_id)
+        if query.exec() and query.first():
+            self.drug_name_line_edit.setText(query.value(0) or "")
+            self.generic_name_line_edit.setText(query.value(1) or "")
+
+            # 设置分类下拉框
+            category_index = self.drug_classify_combox.findData(query.value(6))
+            if category_index >= 0:
+                self.drug_classify_combox.setCurrentIndex(category_index)
+
+            # 设置规格下拉框
+            spec_index = self.pack_combox.findData(query.value(2))
+            if spec_index >= 0:
+                self.pack_combox.setCurrentIndex(spec_index)
+
+            # 设置剂型下拉框
+            dosage_index = self.dosage_combox.findData(query.value(4))
+            if dosage_index >= 0:
+                self.dosage_combox.setCurrentIndex(dosage_index)
+
+            # 设置单位下拉框
+            unit_index = self.drug_unit_combox.findData(query.value(7))
+            if unit_index >= 0:
+                self.drug_unit_combox.setCurrentIndex(unit_index)
+
+            self.cmsw_line_edit.setText(query.value(5) or "")
+            self.price_line_edit.setText(str(query.value(8) or ""))
+            self.manufacturer_line_edit.setText(query.value(3) or "")
+
+    def update_drug(self):
+        """更新药品信息"""
+        # 首先验证输入
+        if not self.validate_input():
+            return
+
+        drug_name = self.drug_name_line_edit.text().strip()
+        drug_genre = self.generic_name_line_edit.text().strip()
+        drug_class = self.drug_classify_combox.itemData(self.drug_classify_combox.currentIndex())
+        drug_pack = self.pack_combox.itemData(self.pack_combox.currentIndex())
+        drug_unit = self.drug_unit_combox.itemData(self.drug_unit_combox.currentIndex())
+        drug_price = self.price_line_edit.text().strip()
+        drug_cmsw = self.cmsw_line_edit.text().strip()
+        drug_dosage = self.dosage_combox.itemData(self.dosage_combox.currentIndex())
+        drug_manufactur = self.manufacturer_line_edit.text().strip()
+
+        query = QSqlQuery()
+        query.prepare(
+            "UPDATE medicine_dic "
+            "SET trade_name = ?, generic_name = ?, specification_id = ?, manufacturer = ?, formulation_id = ?, "
+            "approval_number = ? ,category_id = ?, unit_id = ?, price = ? "
+            "WHERE dic_id = ?"
+        )
+        query.addBindValue(drug_name)
+        query.addBindValue(drug_genre)
+        query.addBindValue(drug_pack)
+        query.addBindValue(drug_manufactur)
+        query.addBindValue(drug_dosage)
+        query.addBindValue(drug_cmsw)
+        query.addBindValue(drug_class)
+        query.addBindValue(drug_unit)
+        query.addBindValue(drug_price)
+        query.addBindValue(self.dic_id)
+
+        if not query.exec():
+            QMessageBox.critical(self, "错误", f"更新失败: {query.lastError().text()}")
+            return
+
+        QMessageBox.information(self, "成功", "药品信息更新成功")
+        self.accept()
+
+    def validate_input(self):
+        """验证输入数据"""
+        if not self.drug_name_line_edit.text().strip():
+            QMessageBox.warning(self, "输入错误", "请输入药品商品名")
+            return False
+
+        if not self.generic_name_line_edit.text().strip():
+            QMessageBox.warning(self, "输入错误", "请输入药品通用名")
+            return False
+
+        if self.drug_classify_combox.currentIndex() < 0:
+            QMessageBox.warning(self, "输入错误", "请选择药品分类")
+            return False
+
+        if self.pack_combox.currentIndex() < 0:
+            QMessageBox.warning(self, "输入错误", "请选择规格")
+            return False
+
+        if self.dosage_combox.currentIndex() < 0:
+            QMessageBox.warning(self, "输入错误", "请选择剂型")
+            return False
+
+        if self.drug_unit_combox.currentIndex() < 0:
+            QMessageBox.warning(self, "输入错误", "请选择单位")
+            return False
+
+        try:
+            price = float(self.price_line_edit.text() or 0)
+            if price < 0:
+                QMessageBox.warning(self, "输入错误", "价格不能为负数")
+                return False
+        except ValueError:
+            QMessageBox.warning(self, "输入错误", "请输入有效的价格")
+            return False
+
+        if not self.manufacturer_line_edit.text().strip():
+            QMessageBox.warning(self, "输入错误", "请输入生产厂家")
+            return False
+
+        return True
+
+    def create_drug(self):
+        """保存药品信息"""
+        # 验证输入
+        if not self.validate_input():
+            return
         drug_name = self.drug_name_line_edit.text()
         drug_genre = self.generic_name_line_edit.text()
         drug_class = self.drug_classify_combox.itemData(self.drug_classify_combox.currentIndex())
@@ -166,7 +300,8 @@ class MedicinesPage(QDialog, Ui_Dialog):
         query = QSqlQuery()
 
         query.prepare(
-            "INSERT INTO medicine_dic (trade_name, generic_name, specification_id, manufacturer, formulation_id, approval_number ,category_id, unit_id, price)"
+            "INSERT INTO medicine_dic (trade_name, generic_name, specification_id, manufacturer, formulation_id, "
+            "approval_number ,category_id, unit_id, price)"
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
         query.addBindValue(drug_name)
         query.addBindValue(drug_genre)
@@ -181,6 +316,7 @@ class MedicinesPage(QDialog, Ui_Dialog):
             QMessageBox.critical(self, "数据库错误", f"添加失败: {query.lastError().text()}")
         else:
             QMessageBox.information(self, "成功", "添加成功")
+            self.accept()  # 关闭对话框
 
 
 # 类别属性页面
@@ -290,6 +426,7 @@ class DrugRormulationPage(QDialog, Ui_RormuDialog):
         else:
             QMessageBox.critical(self, "错误", msg, QMessageBox.StandardButton.Ok)
 
+
 # 药品单位
 class DrugUnitPage(QDialog, Ui_UnitDialog):
     def __init__(self, parent):
@@ -325,6 +462,7 @@ class DrugUnitPage(QDialog, Ui_UnitDialog):
                 QMessageBox.information(self, "成功", "单位添加成功")
                 self.get_drug_unit_model()
                 print(f"输入药品单位: {input_text}")
+
     def delete_selected_row(self):
         success, msg = delete_selected_rows(
             self=self,
@@ -377,6 +515,7 @@ class DrugSpecificationPage(QDialog, Ui_SpecificationDialog):
                 QMessageBox.information(self, "成功", "规格添加成功")
                 self.get_drug_specification_model()
                 print(f"输入包装单位: {input_text}")
+
     def delete_selected_row(self):
         success, msg = delete_selected_rows(
             self=self,
@@ -392,6 +531,7 @@ class DrugSpecificationPage(QDialog, Ui_SpecificationDialog):
             self.specification_tableView.clearSelection()
         else:
             QMessageBox.critical(self, "错误", msg, QMessageBox.StandardButton.Ok)
+
 
 def class_set_page(self):
     self.drug_spec = SpecificationModel(self, self.db)
@@ -415,6 +555,3 @@ def class_set_page(self):
         self.dosage_table_view.hideColumn(col)
 
     return self.drug_spec, self.drug_attr, self.drug_units, self.drug_ror
-
-
-
