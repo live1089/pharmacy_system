@@ -3,11 +3,184 @@ from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QMessageBox
 
 import data.sqlite_data
-from data.sqlite_data import SupplierModel, StockInMainModel, StockInDetailModel, ShelvesDrugsMessageModel
+from data.sqlite_data import (SupplierModel, StockInMainModel, StockInDetailModel, ShelvesDrugsMessageModel,
+                              PurchaseDetailModel, PurchaseOrderModel, StockOutMainModel, StockOutDetailModel,
+                              ShelvesDrugModel
+                              )
 
 # 其他工具
 start_times = QDateTime.currentDateTime().addDays(-30).date().toString("yyyy-MM-dd")
 end_times = QDateTime.currentDateTime().addDays(+1).date().toString("yyyy-MM-dd")
+
+
+# 药品上架查询
+def shelves_select(self):
+    text = self.shelves_select_lineEdit.text().strip()
+    if not text:
+        data.sqlite_data.get_shelves_drug_model(self)
+        return
+
+    self.shelves_model = ShelvesDrugModel(self, self.db)
+    sql = """
+        SELECT
+            e.shelves_id,
+            sm.outbound_number,
+            sd.out_batch,
+            md.trade_name,
+            e.shelves_number,
+            wsp.location,
+            sma.batch as 库存批次,
+            sma.validity as 有效期
+        FROM shelves_drug e
+        LEFT JOIN stock_out_detail sd ON e.out_batch = sd.detail_id
+        LEFT JOIN stock_in_main sma ON sd.stock_batch = sma.in_id
+        LEFT JOIN medicine_dic md ON e.drug = md.dic_id
+        LEFT JOIN warehouse_shelf_position wsp ON e.location_id = wsp.warehouse_shelf_id
+        LEFT JOIN stock_out_main sm ON e.outbound_number = sm.out_id
+        WHERE sm.outbound_number LIKE ?
+    """
+    query = QSqlQuery(self.db)
+    query.prepare(sql)
+    query.addBindValue(f"%{text}%")
+    if not query.exec():
+        print(f"查询错误: {query.lastError().text()}")
+        return
+    self.shelves_model.setQuery(query)
+    self.drugs_on_shelves_tableView.setModel(self.shelves_model)
+    for col in self.shelves_model.HIDDEN_COLUMNS:
+        self.drugs_on_shelves_tableView.hideColumn(col)
+
+
+# 出库单查询
+def stock_out_number_select(self):
+    current_index = self.stock_out_tabWidget.currentIndex()
+    text = self.stock_out_number_lineEdit.text().strip()
+    if not text:
+        data.sqlite_data.get_stock_out_main_model(self, start_times, end_times)
+        data.sqlite_data.get_stock_out_detail_model(self, start_times, end_times)
+        return
+
+    if current_index == 0:
+        self.stock_out_main_model = StockOutMainModel(self, self.db)
+        sql = f"""
+            SELECT
+                s.out_id,
+                s.outbound_number,
+                s.out_type,
+                s.out_date,
+                us.username,
+                s.total_amount,
+                s.remarks
+            FROM stock_out_main s
+            LEFT JOIN users us on s.operator_id = us.users_id
+            WHERE s.outbound_number LIKE ?
+            """
+        query = QSqlQuery(self.db)
+        query.prepare(sql)
+        query.addBindValue(f"%{text}%")
+        if not query.exec():
+            print(f"查询错误: {query.lastError().text()}")
+            return
+        self.stock_out_main_model.setQuery(query)
+        self.stock_out_main_tableView.setModel(self.stock_out_main_model)
+        for col in self.stock_out_main_model.hidden_columns:
+            self.stock_out_main_tableView.hideColumn(col)
+
+    elif current_index == 1:
+        self.stock_out_detail_model = StockOutDetailModel(self, self.db)
+        sql = f"""
+            SELECT
+                s.detail_id,
+                sm.outbound_number,
+                dic.trade_name,
+                st.batch,
+                s.out_batch,
+                s.quantity,
+                s.time,
+                st.in_date as 入库时间
+            FROM stock_out_detail s
+            LEFT JOIN stock_out_main sm ON s.out_id = sm.out_id
+            LEFT JOIN medicine_dic dic ON s.medicine_id = dic.dic_id
+            LEFT JOIN stock_in_main st ON s.stock_batch = st.in_id
+            where sm.outbound_number LIKE ?
+        """
+        query = QSqlQuery(self.db)
+        query.prepare(sql)
+        query.addBindValue(f"%{text}%")
+        if not query.exec():
+            print(f"查询错误: {query.lastError().text()}")
+            return
+        self.stock_out_detail_model.setQuery(query)
+        self.stock_out_detail_tableView.setModel(self.stock_out_detail_model)
+        for col in self.stock_out_detail_model.hidden_columns:
+            self.stock_out_detail_tableView.hideColumn(col)
+
+
+# 采购单查询
+def purchase_order_select(self):
+    current_index = self.order_tabWidget.currentIndex()
+    text = self.purchase_order_lineEdit.text().strip()
+
+    if not text:
+        data.sqlite_data.get_purchase_order_model(self, start_times, end_times)
+        data.sqlite_data.get_purchase_order_detail_model(self, start_times, end_times)
+        return
+
+    if current_index == 0:
+        self.purchase_order_model = PurchaseOrderModel(self, self.db)
+        sql = f"""
+            SELECT
+                pur.order_id,
+                pur.order_number,
+                de.name,
+                pur.order_date,
+                pur.expected_delivery_date,
+                pur.total_amount,
+                pur.remarks
+            FROM purchase_order pur
+            LEFT JOIN supplier de ON pur.supplier_id = de.supplier_id
+            LEFT JOIN purchase_order ord ON pur.order_id = ord.order_id
+            WHERE pur.order_number LIKE ?
+        """
+        query = QSqlQuery(self.db)
+        query.prepare(sql)
+        query.addBindValue(f"%{text}%")
+        if not query.exec():
+            print(f"查询错误: {query.lastError().text()}")
+            return
+        self.purchase_order_model.setQuery(query)
+        self.purchase_order_tableView.setModel(self.purchase_order_model)
+        for col in self.purchase_order_model.hidden_columns:
+            self.purchase_order_tableView.hideColumn(col)
+
+    elif current_index == 1:
+        self.purchase_order_detail_model = PurchaseDetailModel(self, self.db)
+        sql = f"""
+            SELECT
+                pur.detail_id,
+                ord.order_number,
+                de.trade_name,
+                pur.quantity,
+                pur.purchase_total_price,
+                pur.purchase_price,
+                de.price as 售价,
+                ord.order_date as 下单时间,
+                pur.remarks as 备注  
+            FROM purchase_detail pur
+            LEFT JOIN medicine_dic de ON pur.medicine_id = de.dic_id
+            LEFT JOIN purchase_order ord ON pur.order_id = ord.order_id
+            WHERE ord.order_number LIKE ?
+        """
+        query = QSqlQuery(self.db)
+        query.prepare(sql)
+        query.addBindValue(f"%{text}%")
+        if not query.exec():
+            print(f"查询错误: {query.lastError().text()}")
+            return
+        self.purchase_order_detail_model.setQuery(query)
+        self.purchase_detail_tableView.setModel(self.purchase_order_detail_model)
+        for col in self.purchase_order_detail_model.hidden_columns:
+            self.purchase_detail_tableView.hideColumn(col)
 
 
 def stock_in_query(self):
@@ -56,30 +229,22 @@ def stock_in_query(self):
             self.main_tableView.hideColumn(col)
 
     elif current_index == 1:
-        self.stock_in_detail_model = StockInDetailModel(self, self.db)
-        sql = """
+        self.purchase_order_detail_model = PurchaseDetailModel(self, self.db)
+        sql = f"""
             SELECT
-                s.detail_id,
-                o.order_number,
-                dic.trade_name,
-                m.validity,
-                pu.purchase_price,
-                dic.price,
-                s.quantity as 入库数量,
-                s.actual_quantity as 实际入库数量,
-                i.location as 库存位置,
-                st.quantity as 库存数量,
-                m.batch as 库存批次,
-                m.production_lot_number as 生产批号,
-                m.in_date as 入库时间
-            FROM stock_in_detail s
-            LEFT JOIN stock_in_main m ON s.in_id = m.in_id
-            LEFT JOIN purchase_detail pu ON s.purchase_detail_id = pu.detail_id
-            LEFT JOIN purchase_order o ON m.order_id = o.order_id
-            LEFT JOIN medicine_dic dic ON pu.medicine_id = dic.dic_id
-            LEFT JOIN warehouse_shelf_position i ON s.warehouse_shelf_id = i.warehouse_shelf_id
-            LEFT JOIN stock st ON st.batch = s.in_id AND st.location = s.warehouse_shelf_id
-            WHERE o.order_number LIKE ?
+                pur.detail_id,
+                ord.order_number,
+                de.trade_name,
+                pur.quantity,
+                pur.purchase_total_price,
+                pur.purchase_price,
+                de.price as 售价,
+                ord.order_date as 下单时间,
+                pur.remarks as 备注  
+            FROM purchase_detail pur
+            LEFT JOIN medicine_dic de ON pur.medicine_id = de.dic_id
+            LEFT JOIN purchase_order ord ON pur.order_id = ord.order_id
+            WHERE ord.order_number LIKE ?
         """
         query = QSqlQuery(self.db)
         query.prepare(sql)

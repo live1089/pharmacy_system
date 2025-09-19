@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>药品库存</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="1">
@@ -52,13 +52,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="del_row">
-     <property name="text">
-      <string>删除</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

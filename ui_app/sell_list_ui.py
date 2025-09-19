@@ -76,7 +76,7 @@ class Ui_SellListDialog(object):
     # setupUi
 
     def retranslateUi(self, SellListDialog):
-        SellListDialog.setWindowTitle(QCoreApplication.translate("SellListDialog", u"Dialog", None))
+        SellListDialog.setWindowTitle(QCoreApplication.translate("SellListDialog", u"\u9500\u552e\u5355", None))
         self.label.setText(QCoreApplication.translate("SellListDialog", u"\u9500\u552e\u5355\u53f7", None))
         self.label_3.setText(QCoreApplication.translate("SellListDialog", u"\u9500\u552e\u65e5\u671f", None))
         self.label_2.setText(QCoreApplication.translate("SellListDialog", u"\u7528\u6237", None))

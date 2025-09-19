@@ -143,7 +143,7 @@ class Ui_InventoryCountDialog(object):
     # setupUi
 
     def retranslateUi(self, InventoryCountDialog):
-        InventoryCountDialog.setWindowTitle(QCoreApplication.translate("InventoryCountDialog", u"Dialog", None))
+        InventoryCountDialog.setWindowTitle(QCoreApplication.translate("InventoryCountDialog", u"\u836f\u54c1\u76d8\u70b9", None))
         self.label_4.setText(QCoreApplication.translate("InventoryCountDialog", u"\u76d8\u70b9\u65e5\u671f", None))
         self.label_7.setText(QCoreApplication.translate("InventoryCountDialog", u"\u76d8\u70b9\u6279\u6b21", None))
         self.label.setText(QCoreApplication.translate("InventoryCountDialog", u"\u76d8\u70b9\u836f\u54c1", None))

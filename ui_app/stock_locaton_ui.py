@@ -67,7 +67,7 @@ class Ui_StockLocationDialog(object):
     # setupUi
 
     def retranslateUi(self, StockLocationDialog):
-        StockLocationDialog.setWindowTitle(QCoreApplication.translate("StockLocationDialog", u"Dialog", None))
+        StockLocationDialog.setWindowTitle(QCoreApplication.translate("StockLocationDialog", u"\u5e93\u5b58\u5730\u5740\u6dfb\u52a0", None))
         self.refresh_btn.setText(QCoreApplication.translate("StockLocationDialog", u"\u5237\u65b0", None))
         self.add_btn.setText(QCoreApplication.translate("StockLocationDialog", u"\u6dfb\u52a0", None))
         self.del_btn.setText(QCoreApplication.translate("StockLocationDialog", u"\u5220\u9664", None))

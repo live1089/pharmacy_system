@@ -28,7 +28,6 @@ class PageMap(Enum):
     order_tabWidget = 7  # 采购订单
     drugs_on_shelves_tableView = 8  # 最近添加
     inventory_check_tableView = 9  # 库存盘点
-    user_tableWidget = 10  # 本地用户
     drug_dic_tableView = 11  # 药品字典
 
 
@@ -160,7 +159,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     md.trade_name,
                     sm.validity,
                     CAST(julianday(sm.validity) - julianday('now') AS INTEGER),
-                    COALESCE(s.quantity, 0),
+                    COALESCE((SELECT SUM(s.quantity) FROM stock s WHERE s.batch = sm.in_id), 0),
                     30,
                     CASE 
                         WHEN CAST(julianday(sm.validity) - julianday('now') AS INTEGER) < 0 THEN '过期'
@@ -171,8 +170,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 JOIN stock_in_detail sd ON sm.in_id = sd.in_id
                 JOIN purchase_detail pd ON sd.purchase_detail_id = pd.detail_id
                 JOIN medicine_dic md ON pd.medicine_id = md.dic_id
-                LEFT JOIN stock s ON s.batch = sm.in_id
                 WHERE sm.validity IS NOT NULL
+                GROUP BY sm.in_id, md.trade_name, sm.validity
             """)
 
             if query.lastError().isValid():
@@ -235,7 +234,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         try:
             default_threshold = int(self.expiring_drugs_lineEdit_day.text())
         except ValueError:
-            default_threshold = 60  # 默认值
+            default_threshold = 30  # 使用默认值30天而不是60天
 
         query = QSqlQuery(self.db)
         query.prepare("""
@@ -243,6 +242,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             FROM expiring_medicines 
             WHERE days_until_expiry <= COALESCE(alert_threshold, ?)
             AND days_until_expiry >= -30  -- 仍然显示过期不超过30天的药品
+            AND current_stock > 0  -- 只提醒还有库存的药品
             ORDER BY days_until_expiry ASC
         """)
         query.addBindValue(default_threshold)
@@ -356,7 +356,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.drugs_on_shelves.clicked.connect(lambda: self.show_page_by_name(PageMap.drugs_on_shelves_tableView.value))
         self.medicine_purchase.clicked.connect(lambda: self.show_page_by_name(PageMap.order_tabWidget.value))
         self.inventory_record.clicked.connect(lambda: self.show_page_by_name(PageMap.inventory_check_tableView.value))
-        self.user_information.clicked.connect(lambda: self.show_page_by_name(PageMap.user_tableWidget.value))
         self.drug_dic_btn.clicked.connect(lambda: self.show_page_by_name(PageMap.drug_dic_tableView.value))
 
         self.add_stock_location_btn.clicked.connect(lambda: wim.add_stock_location(self))
@@ -380,18 +379,41 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.expiring_drugs_save_btn.clicked.connect(self.save_expiry_threshold)
         self.drug_ref_btn.clicked.connect(self.drug_ref)
         self.ex_ref_btn.clicked.connect(self.ex_ref)
+
         self.sales_records_btn.clicked.connect(lambda: qu.sale_record(self))
         self.purchase_order_btn.clicked.connect(lambda: qu.pur_order(self))
         self.stock_out_query_btn.clicked.connect(lambda: qu.stock_out_query(self))
         self.inventory_check_query_btn.clicked.connect(lambda: qu.inventory_check_query(self))
         self.inventory_btn.clicked.connect(lambda: qu.inventory_record_query(self))
-        # self.storage_btn.clicked.connect(qu.storage_query)
-
         self.supplier_query_btn.clicked.connect(lambda: qu.supplier_query(self))
         self.drug_selection_query_btn.clicked.connect(lambda: qu.drug_selection_query(self))
-        # self.stock_in_query_btn.clicked.connect(qu.stock_in_query)
         self.stock_in_query_btn.clicked.connect(lambda: qu.stock_in_query(self))
         self.storage_btn.clicked.connect(lambda: qu.storage_query(self))
+        self.purchase_order_select_btn.clicked.connect(lambda: qu.purchase_order_select(self))
+        self.stock_out_list_select_btn.clicked.connect(lambda: qu.stock_out_number_select(self))
+        self.shelves_select_btn.clicked.connect(lambda: qu.shelves_select(self))
+
+        self.clear_btn.clicked.connect(self.clean_up_system_data)
+
+    # 添加清理系统数据的方法
+    def clean_up_system_data(self):
+        """
+        清理系统垃圾数据
+        """
+        reply = QMessageBox.question(
+            self,
+            '确认清理',
+            '确定要清理系统垃圾数据吗？\n此操作将删除过期和无用的数据记录。',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                from data.clean_up_useless_data import clean_up_useless_data
+                clean_up_useless_data(self)
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"清理功能执行失败: {str(e)}")
 
     def drug_ref(self):
         data.sqlite_data.get_shelves_drug_message_model(self)

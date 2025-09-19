@@ -110,7 +110,7 @@ class Ui_ShelvesDialog(object):
     # setupUi
 
     def retranslateUi(self, ShelvesDialog):
-        ShelvesDialog.setWindowTitle(QCoreApplication.translate("ShelvesDialog", u"Dialog", None))
+        ShelvesDialog.setWindowTitle(QCoreApplication.translate("ShelvesDialog", u"\u836f\u54c1\u4e0a\u67b6", None))
         self.label_2.setText(QCoreApplication.translate("ShelvesDialog", u"\u4e0a\u67b6\u836f\u54c1", None))
         self.label_4.setText(QCoreApplication.translate("ShelvesDialog", u"\u51fa\u5e93\u6279\u6b21", None))
         self.label.setText(QCoreApplication.translate("ShelvesDialog", u"\u51fa\u5e93\u5355", None))

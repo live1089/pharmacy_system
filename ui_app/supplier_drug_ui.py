@@ -197,7 +197,7 @@ class Ui_SupDialog(object):
     # setupUi
 
     def retranslateUi(self, SupDialog):
-        SupDialog.setWindowTitle(QCoreApplication.translate("SupDialog", u"Dialog", None))
+        SupDialog.setWindowTitle(QCoreApplication.translate("SupDialog", u"\u4f9b\u5e94\u5546\u6dfb\u52a0", None))
         self.label_3.setText(QCoreApplication.translate("SupDialog", u"\u8054\u7cfb\u7535\u8bdd", None))
         self.label_9.setText(QCoreApplication.translate("SupDialog", u"\u90ae\u7bb1", None))
         self.label_5.setText(QCoreApplication.translate("SupDialog", u"\u66f4\u65b0\u4eba", None))

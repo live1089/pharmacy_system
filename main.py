@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QApplication)
 from qtmodern.styles import dark
 
 import login_window
+
 if __name__ == "__main__":
     app = QApplication([])
     app.setStyleSheet(dark(app))

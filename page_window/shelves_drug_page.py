@@ -120,7 +120,8 @@ class ShelvesDrugPage(QDialog, Ui_ShelvesDialog):
     def load_data(self):
         """加载初始数据"""
         # 加载出库单列表（上架类型）
-        query = QSqlQuery("SELECT out_id, outbound_number FROM stock_out_main WHERE out_type = '上架'")
+        query = QSqlQuery("SELECT out_id, outbound_number FROM stock_out_main WHERE out_type = '上架' "
+                          "ORDER BY out_id DESC ")
         while query.next():
             out_id = query.value(0)
             outbound_number = query.value(1)

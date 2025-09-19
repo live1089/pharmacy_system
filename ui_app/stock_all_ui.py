@@ -16,8 +16,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QDialog, QGridLayout, QHeaderView,
-    QPushButton, QSizePolicy, QTabWidget, QTableView,
-    QWidget)
+    QSizePolicy, QTabWidget, QTableView, QWidget)
 
 class Ui_StockInAllDialog(object):
     def setupUi(self, StockInAllDialog):
@@ -66,11 +65,6 @@ class Ui_StockInAllDialog(object):
 
         self.gridLayout_2.addLayout(self.gridLayout, 0, 1, 1, 1)
 
-        self.del_row = QPushButton(StockInAllDialog)
-        self.del_row.setObjectName(u"del_row")
-
-        self.gridLayout_2.addWidget(self.del_row, 1, 1, 1, 1)
-
 
         self.retranslateUi(StockInAllDialog)
 
@@ -81,9 +75,8 @@ class Ui_StockInAllDialog(object):
     # setupUi
 
     def retranslateUi(self, StockInAllDialog):
-        StockInAllDialog.setWindowTitle(QCoreApplication.translate("StockInAllDialog", u"Dialog", None))
+        StockInAllDialog.setWindowTitle(QCoreApplication.translate("StockInAllDialog", u"\u836f\u54c1\u5e93\u5b58", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("StockInAllDialog", u"\u4e0a\u67b6\u5e93\u5b58", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("StockInAllDialog", u"\u4ed3\u5e93\u5e93\u5b58", None))
-        self.del_row.setText(QCoreApplication.translate("StockInAllDialog", u"\u5220\u9664", None))
     # retranslateUi
 

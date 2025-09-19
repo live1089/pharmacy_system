@@ -455,15 +455,6 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
         )
         """)
 
-        # query.exec("""
-        # CREATE TABLE IF NOT EXISTS shelves_stock(
-        #     shelves_stock_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #     drug TEXT NOT NULL,
-        #     outbound_number TEXT,
-        #
-        # )
-        # """)
-
         query.exec("""
         CREATE TABLE IF NOT EXISTS users(                                   -- 用户信息表
             users_id INTEGER PRIMARY KEY AUTOINCREMENT,                     -- 主键ID
@@ -472,15 +463,6 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             role TEXT                                                       -- 用户角色
         )
         """)
-
-        # query.exec("""
-        # CREATE TABLE IF NOT EXISTS customers(                                   -- 客户信息表
-        #     customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #     customer_name TEXT NOT NULL,
-        #     customer_phone TEXT,
-        #     role TEXT
-        # )
-        # """)
 
         query.exec("""
         CREATE TABLE IF NOT EXISTS logs(
@@ -499,7 +481,7 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
             medicine_name TEXT NOT NULL,                              -- 药品名称
             expiry_date DATE NOT NULL,                                -- 药品的到期时间
             days_until_expiry INTEGER NOT NULL,                       -- 距离到期天数
-            current_stock INTEGER NOT NULL,                           -- 当前库存数量
+            current_stock INTEGER NOT NULL,                           -- 当前仓库库存数量
             alert_threshold INTEGER DEFAULT 30,                       -- 预警阈值(天)
             status TEXT CHECK (status IN ('过期', '正常')),            -- 药品状态（过期 或 正常）
             last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,          -- 最后更新时间
@@ -532,7 +514,58 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                 JOIN purchase_detail pd ON md.dic_id = pd.medicine_id
                 JOIN stock_in_main sm ON sm.in_id = NEW.in_id
                 WHERE pd.detail_id = NEW.purchase_detail_id
+                ORDER BY sm.in_id DESC
                 LIMIT 1;
+            END;
+        """)
+
+        # 当药品入库修改变化时，更新临期药品监控数据
+        query.exec("""
+        CREATE TRIGGER update_expiring_medicines_on_stock_in_update
+            AFTER UPDATE ON stock_in_main
+            FOR EACH ROW
+            WHEN OLD.validity != NEW.validity
+            BEGIN
+                -- 更新临期药品监控数据
+                UPDATE expiring_medicines 
+                SET expiry_date = NEW.validity,
+                    days_until_expiry = CAST(julianday(NEW.validity) - julianday('now') AS INTEGER),
+                    status = CASE 
+                        WHEN CAST(julianday(NEW.validity) - julianday('now') AS INTEGER) < 0 THEN '过期'
+                        ELSE '正常'
+                    END,
+                    last_updated = datetime('now', '+8 hours')
+                WHERE batch_id = NEW.in_id;
+            END;
+        """)
+
+        # 添加库存调整时更新临期药品的触发器
+        query.exec("""
+        CREATE TRIGGER update_expiring_medicines_on_stock_adjustment
+            AFTER UPDATE ON stock
+            FOR EACH ROW
+            BEGIN
+                -- 更新临期药品监控数据中的库存数量
+                UPDATE expiring_medicines 
+                SET current_stock = NEW.quantity,
+                    status = CASE 
+                        WHEN days_until_expiry < 0 THEN '过期'
+                        ELSE '正常'
+                    END,
+                    last_updated = datetime('now', '+8 hours')
+                WHERE batch_id = NEW.batch;
+            END;
+        """)
+
+        # 定期清理过期很久的药品监控记录
+        query.exec("""
+        CREATE TRIGGER cleanup_old_expired_medicines
+            AFTER UPDATE ON expiring_medicines
+            FOR EACH ROW
+            WHEN NEW.days_until_expiry < -365
+            BEGIN
+                DELETE FROM expiring_medicines 
+                WHERE expiring_medicine_id = NEW.expiring_medicine_id;
             END;
         """)
 
@@ -637,7 +670,6 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
 
         """)
 
-        # 创建出库修改更新触发器
         # 创建出库修改更新触发器
         query.exec("""
         CREATE TRIGGER IF NOT EXISTS update_inventory_after_stock_out_update
@@ -757,90 +789,48 @@ class DatabaseInit(QSqlDatabase, QMessageBox):
                     datetime('now', '+8 hours'),
                     '销售'
                 );
-
+        
                 -- 更新上架药品信息表中的上架库存数量
                 UPDATE drug_information_shelves
                 SET shelves_sum = shelves_sum - NEW.quantity
                 WHERE drug_information_shelves_id = NEW.medicine_id
                 AND shelves_sum >= NEW.quantity;
-
-                -- 可选：更新临期药品监控数据中的库存数量
-                UPDATE expiring_medicines 
-                SET current_stock = current_stock - NEW.quantity,
-                    status = CASE 
-                        WHEN days_until_expiry < 0 THEN '过期'
-                        ELSE '正常'
-                    END,
-                    last_updated = datetime('now', '+8 hours')
-                WHERE medicine_name = (
-                    SELECT trade_name 
-                    FROM medicine_dic 
-                    WHERE dic_id = NEW.medicine_id
-                )
-                AND current_stock >= NEW.quantity;
-            END
+        
+                -- 更新药品上架库存 (修正版本)
+                UPDATE shelves_drug
+                SET shelves_number = shelves_number - NEW.quantity
+                WHERE drug = NEW.medicine_id
+                AND shelves_number >= NEW.quantity;
+            END;
         """)
 
         # 销售删除上架库存触发器
         query.exec("""
-        CREATE TRIGGER sales_delete_inventory_triggers
-            AFTER DELETE ON sale_details
-            FOR EACH ROW
-            BEGIN
-                -- 记录库存变化历史（删除销售为正数，表示库存增加）
-                INSERT INTO inventory (medicine_id, detail_id, quantity, change_date, change_type)
-                VALUES (
-                    OLD.medicine_id,
-                    OLD.detail_id,
-                    OLD.quantity,
-                    datetime('now', '+8 hours'),
-                    '销售删除'
-                );
+CREATE TRIGGER sales_delete_inventory_triggers
+    AFTER DELETE ON sale_details
+    FOR EACH ROW
+    BEGIN
+        -- 记录库存变化历史（删除销售为正数，表示库存增加）
+        INSERT INTO inventory (medicine_id, detail_id, quantity, change_date, change_type)
+        VALUES (
+            OLD.medicine_id,
+            OLD.detail_id,
+            OLD.quantity,
+            datetime('now', '+8 hours'),
+            '销售删除'
+        );
 
-                -- 更新上架药品信息表中的上架库存数量
-                UPDATE drug_information_shelves
-                SET shelves_sum = shelves_sum + OLD.quantity
-                WHERE drug_information_shelves_id = OLD.medicine_id;
+        -- 更新上架药品信息表中的上架库存数量
+        UPDATE drug_information_shelves
+        SET shelves_sum = shelves_sum + OLD.quantity
+        WHERE drug_information_shelves_id = OLD.medicine_id;
 
-                -- 可选：更新临期药品监控数据中的库存数量
-                UPDATE expiring_medicines 
-                SET current_stock = current_stock + OLD.quantity,
-                    status = CASE 
-                        WHEN days_until_expiry < 0 THEN '过期'
-                        ELSE '正常'
-                    END,
-                    last_updated = datetime('now', '+8 hours')
-                WHERE medicine_name = (
-                    SELECT trade_name 
-                    FROM medicine_dic 
-                    WHERE dic_id = OLD.medicine_id
-                );
-            END
+        -- 更新药品上架库存 (修正版本)
+        UPDATE shelves_drug
+        SET shelves_number = shelves_number + OLD.quantity
+        WHERE drug = OLD.medicine_id;
+    END;
         """)
-
-        # # 销售库存触发器
-        # query.exec("""
-        # CREATE TRIGGER sales_listing_inventory_triggers
-        #     AFTER INSERT ON sale_details
-        #     FOR EACH ROW
-        #     BEGIN
-        #         -- 记录库存变化历史（销售为负数）
-        #         INSERT INTO inventory (medicine_id, detail_id, quantity, change_date, change_type)
-        #         VALUES (
-        #             NEW.medicine_id,
-        #             NEW.detail_id,
-        #             -NEW.quantity,
-        #             datetime('now', '+8 hours'),
-        #             '销售'
-        #         );
-        #
-        #         -- 更新上架药品信息表中的上架库存数量
-        #         UPDATE drug_information_shelves
-        #         SET shelves_sum = shelves_sum - NEW.quantity
-        #         WHERE drug = NEW.medicine_id
-        #         AND shelves_sum >= NEW.quantity;
-        #     END
-        # """)
 
 
 # 基表模型
@@ -943,7 +933,7 @@ class ExpiringMedicineModel(BaseTableModel):
         2: "药品名称",
         3: "药品到期时间",
         4: "距离到期天数",
-        5: "当前库存数量",
+        5: "当前仓库库存数量",
         6: "预警阈值(天)",
         7: "药品状态",
         8: "最后更新时间"
@@ -1481,7 +1471,7 @@ def get_medicine_dic_model(self):
 # 临期
 def get_expiring_medicine_model(self):
     self.expiring_medicine_model = ExpiringMedicineModel(self, self.db)
-    # 可以添加过滤条件，只显示未过期但即将过期的药品
+    # 使用参数化查询，并考虑用户设置的阈值
     sql = """
         SELECT
             e.expiring_medicine_id,
@@ -1495,8 +1485,8 @@ def get_expiring_medicine_model(self):
             e.last_updated
         FROM expiring_medicines e
         LEFT JOIN stock_in_main st ON e.batch_id = st.in_id
-        WHERE days_until_expiry <= 60 
-        ORDER BY days_until_expiry
+        WHERE e.days_until_expiry <= COALESCE(e.alert_threshold, 60)
+        ORDER BY e.days_until_expiry
     """
     self.expiring_medicine_model.setQuery(sql, self.db)
     self.expiring_drugs_tableView.setModel(self.expiring_medicine_model)

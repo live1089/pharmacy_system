@@ -126,7 +126,7 @@ class Ui_SellDialog(object):
     # setupUi
 
     def retranslateUi(self, SellDialog):
-        SellDialog.setWindowTitle(QCoreApplication.translate("SellDialog", u"Dialog", None))
+        SellDialog.setWindowTitle(QCoreApplication.translate("SellDialog", u"\u6dfb\u52a0\u9500\u552e\u836f\u54c1", None))
         self.label_2.setText(QCoreApplication.translate("SellDialog", u"\u6570\u91cf", None))
         self.label_3.setText(QCoreApplication.translate("SellDialog", u"\u5355\u4ef7", None))
         self.label_5.setText(QCoreApplication.translate("SellDialog", u"\u603b\u4ef7", None))
