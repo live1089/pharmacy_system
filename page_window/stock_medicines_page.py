@@ -116,7 +116,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         stock_num = self.incoming_quantity_spin_box.value()  # 获取入库数量
         actual_warehousing_quantity = self.actual_incoming_quantity_spin_box.value()  # 获取实际入库数量
         inbound_date = self.inbound_date_time_edit.dateTime().toString("yyyy-MM-dd hh:mm:ss")  # 获取入库时间
-        operator = self.operator_combox.itemData(self.operator_combox.currentIndex())  # 获取操作员
         inbound_amount = self.inbound_amount_double.value()  # 获取入库金额
         validity = self.valid_date_edit.date().toString("yyyy-MM-dd")
         remarks = self.warehousing_remarks_plain_text_edit.toPlainText()  # 入库备注
@@ -139,11 +138,10 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
 
         try:
             query.prepare(
-                "Insert into stock_in_main(order_id, in_date, operator_id, total_amount, invoice_number, batch, production_lot_number, validity, remarks) "
-                "values (?,?,?,?,?,?,?,?,?)")
+                "Insert into stock_in_main(order_id, in_date, total_amount, invoice_number, batch, production_lot_number, validity, remarks) "
+                "values (?,?,?,?,?,?,?,?)")
             query.addBindValue(purchase_order)
             query.addBindValue(inbound_date)
-            query.addBindValue(operator)
             query.addBindValue(inbound_amount)
             query.addBindValue(invoice_number)
             query.addBindValue(batch_number)
@@ -191,12 +189,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             order_number = query.value(1)
             self.purchase_order_combox.addItem(order_number, order_id)
 
-        query = QSqlQuery("SELECT users_id, username FROM users")
-        while query.next():
-            operator_id = query.value(0)
-            operator_name = query.value(1)
-            self.operator_combox.addItem(operator_name, operator_id)
-
         query = QSqlQuery("SELECT warehouse_shelf_id, location FROM warehouse_shelf_position")
         while query.next():
             location_id = query.value(0)
@@ -210,7 +202,7 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         # 查询主表信息
         stock_in_query = QSqlQuery()
         stock_in_query.prepare("""
-            SELECT order_id, in_date, operator_id, total_amount, invoice_number, batch, production_lot_number, validity, remarks
+            SELECT order_id, in_date, total_amount, invoice_number, batch, production_lot_number, validity, remarks
             FROM stock_in_main
             WHERE stock_in_main.in_id = ?
         """)
@@ -218,7 +210,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
 
         order = None
         in_data = None
-        operator = None
         total_amount = 0.0
         invoice_number = ""
         batch = ""
@@ -229,13 +220,12 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         if stock_in_query.exec() and stock_in_query.next():
             order = stock_in_query.value(0)
             in_data = stock_in_query.value(1)
-            operator = stock_in_query.value(2)
-            total_amount = stock_in_query.value(3) or 0.0
-            invoice_number = stock_in_query.value(4) or ""
-            batch = stock_in_query.value(5) or ""
-            production_lot_number = stock_in_query.value(6) or ""
-            validity = stock_in_query.value(7)
-            remarks = stock_in_query.value(8) or ""
+            total_amount = stock_in_query.value(2) or 0.0
+            invoice_number = stock_in_query.value(3) or ""
+            batch = stock_in_query.value(4) or ""
+            production_lot_number = stock_in_query.value(5) or ""
+            validity = stock_in_query.value(6)
+            remarks = stock_in_query.value(7) or ""
 
         # 设置采购订单下拉框
         if order is not None:
@@ -247,9 +237,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         else:
             self.purchase_order_combox.setCurrentIndex(-1)
 
-        # 设置其他控件值
-        # self.inbound_date_time_edit.setDateTime(in_data if in_data else QDateTime.currentDateTime())
-        # 确保传入的是QDateTime类型
         datetime_value = QDateTime.currentDateTime()  # 默认值
         if in_data:
             if isinstance(in_data, str):
@@ -257,7 +244,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             else:
                 datetime_value = in_data
         self.inbound_date_time_edit.setDateTime(datetime_value)
-        self.operator_combox.setCurrentText(str(operator) or "")
         self.inbound_amount_double.setValue(total_amount)
         self.Invoice_line_edit.setText(invoice_number)
         self.batch_lineEdit.setText(batch)
@@ -303,16 +289,11 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         stock_num = self.incoming_quantity_spin_box.value()
         actual_warehousing_quantity = self.actual_incoming_quantity_spin_box.value()
         inbound_date = self.inbound_date_time_edit.dateTime().toString("yyyy-MM-dd hh:mm:ss")  # 获取入库时间
-        operator = self.operator_combox.itemData(self.operator_combox.currentIndex())  # 获取操作员
         inbound_amount = self.inbound_amount_double.value()  # 获取入库金额
         validity = self.valid_date_edit.date().toString("yyyy-MM-dd")
         remarks = self.warehousing_remarks_plain_text_edit.toPlainText()  # 入库备注
         location = self.location_combox.itemData(self.location_combox.currentIndex())
 
-        # 输入校验
-        if not all([purchase_order, invoice_number, batch, purchase_detail_id, operator]):
-            QMessageBox.warning(self, "输入错误", "请填写所有必填项。")
-            return
 
         if stock_num < 0 or actual_warehousing_quantity < 0 or inbound_amount < 0:
             QMessageBox.warning(self, "输入错误", "数量和金额必须大于等于0。")
@@ -327,12 +308,11 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
             # 更新主表
             query.prepare("""
                 UPDATE stock_in_main 
-                SET order_id=?, in_date=?, operator_id=?, total_amount=?, invoice_number=?, batch=?, production_lot_number=?, validity=?, remarks=?
+                SET order_id=?, in_date=?, total_amount=?, invoice_number=?, batch=?, production_lot_number=?, validity=?, remarks=?
                 WHERE order_id = ?
             """)
             query.addBindValue(purchase_order)
             query.addBindValue(inbound_date)
-            query.addBindValue(operator)
             query.addBindValue(inbound_amount)
             query.addBindValue(invoice_number)
             query.addBindValue(batch)

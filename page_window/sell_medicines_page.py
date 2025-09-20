@@ -1,14 +1,13 @@
 import random
 from datetime import datetime
 
-from PySide6.QtCore import QDateTime, QDate
+from PySide6.QtCore import QDateTime
 from PySide6.QtSql import QSqlQuery
+from PySide6.QtWidgets import QDialog, QMessageBox
 
-from data.sqlite_data import get_sales_lists_model, get_sales_model
 from page_window.tools import install_enter_key_filter
 from ui_app.sell_drug_ui import Ui_SellDialog
 from ui_app.sell_list_ui import Ui_SellListDialog
-from PySide6.QtWidgets import QDialog, QMessageBox, QLineEdit, QDialogButtonBox, QVBoxLayout
 
 
 # 销售单列表
@@ -23,7 +22,6 @@ class SellListDialog(QDialog, Ui_SellListDialog):
 
     def ignore_cargo_return(self):
         install_enter_key_filter(self.sell_list_lineEdit)
-        install_enter_key_filter(self.sell_user_comboBox)
         install_enter_key_filter(self.sell_dateTimeEdit)
 
     def bind_event(self):
@@ -34,14 +32,8 @@ class SellListDialog(QDialog, Ui_SellListDialog):
 
     def load_data(self):
         self.sell_dateTimeEdit.setDateTime(QDateTime.currentDateTime())
-        query = QSqlQuery("SELECT users_id, username FROM users")
-        while query.next():
-            users_id = query.value(0)
-            username = query.value(1)
-            self.sell_user_comboBox.addItem(username, users_id)
         # 获取当前日期和时间
         now = datetime.now()
-
         # 格式化日期和时间部分
         date_part = now.strftime("%Y-%m-%d")
         # time_part = now.strftime("%H:%M:%S")
@@ -56,7 +48,6 @@ class SellListDialog(QDialog, Ui_SellListDialog):
 
     def create_sell_list(self):
         sell_list = self.sell_list_lineEdit.text()
-        sell_user = self.sell_user_comboBox.itemData(self.sell_user_comboBox.currentIndex())
         sell_date = self.sell_dateTimeEdit.dateTime().toString("yyyy-MM-dd HH:mm:ss")
 
         query = QSqlQuery()
@@ -65,10 +56,9 @@ class SellListDialog(QDialog, Ui_SellListDialog):
             return
         try:
             query.prepare(
-                "INSERT INTO sales(sale_no, cashier_id, sale_date) "
-                "VALUES (?,?,?)")
+                "INSERT INTO sales(sale_no, sale_date) "
+                "VALUES (?,?)")
             query.addBindValue(sell_list)
-            query.addBindValue(sell_user)
             query.addBindValue(sell_date)
 
             if not query.exec():
@@ -125,11 +115,17 @@ class SellDrugUiDialog(QDialog, Ui_SellDialog):
         self.create_sell_drug()
 
     def load_data(self):
-        query = QSqlQuery("SELECT dic_id, trade_name FROM medicine_dic")
+        query = QSqlQuery("""
+            SELECT DISTINCT md.dic_id, md.trade_name 
+            FROM medicine_dic md
+            INNER JOIN shelves_drug sd ON md.dic_id = sd.drug
+            ORDER BY md.trade_name
+        """)
         while query.next():
             drug_id = query.value(0)
             drug_name = query.value(1)
             self.sell_drug_combox.addItem(drug_name, drug_id)
+
         query = QSqlQuery("SELECT sales_id, sale_no FROM sales ORDER BY sales_id DESC")
         while query.next():
             sales_id = query.value(0)

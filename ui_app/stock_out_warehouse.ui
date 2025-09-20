@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>582</width>
-    <height>296</height>
+    <height>271</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,17 +19,7 @@
      <item row="0" column="2">
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>出库总额</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>出库时间</string>
+        <string>出库总数</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -39,30 +29,10 @@
      <item row="0" column="1">
       <widget class="QLineEdit" name="outbound_number_lineEdit"/>
      </item>
-     <item row="2" column="2">
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>备注</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
         <string>出库编号</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>操作员</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -86,16 +56,45 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="3">
-      <widget class="QComboBox" name="stock_out_operator_combox"/>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="stock_out_type_combox"/>
      </item>
-     <item row="2" column="3">
+     <item row="1" column="2">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>出库时间</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QDateTimeEdit" name="stock_out_dateTime"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>备注</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" colspan="3">
       <widget class="QPlainTextEdit" name="stock_out_remark_plainTextEdit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>500</width>
+         <height>0</height>
+        </size>
        </property>
        <property name="maximumSize">
         <size>
@@ -104,12 +103,6 @@
         </size>
        </property>
       </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QDateTimeEdit" name="stock_out_dateTime"/>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="stock_out_type_combox"/>
      </item>
     </layout>
    </item>

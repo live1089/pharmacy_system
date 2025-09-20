@@ -40,6 +40,14 @@ class Ui_mainWindow(object):
         self.actiond.setObjectName(u"actiond")
         self.actionlight = QAction(mainWindow)
         self.actionlight.setObjectName(u"actionlight")
+        self.actions = QAction(mainWindow)
+        self.actions.setObjectName(u"actions")
+        self.actions_2 = QAction(mainWindow)
+        self.actions_2.setObjectName(u"actions_2")
+        self.actiong = QAction(mainWindow)
+        self.actiong.setObjectName(u"actiong")
+        self.actionm = QAction(mainWindow)
+        self.actionm.setObjectName(u"actionm")
         self.centralwidget = QWidget(mainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout_2 = QGridLayout(self.centralwidget)
@@ -559,6 +567,23 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout_7.addWidget(self.line_21)
 
+        self.sales_records_lineEdit = QLineEdit(self.page_4)
+        self.sales_records_lineEdit.setObjectName(u"sales_records_lineEdit")
+
+        self.horizontalLayout_7.addWidget(self.sales_records_lineEdit)
+
+        self.sales_rec_btn = QPushButton(self.page_4)
+        self.sales_rec_btn.setObjectName(u"sales_rec_btn")
+
+        self.horizontalLayout_7.addWidget(self.sales_rec_btn)
+
+        self.line_38 = QFrame(self.page_4)
+        self.line_38.setObjectName(u"line_38")
+        self.line_38.setFrameShape(QFrame.Shape.VLine)
+        self.line_38.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_7.addWidget(self.line_38)
+
         self.add_sell_list_btn = QPushButton(self.page_4)
         self.add_sell_list_btn.setObjectName(u"add_sell_list_btn")
 
@@ -909,6 +934,13 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout_5.addWidget(self.purchase_order_select_btn)
 
+        self.line_37 = QFrame(self.page_7)
+        self.line_37.setObjectName(u"line_37")
+        self.line_37.setFrameShape(QFrame.Shape.VLine)
+        self.line_37.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_5.addWidget(self.line_37)
+
         self.add_an_order_btn = QPushButton(self.page_7)
         self.add_an_order_btn.setObjectName(u"add_an_order_btn")
 
@@ -1257,18 +1289,26 @@ class Ui_mainWindow(object):
         self.menubar.setGeometry(QRect(0, 0, 1116, 33))
         self.menu_4 = QMenu(self.menubar)
         self.menu_4.setObjectName(u"menu_4")
+        self.user_set_menu = QMenu(self.menubar)
+        self.user_set_menu.setObjectName(u"user_set_menu")
+        self.user_set_menu.setTearOffEnabled(False)
         mainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(mainWindow)
         self.statusbar.setObjectName(u"statusbar")
         mainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menu_4.menuAction())
+        self.menubar.addAction(self.user_set_menu.menuAction())
         self.menu_4.addAction(self.actiond)
         self.menu_4.addAction(self.actionlight)
+        self.menu_4.addAction(self.actionm)
+        self.user_set_menu.addAction(self.actions)
+        self.user_set_menu.addAction(self.actions_2)
+        self.user_set_menu.addAction(self.actiong)
 
         self.retranslateUi(mainWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
         self.stock_in_tabWidget.setCurrentIndex(0)
         self.tabWidget.setCurrentIndex(0)
         self.stock_out_tabWidget.setCurrentIndex(0)
@@ -1286,6 +1326,10 @@ class Ui_mainWindow(object):
         self.actionh.setText(QCoreApplication.translate("mainWindow", u"\u5bfc\u5165\u62a5\u8868", None))
         self.actiond.setText(QCoreApplication.translate("mainWindow", u"\u6697\u8272", None))
         self.actionlight.setText(QCoreApplication.translate("mainWindow", u"\u6d45\u8272", None))
+        self.actions.setText(QCoreApplication.translate("mainWindow", u"\u5f53\u524d\u8d26\u53f7", None))
+        self.actions_2.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u8d26\u53f7", None))
+        self.actiong.setText(QCoreApplication.translate("mainWindow", u"\u7cfb\u7edf", None))
+        self.actionm.setText(QCoreApplication.translate("mainWindow", u"\u9ed8\u8ba4", None))
         self.medicine.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1", None))
         self.sales_records.setText(QCoreApplication.translate("mainWindow", u"\u9500\u552e\u8bb0\u5f55", None))
         self.expiring_medicine.setText(QCoreApplication.translate("mainWindow", u"\u4e34\u671f\u836f\u54c1", None))
@@ -1326,6 +1370,8 @@ class Ui_mainWindow(object):
         self.label.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65e5\u671f", None))
         self.label_2.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65e5\u671f", None))
         self.sales_records_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))
+        self.sales_records_lineEdit.setPlaceholderText(QCoreApplication.translate("mainWindow", u"\u8f93\u5165\u9500\u552e\u5355\u53f7", None))
+        self.sales_rec_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2\u9500\u552e\u5355", None))
         self.add_sell_list_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u9500\u552e\u5355", None))
         self.sell_drug_btn.setText(QCoreApplication.translate("mainWindow", u"\u52a0\u5165\u9500\u552e\u836f\u54c1", None))
         self.sell_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664", None))
@@ -1381,5 +1427,6 @@ class Ui_mainWindow(object):
         self.drug_add_btn.setText(QCoreApplication.translate("mainWindow", u"\u6dfb\u52a0\u836f\u54c1", None))
         self.drug_dic_btn.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1\u8bcd\u5178", None))
         self.menu_4.setTitle(QCoreApplication.translate("mainWindow", u"\u4e3b\u9898", None))
+        self.user_set_menu.setTitle(QCoreApplication.translate("mainWindow", u"\u8bbe\u7f6e", None))
     # retranslateUi
 

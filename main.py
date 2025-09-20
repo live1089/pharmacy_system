@@ -1,21 +1,45 @@
+# !/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
-Author: live1089 a5u3580@163.com
-Date: 2025-06-11 17:10:47
-LastEditors: live1089 a5u3580@163.com
-LastEditTime: 2025-06-11 17:18:55
-FilePath: \\Pharmacy_drug_management_system\\main.py
+药品管理系统主入口文件
 """
 
-# 导入pyside6库
-from PySide6.QtWidgets import (QApplication)
-# 主题
-from qtmodern.styles import dark
+import os
+import sys
 
-import login_window
+import qdarktheme
+from PySide6.QtWidgets import QApplication
 
-if __name__ == "__main__":
-    app = QApplication([])
-    app.setStyleSheet(dark(app))
-    LoginWindow = login_window.LoginWindow()
-    LoginWindow.show()
-    app.exec()
+from login_window import LoginWindow
+
+# 添加当前目录到Python路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+
+# 确保data目录存在
+data_dir = os.path.join(current_dir, 'data')
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
+
+# 确保backups目录存在
+backups_dir = os.path.join(current_dir, 'backups')
+if not os.path.exists(backups_dir):
+    os.makedirs(backups_dir)
+
+
+def main():
+    app = QApplication(sys.argv)
+
+    # 应用暗色主题
+    app.setStyleSheet(qdarktheme.load_stylesheet())
+
+    # 创建并显示登录窗口
+    login_window = LoginWindow()
+    login_window.show()
+
+    sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    main()

@@ -1,5 +1,6 @@
 from enum import Enum
 
+import qdarktheme
 from PySide6.QtCore import QTimer, QDate, QDateTime
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QMainWindow, QMessageBox
@@ -47,6 +48,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         class_set_page(self)
         self.actiond.triggered.connect(self.set_dark_theme)
         self.actionlight.triggered.connect(self.set_light_theme)
+        self.actionm.triggered.connect(self.set_default_theme)
 
         # 初始化药品有效期监控数据
         self.initialize_expiring_medicines_monitor()
@@ -344,6 +346,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         """设置浅色主题"""
         QApplication.instance().setStyleSheet(light(QApplication.instance()))
 
+    def set_default_theme(self):
+        QApplication.instance().setStyleSheet(qdarktheme.load_stylesheet())
+
     def bind_event(self):
         self.medicine.clicked.connect(lambda: self.show_page_by_name(PageMap.shelves_drug_tableView.value))
         self.sales_records.clicked.connect(lambda: self.show_page_by_name(PageMap.tabWidget.value))
@@ -392,6 +397,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.purchase_order_select_btn.clicked.connect(lambda: qu.purchase_order_select(self))
         self.stock_out_list_select_btn.clicked.connect(lambda: qu.stock_out_number_select(self))
         self.shelves_select_btn.clicked.connect(lambda: qu.shelves_select(self))
+        self.sales_rec_btn.clicked.connect(lambda: qu.sales_record_query(self))
 
         self.clear_btn.clicked.connect(self.clean_up_system_data)
 

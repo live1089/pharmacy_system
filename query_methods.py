@@ -68,11 +68,9 @@ def stock_out_number_select(self):
                 s.outbound_number,
                 s.out_type,
                 s.out_date,
-                us.username,
                 s.total_amount,
                 s.remarks
             FROM stock_out_main s
-            LEFT JOIN users us on s.operator_id = us.users_id
             WHERE s.outbound_number LIKE ?
             """
         query = QSqlQuery(self.db)
@@ -202,7 +200,6 @@ def stock_in_query(self):
                 p.order_number,
                 r.name,
                 s.in_date,
-                us.username,
                 s.total_amount,
                 s.invoice_number,
                 s.batch,
@@ -212,7 +209,6 @@ def stock_in_query(self):
             FROM stock_in_main s
             LEFT JOIN purchase_order p ON s.order_id = p.order_id
             LEFT JOIN supplier r ON p.supplier_id = r.supplier_id
-            LEFT JOIN users us ON s.operator_id = us.users_id
             WHERE p.order_number LIKE ?
         """
         query = QSqlQuery(self.db)
@@ -391,3 +387,32 @@ def inventory_record_query(self):
 
     except Exception as e:
         QMessageBox.critical(self, "查询错误", f"查询库存记录时出错: {str(e)}")
+
+
+def sales_record_query(self):
+    text = self.sales_records_lineEdit.text().strip()
+    if not text:
+        data.sqlite_data.get_sales_lists_model(self)
+        return
+
+    self.purchase_order_detail_model = PurchaseDetailModel(self, self.db)
+    sql = f"""
+        SELECT
+            pur.detail_id,
+            ord.order_number,
+            de.trade_name,
+            pur.quantity,
+            pur.purchase_total_price,
+            pur.purchase_price,
+            de.price as 售价,
+            ord.order_date as 下单时间,
+            pur.remarks as 备注  
+        FROM purchase_detail pur
+        LEFT JOIN medicine_dic de ON pur.medicine_id = de.dic_id
+        LEFT JOIN purchase_order ord ON pur.order_id = ord.order_id
+        WHERE ord.order_number LIKE '%{text}%'
+    """
+    self.purchase_order_detail_model.setQuery(sql, self.db)
+    self.purchase_detail_tableView.setModel(self.purchase_order_detail_model)
+    for col in self.purchase_order_detail_model.hidden_columns:
+        self.purchase_detail_tableView.hideColumn(col)

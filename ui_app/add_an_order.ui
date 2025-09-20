@@ -54,7 +54,11 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="supplier_order_comboBox"/>
+      <widget class="QComboBox" name="supplier_order_comboBox">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_5">

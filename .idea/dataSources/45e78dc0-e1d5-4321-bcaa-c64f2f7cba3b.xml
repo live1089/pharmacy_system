@@ -499,7 +499,7 @@
     </routine>
     <schema id="191" parent="1" name="main">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2025-09-19.08:58:58</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2025-09-20.11:37:57</LastIntrospectionLocalTimestamp>
     </schema>
     <argument id="192" parent="16">
       <ArgumentDirection>R</ArgumentDirection>
@@ -1598,1103 +1598,1052 @@
     <table id="560" parent="191" name="expiring_medicines"/>
     <table id="561" parent="191" name="inventory"/>
     <table id="562" parent="191" name="inventory_check"/>
-    <table id="563" parent="191" name="logs"/>
-    <table id="564" parent="191" name="medicine_dic"/>
-    <table id="565" parent="191" name="price_adjustment"/>
-    <table id="566" parent="191" name="purchase_detail"/>
-    <table id="567" parent="191" name="purchase_order"/>
-    <table id="568" parent="191" name="sale_details"/>
-    <table id="569" parent="191" name="sales"/>
-    <table id="570" parent="191" name="shelves_drug"/>
-    <table id="571" parent="191" name="sqlite_master">
+    <table id="563" parent="191" name="medicine_dic"/>
+    <table id="564" parent="191" name="price_adjustment"/>
+    <table id="565" parent="191" name="purchase_detail"/>
+    <table id="566" parent="191" name="purchase_order"/>
+    <table id="567" parent="191" name="sale_details"/>
+    <table id="568" parent="191" name="sales"/>
+    <table id="569" parent="191" name="shelves_drug"/>
+    <table id="570" parent="191" name="sqlite_master">
       <System>1</System>
     </table>
-    <table id="572" parent="191" name="sqlite_sequence">
+    <table id="571" parent="191" name="sqlite_sequence">
       <System>1</System>
     </table>
-    <table id="573" parent="191" name="stock"/>
-    <table id="574" parent="191" name="stock_in_detail"/>
-    <table id="575" parent="191" name="stock_in_main"/>
-    <table id="576" parent="191" name="stock_out_detail"/>
-    <table id="577" parent="191" name="stock_out_main"/>
-    <table id="578" parent="191" name="supplier"/>
-    <table id="579" parent="191" name="users"/>
-    <table id="580" parent="191" name="warehouse_shelf_position"/>
-    <column id="581" parent="555" name="category_id">
+    <table id="572" parent="191" name="stock"/>
+    <table id="573" parent="191" name="stock_in_detail"/>
+    <table id="574" parent="191" name="stock_in_main"/>
+    <table id="575" parent="191" name="stock_out_detail"/>
+    <table id="576" parent="191" name="stock_out_main"/>
+    <table id="577" parent="191" name="supplier"/>
+    <table id="578" parent="191" name="users"/>
+    <table id="579" parent="191" name="warehouse_shelf_position"/>
+    <column id="580" parent="555" name="category_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="582" parent="555" name="category_name">
+    <column id="581" parent="555" name="category_name">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <index id="583" parent="555" name="sqlite_autoindex_MedicineCategories_1">
+    <index id="582" parent="555" name="sqlite_autoindex_MedicineCategories_1">
       <ColNames>category_name</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="584" parent="555">
+    <key id="583" parent="555">
       <ColNames>category_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="585" parent="555">
+    <key id="584" parent="555">
       <ColNames>category_name</ColNames>
       <UnderlyingIndexName>sqlite_autoindex_MedicineCategories_1</UnderlyingIndexName>
     </key>
-    <column id="586" parent="556" name="specification_id">
+    <column id="585" parent="556" name="specification_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="587" parent="556" name="formulation_id">
+    <column id="586" parent="556" name="formulation_id">
       <DasType>INTEGER|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="588" parent="556" name="unit_id">
+    <column id="587" parent="556" name="unit_id">
       <DasType>INTEGER|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="589" parent="556" name="packaging_specifications">
+    <column id="588" parent="556" name="packaging_specifications">
       <DasType>TEXT|0s</DasType>
       <Position>4</Position>
     </column>
-    <foreign-key id="590" parent="556">
+    <foreign-key id="589" parent="556">
       <ColNames>formulation_id</ColNames>
       <RefColNames>formulation_id</RefColNames>
       <RefTableName>drug_formulation</RefTableName>
     </foreign-key>
-    <foreign-key id="591" parent="556">
+    <foreign-key id="590" parent="556">
       <ColNames>unit_id</ColNames>
       <RefColNames>unit_id</RefColNames>
       <RefTableName>drug_unit</RefTableName>
     </foreign-key>
-    <key id="592" parent="556">
+    <key id="591" parent="556">
       <ColNames>specification_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="593" parent="557" name="formulation_id">
+    <column id="592" parent="557" name="formulation_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="594" parent="557" name="formulation_name">
+    <column id="593" parent="557" name="formulation_name">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <key id="595" parent="557">
+    <key id="594" parent="557">
       <ColNames>formulation_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="596" parent="558" name="drug_information_shelves_id">
+    <column id="595" parent="558" name="drug_information_shelves_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="597" parent="558" name="drug">
+    <column id="596" parent="558" name="drug">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="598" parent="558" name="expiration_date">
+    <column id="597" parent="558" name="expiration_date">
       <DasType>DATE|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="599" parent="558" name="purchase_date">
+    <column id="598" parent="558" name="purchase_date">
       <DasType>date|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="600" parent="558" name="shelves_sum">
+    <column id="599" parent="558" name="shelves_sum">
       <DasType>INTEGER|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="601" parent="558" name="warehouse_inventory_sum">
+    <column id="600" parent="558" name="warehouse_inventory_sum">
       <DasType>INTEGER|0s</DasType>
       <Position>6</Position>
     </column>
-    <column id="602" parent="558" name="shelves_location">
+    <column id="601" parent="558" name="shelves_location">
       <DasType>TEXT|0s</DasType>
       <Position>7</Position>
     </column>
-    <column id="603" parent="558" name="warehouse_inventory_location">
+    <column id="602" parent="558" name="warehouse_inventory_location">
       <DasType>TEXT|0s</DasType>
       <Position>8</Position>
     </column>
-    <column id="604" parent="558" name="approval_number">
+    <column id="603" parent="558" name="approval_number">
       <DasType>TEXT|0s</DasType>
       <Position>9</Position>
     </column>
-    <column id="605" parent="558" name="manufacturer">
+    <column id="604" parent="558" name="manufacturer">
       <DasType>TEXT|0s</DasType>
       <Position>10</Position>
     </column>
-    <column id="606" parent="558" name="batch">
+    <column id="605" parent="558" name="batch">
       <DasType>TEXT|0s</DasType>
       <Position>11</Position>
     </column>
-    <column id="607" parent="558" name="supplier">
+    <column id="606" parent="558" name="supplier">
       <DasType>TEXT|0s</DasType>
       <Position>12</Position>
     </column>
-    <key id="608" parent="558">
+    <key id="607" parent="558">
       <ColNames>drug_information_shelves_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="609" parent="559" name="unit_id">
+    <column id="608" parent="559" name="unit_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="610" parent="559" name="unit_name">
+    <column id="609" parent="559" name="unit_name">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <index id="611" parent="559" name="sqlite_autoindex_drug_unit_1">
+    <index id="610" parent="559" name="sqlite_autoindex_drug_unit_1">
       <ColNames>unit_name</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="612" parent="559">
+    <key id="611" parent="559">
       <ColNames>unit_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="613" parent="559">
+    <key id="612" parent="559">
       <ColNames>unit_name</ColNames>
       <UnderlyingIndexName>sqlite_autoindex_drug_unit_1</UnderlyingIndexName>
     </key>
-    <check id="614" parent="560">
+    <check id="613" parent="560">
       <Predicate>status IN (&apos;过期&apos;, &apos;正常&apos;)</Predicate>
     </check>
-    <column id="615" parent="560" name="expiring_medicine_id">
+    <column id="614" parent="560" name="expiring_medicine_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="616" parent="560" name="batch_id">
+    <column id="615" parent="560" name="batch_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="617" parent="560" name="medicine_name">
+    <column id="616" parent="560" name="medicine_name">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="618" parent="560" name="expiry_date">
+    <column id="617" parent="560" name="expiry_date">
       <DasType>DATE|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="619" parent="560" name="days_until_expiry">
+    <column id="618" parent="560" name="days_until_expiry">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="620" parent="560" name="current_stock">
+    <column id="619" parent="560" name="current_stock">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <column id="621" parent="560" name="alert_threshold">
+    <column id="620" parent="560" name="alert_threshold">
       <DasType>INTEGER|0s</DasType>
       <DefaultExpression>30</DefaultExpression>
       <Position>7</Position>
     </column>
-    <column id="622" parent="560" name="status">
+    <column id="621" parent="560" name="status">
       <DasType>TEXT|0s</DasType>
       <Position>8</Position>
     </column>
-    <column id="623" parent="560" name="last_updated">
+    <column id="622" parent="560" name="last_updated">
       <DasType>DATETIME|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <Position>9</Position>
     </column>
-    <foreign-key id="624" parent="560">
+    <foreign-key id="623" parent="560">
       <ColNames>batch_id</ColNames>
       <RefColNames>in_id</RefColNames>
       <RefTableName>stock_in_main</RefTableName>
     </foreign-key>
-    <key id="625" parent="560">
+    <key id="624" parent="560">
       <ColNames>expiring_medicine_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="626" parent="561" name="inventory_id">
+    <column id="625" parent="561" name="inventory_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="627" parent="561" name="medicine_id">
+    <column id="626" parent="561" name="medicine_id">
       <DasType>INTEGER|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="628" parent="561" name="detail_id">
+    <column id="627" parent="561" name="detail_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="629" parent="561" name="quantity">
+    <column id="628" parent="561" name="quantity">
       <DasType>INTEGER|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="630" parent="561" name="change_date">
+    <column id="629" parent="561" name="change_date">
       <DasType>DATE|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="631" parent="561" name="change_type">
+    <column id="630" parent="561" name="change_type">
       <DasType>TEXT|0s</DasType>
       <Position>6</Position>
     </column>
-    <column id="632" parent="561" name="batch_number">
+    <column id="631" parent="561" name="batch_number">
       <DasType>TEXT|0s</DasType>
       <Position>7</Position>
     </column>
-    <column id="633" parent="561" name="production_lot">
+    <column id="632" parent="561" name="production_lot">
       <DasType>TEXT|0s</DasType>
       <Position>8</Position>
     </column>
-    <foreign-key id="634" parent="561">
+    <foreign-key id="633" parent="561">
       <ColNames>medicine_id</ColNames>
       <RefColNames>dic_id</RefColNames>
       <RefTableName>medicine_dic</RefTableName>
     </foreign-key>
-    <foreign-key id="635" parent="561">
+    <foreign-key id="634" parent="561">
       <ColNames>detail_id</ColNames>
       <RefColNames>detail_id</RefColNames>
       <RefTableName>stock_in_detail</RefTableName>
     </foreign-key>
-    <key id="636" parent="561">
+    <key id="635" parent="561">
       <ColNames>inventory_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="637" parent="562" name="check_id">
+    <column id="636" parent="562" name="check_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="638" parent="562" name="medicine_id">
+    <column id="637" parent="562" name="medicine_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="639" parent="562" name="inventory_of_batches">
+    <column id="638" parent="562" name="inventory_of_batches">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="640" parent="562" name="inventory_of_location">
+    <column id="639" parent="562" name="inventory_of_location">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="641" parent="562" name="recorded_quantity">
+    <column id="640" parent="562" name="recorded_quantity">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="642" parent="562" name="actual_quantity">
+    <column id="641" parent="562" name="actual_quantity">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <column id="643" parent="562" name="check_date">
+    <column id="642" parent="562" name="check_date">
       <DasType>DATE|0s</DasType>
       <NotNull>1</NotNull>
       <Position>7</Position>
     </column>
-    <column id="644" parent="562" name="discrepancy_reason">
+    <column id="643" parent="562" name="discrepancy_reason">
       <DasType>TEXT|0s</DasType>
       <Position>8</Position>
     </column>
-    <column id="645" parent="562" name="user_id">
-      <DasType>INTEGER|0s</DasType>
-      <NotNull>1</NotNull>
-      <Position>9</Position>
-    </column>
-    <foreign-key id="646" parent="562">
+    <foreign-key id="644" parent="562">
       <ColNames>medicine_id</ColNames>
       <RefColNames>dic_id</RefColNames>
       <RefTableName>medicine_dic</RefTableName>
     </foreign-key>
-    <foreign-key id="647" parent="562">
+    <foreign-key id="645" parent="562">
       <ColNames>inventory_of_batches</ColNames>
       <RefColNames>in_id</RefColNames>
       <RefTableName>stock_in_main</RefTableName>
     </foreign-key>
-    <foreign-key id="648" parent="562">
+    <foreign-key id="646" parent="562">
       <ColNames>inventory_of_location</ColNames>
       <RefColNames>warehouse_shelf_id</RefColNames>
       <RefTableName>warehouse_shelf_position</RefTableName>
     </foreign-key>
-    <foreign-key id="649" parent="562">
-      <ColNames>user_id</ColNames>
-      <RefColNames>users_id</RefColNames>
-      <RefTableName>users</RefTableName>
-    </foreign-key>
-    <key id="650" parent="562">
+    <key id="647" parent="562">
       <ColNames>check_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="651" parent="563" name="logs_id">
-      <AutoIncrement>1</AutoIncrement>
-      <DasType>INTEGER|0s</DasType>
-      <Position>1</Position>
-    </column>
-    <column id="652" parent="563" name="user_id">
-      <DasType>INTEGER|0s</DasType>
-      <Position>2</Position>
-    </column>
-    <column id="653" parent="563" name="action">
-      <DasType>TEXT|0s</DasType>
-      <Position>3</Position>
-    </column>
-    <column id="654" parent="563" name="timestamp">
-      <DasType>DATETIME|0s</DasType>
-      <Position>4</Position>
-    </column>
-    <foreign-key id="655" parent="563">
-      <ColNames>user_id</ColNames>
-      <RefColNames>users_id</RefColNames>
-      <RefTableName>users</RefTableName>
-    </foreign-key>
-    <key id="656" parent="563">
-      <ColNames>logs_id</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <check id="657" parent="564">
+    <check id="648" parent="563">
       <Predicate>price &gt;= 0</Predicate>
     </check>
-    <column id="658" parent="564" name="dic_id">
+    <column id="649" parent="563" name="dic_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="659" parent="564" name="trade_name">
+    <column id="650" parent="563" name="trade_name">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="660" parent="564" name="generic_name">
+    <column id="651" parent="563" name="generic_name">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="661" parent="564" name="specification_id">
+    <column id="652" parent="563" name="specification_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="662" parent="564" name="manufacturer">
+    <column id="653" parent="563" name="manufacturer">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="663" parent="564" name="formulation_id">
+    <column id="654" parent="563" name="formulation_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <column id="664" parent="564" name="approval_number">
+    <column id="655" parent="563" name="approval_number">
       <DasType>TEXT|0s</DasType>
       <Position>7</Position>
     </column>
-    <column id="665" parent="564" name="category_id">
+    <column id="656" parent="563" name="category_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>8</Position>
     </column>
-    <column id="666" parent="564" name="unit_id">
+    <column id="657" parent="563" name="unit_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>9</Position>
     </column>
-    <column id="667" parent="564" name="price">
+    <column id="658" parent="563" name="price">
       <DasType>REAL|0s</DasType>
       <Position>10</Position>
     </column>
-    <foreign-key id="668" parent="564">
+    <foreign-key id="659" parent="563">
       <ColNames>specification_id</ColNames>
       <RefColNames>specification_id</RefColNames>
       <RefTableName>Specification</RefTableName>
     </foreign-key>
-    <foreign-key id="669" parent="564">
+    <foreign-key id="660" parent="563">
       <ColNames>formulation_id</ColNames>
       <RefColNames>formulation_id</RefColNames>
       <RefTableName>drug_formulation</RefTableName>
     </foreign-key>
-    <foreign-key id="670" parent="564">
+    <foreign-key id="661" parent="563">
       <ColNames>category_id</ColNames>
       <RefColNames>category_id</RefColNames>
       <RefTableName>MedicineCategories</RefTableName>
     </foreign-key>
-    <foreign-key id="671" parent="564">
+    <foreign-key id="662" parent="563">
       <ColNames>unit_id</ColNames>
       <RefColNames>unit_id</RefColNames>
       <RefTableName>drug_unit</RefTableName>
     </foreign-key>
-    <index id="672" parent="564" name="sqlite_autoindex_medicine_dic_1">
+    <index id="663" parent="563" name="sqlite_autoindex_medicine_dic_1">
       <ColNames>generic_name
 specification_id
 manufacturer</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="673" parent="564">
+    <key id="664" parent="563">
       <ColNames>dic_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="674" parent="564">
+    <key id="665" parent="563">
       <ColNames>generic_name
 specification_id
 manufacturer</ColNames>
       <UnderlyingIndexName>sqlite_autoindex_medicine_dic_1</UnderlyingIndexName>
     </key>
-    <column id="675" parent="565" name="adjustment_id">
+    <column id="666" parent="564" name="adjustment_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="676" parent="565" name="medicine_id">
+    <column id="667" parent="564" name="medicine_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="677" parent="565" name="old_price">
+    <column id="668" parent="564" name="old_price">
       <DasType>REAL|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="678" parent="565" name="new_price">
+    <column id="669" parent="564" name="new_price">
       <DasType>REAL|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="679" parent="565" name="adjustment_date">
+    <column id="670" parent="564" name="adjustment_date">
       <DasType>DATE|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="680" parent="565" name="reason">
+    <column id="671" parent="564" name="reason">
       <DasType>TEXT|0s</DasType>
       <Position>6</Position>
     </column>
-    <foreign-key id="681" parent="565">
+    <foreign-key id="672" parent="564">
       <ColNames>medicine_id</ColNames>
       <RefColNames>dic_id</RefColNames>
       <RefTableName>medicine_dic</RefTableName>
     </foreign-key>
-    <key id="682" parent="565">
+    <key id="673" parent="564">
       <ColNames>adjustment_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <check id="683" parent="566">
+    <check id="674" parent="565">
       <Predicate>purchase_price &gt;= 0</Predicate>
     </check>
-    <check id="684" parent="566">
+    <check id="675" parent="565">
       <Predicate>purchase_total_price &gt;= 0</Predicate>
     </check>
-    <check id="685" parent="566">
+    <check id="676" parent="565">
       <Predicate>quantity &gt; 0</Predicate>
     </check>
-    <column id="686" parent="566" name="detail_id">
+    <column id="677" parent="565" name="detail_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="687" parent="566" name="order_id">
+    <column id="678" parent="565" name="order_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="688" parent="566" name="medicine_id">
+    <column id="679" parent="565" name="medicine_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="689" parent="566" name="quantity">
+    <column id="680" parent="565" name="quantity">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="690" parent="566" name="purchase_total_price">
+    <column id="681" parent="565" name="purchase_total_price">
       <DasType>REAL|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="691" parent="566" name="purchase_price">
+    <column id="682" parent="565" name="purchase_price">
       <DasType>REAL|0s</DasType>
       <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <column id="692" parent="566" name="remarks">
+    <column id="683" parent="565" name="remarks">
       <DasType>TEXT|0s</DasType>
       <Position>7</Position>
     </column>
-    <foreign-key id="693" parent="566">
+    <foreign-key id="684" parent="565">
       <ColNames>order_id</ColNames>
       <RefColNames>order_id</RefColNames>
       <RefTableName>purchase_order</RefTableName>
     </foreign-key>
-    <foreign-key id="694" parent="566">
+    <foreign-key id="685" parent="565">
       <ColNames>medicine_id</ColNames>
       <RefColNames>dic_id</RefColNames>
       <RefTableName>medicine_dic</RefTableName>
     </foreign-key>
-    <key id="695" parent="566">
+    <key id="686" parent="565">
       <ColNames>detail_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="696" parent="567" name="order_id">
+    <column id="687" parent="566" name="order_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="697" parent="567" name="order_number">
+    <column id="688" parent="566" name="order_number">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="698" parent="567" name="supplier_id">
+    <column id="689" parent="566" name="supplier_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="699" parent="567" name="order_date">
+    <column id="690" parent="566" name="order_date">
       <DasType>DATE|0s</DasType>
       <DefaultExpression>CURRENT_DATE</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="700" parent="567" name="expected_delivery_date">
+    <column id="691" parent="566" name="expected_delivery_date">
       <DasType>DATE|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="701" parent="567" name="total_amount">
+    <column id="692" parent="566" name="total_amount">
       <DasType>REAL|0s</DasType>
       <Position>6</Position>
     </column>
-    <column id="702" parent="567" name="remarks">
+    <column id="693" parent="566" name="remarks">
       <DasType>TEXT|0s</DasType>
       <Position>7</Position>
     </column>
-    <foreign-key id="703" parent="567">
+    <foreign-key id="694" parent="566">
       <ColNames>supplier_id</ColNames>
       <RefColNames>supplier_id</RefColNames>
       <RefTableName>supplier</RefTableName>
     </foreign-key>
-    <key id="704" parent="567">
+    <key id="695" parent="566">
       <ColNames>order_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <check id="705" parent="568">
+    <check id="696" parent="567">
       <Predicate>price &gt;= 0</Predicate>
     </check>
-    <check id="706" parent="568">
+    <check id="697" parent="567">
       <Predicate>quantity &gt;= 0</Predicate>
     </check>
-    <column id="707" parent="568" name="detail_id">
+    <column id="698" parent="567" name="detail_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="708" parent="568" name="sales_id">
+    <column id="699" parent="567" name="sales_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="709" parent="568" name="medicine_id">
+    <column id="700" parent="567" name="medicine_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="710" parent="568" name="quantity">
+    <column id="701" parent="567" name="quantity">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="711" parent="568" name="price">
+    <column id="702" parent="567" name="price">
       <DasType>REAL|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="712" parent="568" name="total_amount">
+    <column id="703" parent="567" name="total_amount">
       <DasType>DECIMAL(10,2)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <foreign-key id="713" parent="568">
+    <foreign-key id="704" parent="567">
       <ColNames>sales_id</ColNames>
       <RefColNames>sales_id</RefColNames>
       <RefTableName>sales</RefTableName>
     </foreign-key>
-    <foreign-key id="714" parent="568">
+    <foreign-key id="705" parent="567">
       <ColNames>medicine_id</ColNames>
       <RefColNames>dic_id</RefColNames>
       <RefTableName>medicine_dic</RefTableName>
     </foreign-key>
-    <key id="715" parent="568">
+    <key id="706" parent="567">
       <ColNames>detail_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="716" parent="569" name="sales_id">
+    <column id="707" parent="568" name="sales_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="717" parent="569" name="sale_no">
+    <column id="708" parent="568" name="sale_no">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="718" parent="569" name="cashier_id">
-      <DasType>INTEGER|0s</DasType>
-      <NotNull>1</NotNull>
-      <Position>3</Position>
-    </column>
-    <column id="719" parent="569" name="sale_date">
+    <column id="709" parent="568" name="sale_date">
       <DasType>DATETIME|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
-      <Position>4</Position>
+      <Position>3</Position>
     </column>
-    <foreign-key id="720" parent="569">
-      <ColNames>cashier_id</ColNames>
-      <RefColNames>users_id</RefColNames>
-      <RefTableName>users</RefTableName>
-    </foreign-key>
-    <index id="721" parent="569" name="sqlite_autoindex_sales_1">
+    <index id="710" parent="568" name="sqlite_autoindex_sales_1">
       <ColNames>sale_no</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="722" parent="569">
+    <key id="711" parent="568">
       <ColNames>sales_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="723" parent="569">
+    <key id="712" parent="568">
       <ColNames>sale_no</ColNames>
       <UnderlyingIndexName>sqlite_autoindex_sales_1</UnderlyingIndexName>
     </key>
-    <column id="724" parent="570" name="shelves_id">
+    <column id="713" parent="569" name="shelves_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="725" parent="570" name="outbound_number">
+    <column id="714" parent="569" name="outbound_number">
       <DasType>INTEGER|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="726" parent="570" name="out_batch">
+    <column id="715" parent="569" name="out_batch">
       <DasType>INTEGER|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="727" parent="570" name="drug">
+    <column id="716" parent="569" name="drug">
       <DasType>INTEGER|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="728" parent="570" name="shelves_number">
+    <column id="717" parent="569" name="shelves_number">
       <DasType>INTEGER|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="729" parent="570" name="location_id">
+    <column id="718" parent="569" name="location_id">
       <DasType>INTEGER|0s</DasType>
       <Position>6</Position>
     </column>
-    <foreign-key id="730" parent="570">
+    <foreign-key id="719" parent="569">
       <ColNames>out_batch</ColNames>
       <RefColNames>detail_id</RefColNames>
       <RefTableName>stock_out_detail</RefTableName>
     </foreign-key>
-    <foreign-key id="731" parent="570">
+    <foreign-key id="720" parent="569">
       <ColNames>drug</ColNames>
       <RefColNames>dic_id</RefColNames>
       <RefTableName>medicine_dic</RefTableName>
     </foreign-key>
-    <foreign-key id="732" parent="570">
+    <foreign-key id="721" parent="569">
       <ColNames>location_id</ColNames>
       <RefColNames>warehouse_shelf_id</RefColNames>
       <RefTableName>warehouse_shelf_position</RefTableName>
     </foreign-key>
-    <key id="733" parent="570">
+    <key id="722" parent="569">
       <ColNames>shelves_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="734" parent="571" name="type">
+    <trigger id="723" parent="569" name="update_shelves_location_on_shelf_update">
+      <Condition>OLD.location_id != NEW.location_id OR OLD.drug != NEW.drug</Condition>
+      <Events>U</Events>
+      <SourceTextLength>1041</SourceTextLength>
+      <Turn>after-row</Turn>
+    </trigger>
+    <column id="724" parent="570" name="type">
       <DasType>TEXT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="735" parent="571" name="name">
+    <column id="725" parent="570" name="name">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="736" parent="571" name="tbl_name">
+    <column id="726" parent="570" name="tbl_name">
       <DasType>TEXT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="737" parent="571" name="rootpage">
+    <column id="727" parent="570" name="rootpage">
       <DasType>INT|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="738" parent="571" name="sql">
+    <column id="728" parent="570" name="sql">
       <DasType>TEXT|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="739" parent="572" name="name">
+    <column id="729" parent="571" name="name">
       <Position>1</Position>
     </column>
-    <column id="740" parent="572" name="seq">
+    <column id="730" parent="571" name="seq">
       <Position>2</Position>
     </column>
-    <check id="741" parent="573">
+    <check id="731" parent="572">
       <Predicate>quantity &gt;= 0</Predicate>
     </check>
-    <column id="742" parent="573" name="stock_id">
+    <column id="732" parent="572" name="stock_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="743" parent="573" name="drug_id">
+    <column id="733" parent="572" name="drug_id">
       <DasType>INTEGER|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="744" parent="573" name="batch">
+    <column id="734" parent="572" name="batch">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="745" parent="573" name="location">
+    <column id="735" parent="572" name="location">
       <DasType>INT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="746" parent="573" name="quantity">
+    <column id="736" parent="572" name="quantity">
       <DasType>INT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="747" parent="573" name="last_update">
+    <column id="737" parent="572" name="last_update">
       <DasType>DATETIME|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <Position>6</Position>
     </column>
-    <foreign-key id="748" parent="573">
+    <foreign-key id="738" parent="572">
       <ColNames>drug_id</ColNames>
       <RefColNames>dic_id</RefColNames>
       <RefTableName>medicine_dic</RefTableName>
     </foreign-key>
-    <foreign-key id="749" parent="573">
+    <foreign-key id="739" parent="572">
       <ColNames>batch</ColNames>
       <RefColNames>in_id</RefColNames>
       <RefTableName>stock_in_main</RefTableName>
     </foreign-key>
-    <foreign-key id="750" parent="573">
+    <foreign-key id="740" parent="572">
       <ColNames>location</ColNames>
       <RefColNames>warehouse_shelf_id</RefColNames>
       <RefTableName>warehouse_shelf_position</RefTableName>
     </foreign-key>
-    <key id="751" parent="573">
+    <key id="741" parent="572">
       <ColNames>stock_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <check id="752" parent="574">
+    <check id="742" parent="573">
       <Predicate>actual_quantity &lt;= quantity</Predicate>
     </check>
-    <check id="753" parent="574">
+    <check id="743" parent="573">
       <Predicate>actual_quantity &gt; 0</Predicate>
     </check>
-    <check id="754" parent="574">
+    <check id="744" parent="573">
       <Predicate>quantity &gt; 0</Predicate>
     </check>
-    <column id="755" parent="574" name="detail_id">
+    <column id="745" parent="573" name="detail_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="756" parent="574" name="in_id">
+    <column id="746" parent="573" name="in_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="757" parent="574" name="purchase_detail_id">
+    <column id="747" parent="573" name="purchase_detail_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="758" parent="574" name="quantity">
+    <column id="748" parent="573" name="quantity">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="759" parent="574" name="actual_quantity">
+    <column id="749" parent="573" name="actual_quantity">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="760" parent="574" name="warehouse_shelf_id">
+    <column id="750" parent="573" name="warehouse_shelf_id">
       <DasType>INTEGER|0s</DasType>
       <Position>6</Position>
     </column>
-    <foreign-key id="761" parent="574">
+    <foreign-key id="751" parent="573">
       <ColNames>in_id</ColNames>
       <RefColNames>in_id</RefColNames>
       <RefTableName>stock_in_main</RefTableName>
     </foreign-key>
-    <foreign-key id="762" parent="574">
+    <foreign-key id="752" parent="573">
       <ColNames>purchase_detail_id</ColNames>
       <RefColNames>detail_id</RefColNames>
       <RefTableName>purchase_detail</RefTableName>
     </foreign-key>
-    <foreign-key id="763" parent="574">
+    <foreign-key id="753" parent="573">
       <ColNames>warehouse_shelf_id</ColNames>
       <RefColNames>warehouse_shelf_id</RefColNames>
       <RefTableName>warehouse_shelf_position</RefTableName>
     </foreign-key>
-    <key id="764" parent="574">
+    <key id="754" parent="573">
       <ColNames>detail_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="765" parent="575" name="in_id">
+    <column id="755" parent="574" name="in_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="766" parent="575" name="order_id">
+    <column id="756" parent="574" name="order_id">
       <DasType>INTEGER|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="767" parent="575" name="in_date">
+    <column id="757" parent="574" name="in_date">
       <DasType>DATETIME|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="768" parent="575" name="operator_id">
-      <DasType>INTEGER|0s</DasType>
-      <NotNull>1</NotNull>
+    <column id="758" parent="574" name="total_amount">
+      <DasType>REAL|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="769" parent="575" name="total_amount">
-      <DasType>REAL|0s</DasType>
+    <column id="759" parent="574" name="invoice_number">
+      <DasType>TEXT|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="770" parent="575" name="invoice_number">
-      <DasType>TEXT|0s</DasType>
+    <column id="760" parent="574" name="batch">
+      <DasType>INTEGER|0s</DasType>
+      <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <column id="771" parent="575" name="batch">
+    <column id="761" parent="574" name="production_lot_number">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>7</Position>
     </column>
-    <column id="772" parent="575" name="production_lot_number">
-      <DasType>INTEGER|0s</DasType>
-      <NotNull>1</NotNull>
-      <Position>8</Position>
-    </column>
-    <column id="773" parent="575" name="validity">
+    <column id="762" parent="574" name="validity">
       <DasType>DATETIME|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
+      <Position>8</Position>
+    </column>
+    <column id="763" parent="574" name="remarks">
+      <DasType>TEXT|0s</DasType>
       <Position>9</Position>
     </column>
-    <column id="774" parent="575" name="remarks">
-      <DasType>TEXT|0s</DasType>
-      <Position>10</Position>
-    </column>
-    <foreign-key id="775" parent="575">
-      <ColNames>operator_id</ColNames>
-      <RefColNames>users_id</RefColNames>
-      <RefTableName>users</RefTableName>
-    </foreign-key>
-    <key id="776" parent="575">
+    <key id="764" parent="574">
       <ColNames>in_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="777" parent="576" name="detail_id">
+    <column id="765" parent="575" name="detail_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="778" parent="576" name="out_id">
+    <column id="766" parent="575" name="out_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="779" parent="576" name="medicine_id">
+    <column id="767" parent="575" name="medicine_id">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="780" parent="576" name="stock_batch">
+    <column id="768" parent="575" name="stock_batch">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="781" parent="576" name="out_batch">
+    <column id="769" parent="575" name="out_batch">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="782" parent="576" name="quantity">
+    <column id="770" parent="575" name="quantity">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <column id="783" parent="576" name="time">
+    <column id="771" parent="575" name="time">
       <DasType>Date|0s</DasType>
       <NotNull>1</NotNull>
       <Position>7</Position>
     </column>
-    <foreign-key id="784" parent="576">
+    <foreign-key id="772" parent="575">
       <ColNames>out_id</ColNames>
       <RefColNames>out_id</RefColNames>
       <RefTableName>stock_out_main</RefTableName>
     </foreign-key>
-    <foreign-key id="785" parent="576">
+    <foreign-key id="773" parent="575">
       <ColNames>medicine_id</ColNames>
       <RefColNames>dic_id</RefColNames>
       <RefTableName>medicine_dic</RefTableName>
     </foreign-key>
-    <foreign-key id="786" parent="576">
+    <foreign-key id="774" parent="575">
       <ColNames>stock_batch</ColNames>
       <RefColNames>in_id</RefColNames>
       <RefTableName>stock_in_main</RefTableName>
     </foreign-key>
-    <key id="787" parent="576">
+    <key id="775" parent="575">
       <ColNames>detail_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <check id="788" parent="577">
+    <check id="776" parent="576">
       <Predicate>out_type IN (&apos;调拨&apos;, &apos;报损&apos;, &apos;退货&apos;,&apos;上架&apos;)</Predicate>
     </check>
-    <column id="789" parent="577" name="out_id">
+    <column id="777" parent="576" name="out_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="790" parent="577" name="outbound_number">
+    <column id="778" parent="576" name="outbound_number">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="791" parent="577" name="out_type">
+    <column id="779" parent="576" name="out_type">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="792" parent="577" name="out_date">
+    <column id="780" parent="576" name="out_date">
       <DasType>DATETIME|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="793" parent="577" name="operator_id">
-      <DasType>INTEGER|0s</DasType>
-      <NotNull>1</NotNull>
+    <column id="781" parent="576" name="total_amount">
+      <DasType>REAL|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="794" parent="577" name="total_amount">
-      <DasType>REAL|0s</DasType>
+    <column id="782" parent="576" name="remarks">
+      <DasType>TEXT|0s</DasType>
       <Position>6</Position>
     </column>
-    <column id="795" parent="577" name="remarks">
-      <DasType>TEXT|0s</DasType>
-      <Position>7</Position>
-    </column>
-    <foreign-key id="796" parent="577">
-      <ColNames>operator_id</ColNames>
-      <RefColNames>users_id</RefColNames>
-      <RefTableName>users</RefTableName>
-    </foreign-key>
-    <key id="797" parent="577">
+    <key id="783" parent="576">
       <ColNames>out_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="798" parent="578" name="supplier_id">
+    <column id="784" parent="577" name="supplier_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="799" parent="578" name="name">
+    <column id="785" parent="577" name="name">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="800" parent="578" name="contact_person">
+    <column id="786" parent="577" name="contact_person">
       <DasType>TEXT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="801" parent="578" name="phone">
+    <column id="787" parent="577" name="phone">
       <DasType>TEXT|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="802" parent="578" name="address">
+    <column id="788" parent="577" name="address">
       <DasType>TEXT|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="803" parent="578" name="email">
+    <column id="789" parent="577" name="email">
       <DasType>TEXT|0s</DasType>
       <Position>6</Position>
     </column>
-    <column id="804" parent="578" name="remarks">
+    <column id="790" parent="577" name="remarks">
       <DasType>TEXT|0s</DasType>
       <Position>7</Position>
     </column>
-    <column id="805" parent="578" name="update_at">
+    <column id="791" parent="577" name="update_at">
       <DasType>TIMESTAMP|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <Position>8</Position>
     </column>
-    <column id="806" parent="578" name="update_by">
+    <column id="792" parent="577" name="update_by">
       <DasType>TEXT|0s</DasType>
       <Position>9</Position>
     </column>
-    <column id="807" parent="578" name="create_at">
+    <column id="793" parent="577" name="create_at">
       <DasType>TIMESTAMP|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <Position>10</Position>
     </column>
-    <column id="808" parent="578" name="created_by">
+    <column id="794" parent="577" name="created_by">
       <DasType>TEXT|0s</DasType>
       <Position>11</Position>
     </column>
-    <key id="809" parent="578">
+    <key id="795" parent="577">
       <ColNames>supplier_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="810" parent="579" name="users_id">
+    <column id="796" parent="578" name="users_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="811" parent="579" name="username">
+    <column id="797" parent="578" name="username">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="812" parent="579" name="password">
+    <column id="798" parent="578" name="password">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="813" parent="579" name="role">
+    <column id="799" parent="578" name="salt">
       <DasType>TEXT|0s</DasType>
+      <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <key id="814" parent="579">
+    <column id="800" parent="578" name="phone_number">
+      <DasType>TEXT|0s</DasType>
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+    </column>
+    <column id="801" parent="578" name="tip">
+      <DasType>TEXT|0s</DasType>
+      <Position>6</Position>
+    </column>
+    <key id="802" parent="578">
       <ColNames>users_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="815" parent="580" name="warehouse_shelf_id">
+    <column id="803" parent="579" name="warehouse_shelf_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="816" parent="580" name="location">
+    <column id="804" parent="579" name="location">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <key id="817" parent="580">
+    <key id="805" parent="579">
       <ColNames>warehouse_shelf_id</ColNames>
       <Primary>1</Primary>
     </key>

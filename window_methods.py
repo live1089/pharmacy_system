@@ -14,6 +14,7 @@ from page_window.shelves_drug_page import ShelvesDrugPage
 from page_window.stock_medicines_page import StockMedicinesPage, StockLocationPage, StockInAllPage
 from page_window.stock_out_page import StockOutPage, StockOutAddDrugPage
 from page_window.supplier_medicines_page import SupplierDrugPage, get_selected_logical_rows
+from page_window.user_set_menu import UserSetPage, CurrentUserPage, SystemPage
 
 start_times = QDateTime.currentDateTime().addDays(-30).date().toString("yyyy-MM-dd")
 end_times = QDateTime.currentDateTime().addDays(+1).date().toString("yyyy-MM-dd")
@@ -278,20 +279,26 @@ def inventory_del(self):
 
 
 def stock_mod(self):
-    selected_rows = get_selected_logical_rows(self.main_tableView)
-    if not selected_rows:
-        QMessageBox.warning(self, "警告", "请先选择要修改的记录")
-        return
+    current_order_tab_index = self.stock_in_tabWidget.currentIndex()
+    if current_order_tab_index == 0:
+        selected_rows = get_selected_logical_rows(self.main_tableView)
+        if not selected_rows:
+            # 根据当前标签页显示不同的提示信息
+            if current_order_tab_index == 0:
+                QMessageBox.warning(self, "警告", "请先选择要修改的记录")
+            elif current_order_tab_index == 1:
+                QMessageBox.warning(self, "警告", "请切换到主表标签页选择要修改的记录")
+            return
 
-    model = self.main_tableView.model()
-    if model and len(selected_rows) > 0:
-        stock_in_id = model.data(model.index(selected_rows[0], 0))
+        model = self.main_tableView.model()
+        if model and len(selected_rows) > 0:
+            stock_in_id = model.data(model.index(selected_rows[0], 0))
 
-        self.sup = StockMedicinesPage(self)
-        self.sup.load_order_data(stock_in_id)  # 先填充数据
-        if self.sup.exec() == QDialog.DialogCode.Accepted:  # 如果成功保存
-            data.sqlite_data.get_stock_in_main_model(self, start_times, end_times)
-            data.sqlite_data.get_stock_in_detail_model(self, start_times, end_times)
+            self.sup = StockMedicinesPage(self)
+            self.sup.load_order_data(stock_in_id)  # 先填充数据
+            if self.sup.exec() == QDialog.DialogCode.Accepted:  # 如果成功保存
+                data.sqlite_data.get_stock_in_main_model(self, start_times, end_times)
+                data.sqlite_data.get_stock_in_detail_model(self, start_times, end_times)
 
 
 def shelves_mod(self):
@@ -393,6 +400,9 @@ def inventory_check_mod(self):
 
 # -------------------------------------------------------------------------------------------------------------------------------
 # 添加跳出子窗口事件
+
+
+
 def sub_window_event(self):
     self.drug_add_btn.clicked.connect(lambda: drug_adds(self))
     self.drugs_set_btn.clicked.connect(lambda: drug_attribute(self))
@@ -410,6 +420,23 @@ def sub_window_event(self):
     self.inventory_check_add_btn.clicked.connect(lambda: inventory_check_add(self))
     self.shelves_add_btn.clicked.connect(lambda: shelves_add(self))
 
+    self.actions_2.triggered.connect(lambda: user_set_menu_event(self))
+    self.actions.triggered.connect(lambda: user_menu_event(self))
+    self.actiong.triggered.connect(lambda: system_formatting(self))
+
+def system_formatting(self):
+    self.formatting = SystemPage(self)
+    self.formatting.exec()
+
+
+def user_menu_event(self):
+    self.current_user_page = CurrentUserPage(self)
+    self.current_user_page.exec()
+
+
+def user_set_menu_event(self):
+    self.user_set_menu_event_page = UserSetPage(self)
+    self.user_set_menu_event_page.exec()
 
 
 def shelves_add(self):
@@ -501,3 +528,44 @@ def inventory_check_add(self):
     self.inventory_check_add_page = InventoryCountPage(self)
     self.inventory_check_add_page.exec()
     data.sqlite_data.get_inventory_check(self, start_times, end_times)
+
+
+
+# 数据库备份恢复事件
+def backup_database_event(self):
+    """
+    数据库备份事件处理函数
+    """
+    from data.backup import backup_database
+    backup_database(self)
+
+
+def restore_database_event(self):
+    """
+    数据库恢复事件处理函数
+    """
+    from data.backup import restore_database
+    if restore_database(self):
+        # 恢复成功后提示重启应用
+        reply = QMessageBox.question(
+            self,
+            "重启应用",
+            "数据库恢复成功，需要重启应用才能生效。\n\n是否现在重启？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            # 重启应用的代码
+            import sys
+            import os
+            os.execv(sys.executable, ['python'] + sys.argv)
+
+
+def auto_backup_database_event(self):
+    """
+    自动备份数据库事件处理函数
+    """
+    from data.backup import auto_backup_database
+    auto_backup_database(self)
+

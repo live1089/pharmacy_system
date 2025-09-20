@@ -54,6 +54,7 @@ class Ui_AnOrderDialog(object):
 
         self.supplier_order_comboBox = QComboBox(AnOrderDialog)
         self.supplier_order_comboBox.setObjectName(u"supplier_order_comboBox")
+        self.supplier_order_comboBox.setEditable(True)
 
         self.gridLayout.addWidget(self.supplier_order_comboBox, 1, 1, 1, 1)
 

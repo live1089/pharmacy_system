@@ -1,12 +1,13 @@
-from PySide6 import QtCore
-from PySide6.QtCore import QDate, QDateTime, Qt, QEvent
-from PySide6.QtSql import QSqlQuery
-from PySide6.QtWidgets import QDialog, QMessageBox, QLineEdit
 import random
 
+from PySide6 import QtCore
+from PySide6.QtCore import QDate, QDateTime
+from PySide6.QtSql import QSqlQuery
+from PySide6.QtWidgets import QDialog, QMessageBox
+
 from page_window.tools import install_enter_key_filter, safe_set_datetime
-from ui_app.stock_out_warehouse_ui import Ui_OutWarehouseMTDialog
 from ui_app.stock_out_warehouse_drug_ui import Ui_OutWarehouseDrugDialog
+from ui_app.stock_out_warehouse_ui import Ui_OutWarehouseMTDialog
 
 
 class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
@@ -55,17 +56,11 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
         for type_name in types:
             self.stock_out_type_combox.addItem(type_name, type_name)  # 第二个参数是 itemData
 
-        query = QSqlQuery("SELECT users_id, username FROM users")
-        while query.next():
-            operator_id = query.value(0)
-            operator_name = query.value(1)
-            self.stock_out_operator_combox.addItem(operator_name, operator_id)
-
     def load_stock_out_data(self, out_id):
         self.out_id = out_id
         self.out_warehouse_save_btn.setText("更新出库")
         query = QSqlQuery()
-        query.prepare("SELECT outbound_number, out_type, out_date, operator_id, total_amount, remarks "
+        query.prepare("SELECT outbound_number, out_type, out_date, total_amount, remarks "
                       "FROM stock_out_main "
                       "WHERE out_id = ?")
         query.addBindValue(out_id)
@@ -74,13 +69,11 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
             outbound_number = query.value(0)
             stock_out_type = query.value(1)
             out_date = query.value(2)
-            stock_out_operator = query.value(3)
-            total_amount = query.value(4)
-            stock_out_remark = query.value(5)
+            total_amount = query.value(3)
+            stock_out_remark = query.value(4)
 
             self.outbound_number_lineEdit.setText(outbound_number)
             self.stock_out_type_combox.setCurrentIndex(self.stock_out_type_combox.findData(stock_out_type))
-            self.stock_out_operator_combox.setCurrentIndex(self.stock_out_operator_combox.findData(stock_out_operator))
             datetime_value = QDateTime.currentDateTime()  # 默认值
             if out_date:
                 if isinstance(out_date, str):
@@ -97,7 +90,6 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
             return
         outbound_number = self.outbound_number_lineEdit.text()
         stock_out_type = self.stock_out_type_combox.itemData(self.stock_out_type_combox.currentIndex())
-        stock_out_operator = self.stock_out_operator_combox.itemData(self.stock_out_operator_combox.currentIndex())
         stock_out_date = self.stock_out_dateTime.dateTime().toString("yyyy-MM-dd hh:mm:ss")
         stock_out_total_amount = self.stock_out_total_amount_spinBox.value()
         stock_out_remark = self.stock_out_remark_plainTextEdit.toPlainText()
@@ -110,12 +102,11 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
 
             query.prepare(
                 "UPDATE stock_out_main "
-                "SET outbound_number = ?, out_type = ?, out_date = ?, operator_id = ?, total_amount = ?, remarks = ? "
+                "SET outbound_number = ?, out_type = ?, out_date = ?, total_amount = ?, remarks = ? "
                 "WHERE out_id = ?")
             query.addBindValue(outbound_number)
             query.addBindValue(stock_out_type)
             query.addBindValue(stock_out_date)
-            query.addBindValue(stock_out_operator)
             query.addBindValue(stock_out_total_amount)
             query.addBindValue(stock_out_remark)
             query.addBindValue(self.out_id)
@@ -132,7 +123,6 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
     def create_stock_out(self):
         outbound_number = self.outbound_number_lineEdit.text()
         stock_out_type = self.stock_out_type_combox.currentText()
-        stock_out_operator = self.stock_out_operator_combox.itemData(self.stock_out_operator_combox.currentIndex())
         stock_out_date = self.stock_out_dateTime.dateTime().toString("yyyy-MM-dd hh:mm:ss")
         stock_out_total_amount = self.stock_out_total_amount_spinBox.value()
         stock_out_remark = self.stock_out_remark_plainTextEdit.toPlainText()
@@ -144,12 +134,11 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
 
         try:
             query.prepare(
-                "Insert into stock_out_main(outbound_number, out_type, out_date, operator_id, total_amount, remarks) "
-                "values (?,?,?,?,?,?)")
+                "Insert into stock_out_main(outbound_number, out_type, out_date, total_amount, remarks) "
+                "values (?,?,?,?,?)")
             query.addBindValue(outbound_number)
             query.addBindValue(stock_out_type)
             query.addBindValue(stock_out_date)
-            query.addBindValue(stock_out_operator)
             query.addBindValue(stock_out_total_amount)
             query.addBindValue(stock_out_remark)
             if not query.exec():  # 执行INSERT语句
@@ -189,12 +178,13 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
 
     def bind_event(self):
         self.stock_out_warehouse_drug_save_btn.clicked.connect(self.save)
-        self.stock_batch_combox.currentIndexChanged.connect(self.load_stock_out_drug_data)
+        self.stock_batch_combox.currentIndexChanged.connect(self.load_stock_out_drug_data)  # 批次下拉框的索引改变时加载药品数据
 
     def load_stock_out_drug_data(self, index):
         if index >= 0:
             stock_out_batch_id = self.stock_batch_combox.itemData(self.stock_batch_combox.currentIndex())
             self.load_stock_out_drug(stock_out_batch_id)
+            self.load_inventory_data(stock_out_batch_id)
 
     def load_stock_out_drug(self, stock_out_batch_id):
         if stock_out_batch_id is not None:
@@ -229,6 +219,31 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
                 self.stock_out_drug_combox.addItem("请选择药品", None)
                 if not query.exec():
                     print(f"数据库查询错误: {query.lastError().text()}")
+
+    def load_inventory_data(self, stock_batch_id):
+        """
+        根据库存批次ID查询并显示当前库存数量
+        :param stock_batch_id: 库存批次ID
+        """
+        if stock_batch_id is None:
+            self.current_inventory_label.setText("未知")
+            return
+
+        # 查询该批次的库存数量
+        query = QSqlQuery()
+        query.prepare("""
+            SELECT COALESCE(SUM(quantity), 0) as total_stock
+            FROM stock 
+            WHERE batch = ?
+        """)
+        query.addBindValue(stock_batch_id)
+
+        if query.exec() and query.next():
+            total_stock = query.value(0)
+            self.current_inventory_label.setText(str(total_stock))
+        else:
+            self.current_inventory_label.setText("查询失败")
+            print(f"查询库存失败: {query.lastError().text()}")
 
     def save(self):
         if self.detail_id:

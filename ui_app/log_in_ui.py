@@ -41,17 +41,14 @@ class Ui_Form(object):
         self.gridLayout.setHorizontalSpacing(12)
         self.gridLayout.setVerticalSpacing(10)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.tiplb = QLabel(Form)
+        self.tiplb.setObjectName(u"tiplb")
+        self.tiplb.setInputMethodHints(Qt.InputMethodHint.ImhNone)
+        self.tiplb.setTextFormat(Qt.TextFormat.PlainText)
+        self.tiplb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.tiplb.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
-        self.gridLayout.addItem(self.verticalSpacer_2, 12, 3, 1, 1)
-
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.gridLayout.addItem(self.verticalSpacer, 0, 3, 1, 1)
-
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.gridLayout.addItem(self.horizontalSpacer, 7, 4, 1, 1)
+        self.gridLayout.addWidget(self.tiplb, 11, 3, 1, 1)
 
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -66,11 +63,10 @@ class Ui_Form(object):
 
         self.gridLayout.addWidget(self.password_le, 7, 3, 1, 1)
 
-        self.password_lb = QLabel(Form)
-        self.password_lb.setObjectName(u"password_lb")
-        self.password_lb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.log_on_btn = QPushButton(Form)
+        self.log_on_btn.setObjectName(u"log_on_btn")
 
-        self.gridLayout.addWidget(self.password_lb, 7, 1, 1, 1)
+        self.gridLayout.addWidget(self.log_on_btn, 10, 3, 1, 1)
 
         self.account_le = QLineEdit(Form)
         self.account_le.setObjectName(u"account_le")
@@ -83,10 +79,19 @@ class Ui_Form(object):
 
         self.gridLayout.addWidget(self.account_le, 1, 3, 1, 1)
 
-        self.log_on_btn = QPushButton(Form)
-        self.log_on_btn.setObjectName(u"log_on_btn")
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.gridLayout.addWidget(self.log_on_btn, 10, 3, 1, 1)
+        self.gridLayout.addItem(self.horizontalSpacer, 7, 5, 1, 1)
+
+        self.password_lb = QLabel(Form)
+        self.password_lb.setObjectName(u"password_lb")
+        self.password_lb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout.addWidget(self.password_lb, 7, 1, 1, 1)
+
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.gridLayout.addItem(self.verticalSpacer_2, 12, 3, 1, 1)
 
         self.account_lb = QLabel(Form)
         self.account_lb.setObjectName(u"account_lb")
@@ -95,14 +100,20 @@ class Ui_Form(object):
 
         self.gridLayout.addWidget(self.account_lb, 1, 1, 1, 1)
 
-        self.tiplb = QLabel(Form)
-        self.tiplb.setObjectName(u"tiplb")
-        self.tiplb.setInputMethodHints(Qt.InputMethodHint.ImhNone)
-        self.tiplb.setTextFormat(Qt.TextFormat.PlainText)
-        self.tiplb.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.tiplb.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.gridLayout.addWidget(self.tiplb, 11, 3, 1, 1)
+        self.gridLayout.addItem(self.verticalSpacer, 0, 3, 1, 1)
+
+        self.tip_btn = QPushButton(Form)
+        self.tip_btn.setObjectName(u"tip_btn")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.tip_btn.sizePolicy().hasHeightForWidth())
+        self.tip_btn.setSizePolicy(sizePolicy1)
+        self.tip_btn.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+
+        self.gridLayout.addWidget(self.tip_btn, 12, 5, 1, 1)
 
 
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
@@ -115,13 +126,14 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"\u836f\u623f\u7cfb\u7edf\u767b\u5f55", None))
+        self.tiplb.setText("")
         self.password_le.setPlaceholderText(QCoreApplication.translate("Form", u"8\u4f4d\u5bc6\u7801\uff0c\u5305\u542b\u82f1\u6587\u4e0e\u6570\u5b57", None))
-        self.password_lb.setText(QCoreApplication.translate("Form", u"\u5bc6\u7801", None))
+        self.log_on_btn.setText(QCoreApplication.translate("Form", u"\u767b\u5f55\u8d26\u53f7", None))
         self.account_le.setInputMask("")
         self.account_le.setText("")
         self.account_le.setPlaceholderText(QCoreApplication.translate("Form", u"\u624b\u673a\u53f7\u6216\u90ae\u7bb1", None))
-        self.log_on_btn.setText(QCoreApplication.translate("Form", u"\u767b\u5f55\u8d26\u53f7", None))
+        self.password_lb.setText(QCoreApplication.translate("Form", u"\u5bc6\u7801", None))
         self.account_lb.setText(QCoreApplication.translate("Form", u"\u8d26\u53f7", None))
-        self.tiplb.setText("")
+        self.tip_btn.setText(QCoreApplication.translate("Form", u"\u63d0\u793a", None))
     # retranslateUi
 

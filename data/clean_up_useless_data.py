@@ -25,7 +25,7 @@ class DataCleaner:
             expired_medicines_count = query.numRowsAffected()
             cleaned_count += expired_medicines_count
 
-            # 2. 清理过期的库存记录(可选)
+            # 2. 清理过期的库存记录(数量为0的记录)
             query.exec("""
                 DELETE FROM stock 
                 WHERE quantity = 0
@@ -65,13 +65,40 @@ class DataCleaner:
             orphaned_sale_details_count = query.numRowsAffected()
             cleaned_count += orphaned_sale_details_count
 
+            # 7. 清理没有库存批次的库存信息
+            query.exec("""
+                DELETE FROM stock 
+                WHERE batch NOT IN (SELECT in_id FROM stock_in_main)
+            """)
+            orphaned_stock_batch_count = query.numRowsAffected()
+            cleaned_count += orphaned_stock_batch_count
+
+            # 8. 清理没有对应药品的库存信息
+            query.exec("""
+                DELETE FROM stock 
+                WHERE drug_id NOT IN (SELECT dic_id FROM medicine_dic)
+            """)
+            orphaned_stock_drug_count = query.numRowsAffected()
+            cleaned_count += orphaned_stock_drug_count
+
+            # 9. 清理没有对应货位的库存信息
+            query.exec("""
+                DELETE FROM stock 
+                WHERE location NOT IN (SELECT warehouse_shelf_id FROM warehouse_shelf_position)
+            """)
+            orphaned_stock_location_count = query.numRowsAffected()
+            cleaned_count += orphaned_stock_location_count
+
             return True, f"清理完成，共清理 {cleaned_count} 条无用数据记录:\n" \
                          f"- 过期药品监控记录: {expired_medicines_count} 条\n" \
                          f"- 零库存记录: {zero_stock_count} 条\n" \
                          f"- 孤立采购明细: {orphaned_purchase_detail_count} 条\n" \
                          f"- 孤立入库明细: {orphaned_stock_in_detail_count} 条\n" \
                          f"- 孤立出库明细: {orphaned_stock_out_detail_count} 条\n" \
-                         f"- 孤立销售明细: {orphaned_sale_details_count} 条"
+                         f"- 孤立销售明细: {orphaned_sale_details_count} 条\n" \
+                         f"- 没有库存批次的库存信息: {orphaned_stock_batch_count} 条\n" \
+                         f"- 没有对应药品的库存信息: {orphaned_stock_drug_count} 条\n" \
+                         f"- 没有对应货位的库存信息: {orphaned_stock_location_count} 条"
 
         except Exception as e:
             return False, f"清理过程中发生错误: {str(e)}"

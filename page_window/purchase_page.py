@@ -116,7 +116,8 @@ class PurAddPage(QDialog, Ui_PurchaseDialog):
         try:
             # 采购明细表
             query.prepare(
-                "INSERT INTO purchase_detail(order_id, medicine_id, quantity, purchase_total_price, purchase_price, remarks) "
+                "INSERT INTO purchase_detail(order_id, medicine_id, quantity, "
+                "purchase_total_price, purchase_price, remarks) "
                 "VALUES (?,?,?,?,?,?)")
             query.addBindValue(order_number)
             query.addBindValue(drug)

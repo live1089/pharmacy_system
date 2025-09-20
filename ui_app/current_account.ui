@@ -1,38 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SellListDialog</class>
- <widget class="QDialog" name="SellListDialog">
+ <class>CurrentDialog</class>
+ <widget class="QDialog" name="CurrentDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>393</width>
-    <height>148</height>
+    <width>498</width>
+    <height>138</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>销售单</string>
+   <string>当前账号</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="current_user_lineEdit">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>销售日期</string>
+        <string>用户名</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="sell_list_lineEdit"/>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>销售单号</string>
+        <string>手机号</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -40,16 +44,13 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QDateTimeEdit" name="sell_dateTimeEdit"/>
+      <widget class="QLineEdit" name="current_phone_lineEdit">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QPushButton" name="sell_list_save_btn">
-     <property name="text">
-      <string>保存</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

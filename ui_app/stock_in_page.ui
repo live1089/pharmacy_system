@@ -43,16 +43,6 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="4">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>入库总金额</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
      <item row="4" column="2">
       <widget class="QLabel" name="label_11">
        <property name="text">
@@ -89,9 +79,6 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="5">
-      <widget class="QDateEdit" name="valid_date_edit"/>
-     </item>
      <item row="0" column="5">
       <widget class="QDateTimeEdit" name="inbound_date_time_edit"/>
      </item>
@@ -105,30 +92,10 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="4">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>有效期</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="3">
       <widget class="QComboBox" name="stock_drug_combox">
        <property name="editable">
         <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="4">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>操作员</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -148,9 +115,6 @@
         <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
-     </item>
-     <item row="3" column="5">
-      <widget class="QComboBox" name="operator_combox"/>
      </item>
      <item row="7" column="0">
       <widget class="QLabel" name="label">
@@ -176,13 +140,6 @@
       <widget class="QComboBox" name="purchase_order_combox">
        <property name="editable">
         <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="5">
-      <widget class="QDoubleSpinBox" name="inbound_amount_double">
-       <property name="maximum">
-        <double>999999999.990000009536743</double>
        </property>
       </widget>
      </item>
@@ -239,7 +196,40 @@
          <height>0</height>
         </size>
        </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
       </widget>
+     </item>
+     <item row="3" column="4">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>入库总金额</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="5">
+      <widget class="QDoubleSpinBox" name="inbound_amount_double">
+       <property name="maximum">
+        <double>999999999.990000009536743</double>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="4">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>有效期</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="5">
+      <widget class="QDateEdit" name="valid_date_edit"/>
      </item>
     </layout>
    </item>

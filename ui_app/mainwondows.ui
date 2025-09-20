@@ -162,7 +162,7 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -622,6 +622,27 @@
              </widget>
             </item>
             <item>
+             <widget class="QLineEdit" name="sales_records_lineEdit">
+              <property name="placeholderText">
+               <string>输入销售单号</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="sales_rec_btn">
+              <property name="text">
+               <string>查询销售单</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="Line" name="line_38">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="add_sell_list_btn">
               <property name="text">
                <string>添加销售单</string>
@@ -1022,6 +1043,13 @@
              <widget class="QPushButton" name="purchase_order_select_btn">
               <property name="text">
                <string>查询订单</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="Line" name="line_37">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
               </property>
              </widget>
             </item>
@@ -1460,8 +1488,21 @@
     </property>
     <addaction name="actiond"/>
     <addaction name="actionlight"/>
+    <addaction name="actionm"/>
+   </widget>
+   <widget class="QMenu" name="user_set_menu">
+    <property name="tearOffEnabled">
+     <bool>false</bool>
+    </property>
+    <property name="title">
+     <string>设置</string>
+    </property>
+    <addaction name="actions"/>
+    <addaction name="actions_2"/>
+    <addaction name="actiong"/>
    </widget>
    <addaction name="menu_4"/>
+   <addaction name="user_set_menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionout">
@@ -1487,6 +1528,26 @@
   <action name="actionlight">
    <property name="text">
     <string>浅色</string>
+   </property>
+  </action>
+  <action name="actions">
+   <property name="text">
+    <string>当前账号</string>
+   </property>
+  </action>
+  <action name="actions_2">
+   <property name="text">
+    <string>修改账号</string>
+   </property>
+  </action>
+  <action name="actiong">
+   <property name="text">
+    <string>系统</string>
+   </property>
+  </action>
+  <action name="actionm">
+   <property name="text">
+    <string>默认</string>
    </property>
   </action>
  </widget>
