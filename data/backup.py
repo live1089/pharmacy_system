@@ -1,17 +1,19 @@
 # data/backup.py
 import os
 import shutil
+import sys
 from datetime import datetime
-from PySide6.QtWidgets import QMessageBox, QFileDialog
-from PySide6.QtSql import QSqlQuery
 
+from PySide6.QtWidgets import QMessageBox, QFileDialog
+from config_manager import ConfigManager
 
 class DatabaseBackup:
     def __init__(self, db, parent_window):
         self.db = db
         self.parent_window = parent_window
-        self.db_path = "data/pharmacy.db"
-        self.backup_dir = "backups"
+        self.config = ConfigManager()
+        self.db_path = self.config.get_db_path()
+        self.backup_dir = self.config.get_backup_dir()
 
     def backup_database(self):
         """
@@ -222,7 +224,7 @@ class DatabaseBackup:
         return f"{size_bytes:.1f} {size_names[i]}"
 
 
-def backup_database(parent_window, db_path="data/pharmacy.db"):
+def backup_database(parent_window, db_path="_internal/data/pharmacy.db"):
     """
     备份数据库文件
 
@@ -270,7 +272,7 @@ def backup_database(parent_window, db_path="data/pharmacy.db"):
         return False
 
 
-def restore_database(parent_window, db_path="data/pharmacy.db"):
+def restore_database(parent_window, db_path="_internal/data/pharmacy.db"):
     """
     从备份恢复数据库文件
 
@@ -326,7 +328,7 @@ def restore_database(parent_window, db_path="data/pharmacy.db"):
         return False
 
 
-def auto_backup_database(parent_window, db_path="data/pharmacy.db", backup_dir="backups"):
+def auto_backup_database(parent_window, db_path, backup_dir):
     """
     自动备份数据库到指定目录
 
@@ -356,7 +358,7 @@ def auto_backup_database(parent_window, db_path="data/pharmacy.db", backup_dir="
         # 清理旧备份（保留最近7天的备份）
         cleanup_old_backups(backup_dir, days=7)
 
-        print(f"自动备份完成: {backup_path}")
+        QMessageBox.warning(parent_window, "自动备份完成", f"备份地址: {backup_path}")
         return True
 
     except Exception as e:

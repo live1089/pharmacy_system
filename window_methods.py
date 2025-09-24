@@ -402,7 +402,6 @@ def inventory_check_mod(self):
 # 添加跳出子窗口事件
 
 
-
 def sub_window_event(self):
     self.drug_add_btn.clicked.connect(lambda: drug_adds(self))
     self.drugs_set_btn.clicked.connect(lambda: drug_attribute(self))
@@ -423,6 +422,7 @@ def sub_window_event(self):
     self.actions_2.triggered.connect(lambda: user_set_menu_event(self))
     self.actions.triggered.connect(lambda: user_menu_event(self))
     self.actiong.triggered.connect(lambda: system_formatting(self))
+
 
 def system_formatting(self):
     self.formatting = SystemPage(self)
@@ -530,14 +530,15 @@ def inventory_check_add(self):
     data.sqlite_data.get_inventory_check(self, start_times, end_times)
 
 
-
-# 数据库备份恢复事件
 def backup_database_event(self):
     """
     数据库备份事件处理函数
     """
     from data.backup import backup_database
-    backup_database(self)
+    import config_manager as cfg
+    config = cfg.ConfigManager()  # 创建 ConfigManager 实例
+    path = config.get_db_path()  # 调用实例方法
+    backup_database(self, path)
 
 
 def restore_database_event(self):
@@ -545,7 +546,10 @@ def restore_database_event(self):
     数据库恢复事件处理函数
     """
     from data.backup import restore_database
-    if restore_database(self):
+    import config_manager as cfg
+    config = cfg.ConfigManager()  # 创建 ConfigManager 实例
+    path = config.get_db_path()  # 调用实例方法
+    if restore_database(self, path):
         # 恢复成功后提示重启应用
         reply = QMessageBox.question(
             self,
@@ -567,5 +571,8 @@ def auto_backup_database_event(self):
     自动备份数据库事件处理函数
     """
     from data.backup import auto_backup_database
-    auto_backup_database(self)
-
+    import config_manager as cfg
+    config = cfg.ConfigManager()  # 创建 ConfigManager 实例
+    path = config.get_db_path()  # 获取数据库路径
+    backup = config.get_backup_dir()  # 获取备份目录
+    auto_backup_database(self, db_path=path, backup_dir=backup)

@@ -162,7 +162,7 @@
          <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -566,6 +566,11 @@
                  </layout>
                 </item>
                </layout>
+              </widget>
+              <widget class="QWidget" name="tab_4">
+               <attribute name="title">
+                <string>销售统计</string>
+               </attribute>
               </widget>
              </widget>
             </item>
@@ -1486,9 +1491,9 @@
     <property name="title">
      <string>主题</string>
     </property>
+    <addaction name="actionm"/>
     <addaction name="actiond"/>
     <addaction name="actionlight"/>
-    <addaction name="actionm"/>
    </widget>
    <widget class="QMenu" name="user_set_menu">
     <property name="tearOffEnabled">
@@ -1522,7 +1527,7 @@
   </action>
   <action name="actiond">
    <property name="text">
-    <string>暗色</string>
+    <string>灰色</string>
    </property>
   </action>
   <action name="actionlight">
@@ -1547,7 +1552,7 @@
   </action>
   <action name="actionm">
    <property name="text">
-    <string>默认</string>
+    <string>暗色</string>
    </property>
   </action>
  </widget>

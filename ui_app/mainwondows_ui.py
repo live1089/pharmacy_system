@@ -513,6 +513,9 @@ class Ui_mainWindow(object):
         self.gridLayout_20.addLayout(self.gridLayout_19, 0, 0, 1, 1)
 
         self.tabWidget.addTab(self.tab_3, "")
+        self.tab_4 = QWidget()
+        self.tab_4.setObjectName(u"tab_4")
+        self.tabWidget.addTab(self.tab_4, "")
 
         self.gridLayout_5.addWidget(self.tabWidget, 0, 0, 1, 1)
 
@@ -1299,16 +1302,16 @@ class Ui_mainWindow(object):
 
         self.menubar.addAction(self.menu_4.menuAction())
         self.menubar.addAction(self.user_set_menu.menuAction())
+        self.menu_4.addAction(self.actionm)
         self.menu_4.addAction(self.actiond)
         self.menu_4.addAction(self.actionlight)
-        self.menu_4.addAction(self.actionm)
         self.user_set_menu.addAction(self.actions)
         self.user_set_menu.addAction(self.actions_2)
         self.user_set_menu.addAction(self.actiong)
 
         self.retranslateUi(mainWindow)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(0)
         self.stock_in_tabWidget.setCurrentIndex(0)
         self.tabWidget.setCurrentIndex(0)
         self.stock_out_tabWidget.setCurrentIndex(0)
@@ -1324,12 +1327,12 @@ class Ui_mainWindow(object):
         self.actionout.setText(QCoreApplication.translate("mainWindow", u"\u5bfc\u51fa\u62a5\u8868", None))
         self.actionfg.setText(QCoreApplication.translate("mainWindow", u"\u5207\u6362\u8d26\u53f7", None))
         self.actionh.setText(QCoreApplication.translate("mainWindow", u"\u5bfc\u5165\u62a5\u8868", None))
-        self.actiond.setText(QCoreApplication.translate("mainWindow", u"\u6697\u8272", None))
+        self.actiond.setText(QCoreApplication.translate("mainWindow", u"\u7070\u8272", None))
         self.actionlight.setText(QCoreApplication.translate("mainWindow", u"\u6d45\u8272", None))
         self.actions.setText(QCoreApplication.translate("mainWindow", u"\u5f53\u524d\u8d26\u53f7", None))
         self.actions_2.setText(QCoreApplication.translate("mainWindow", u"\u4fee\u6539\u8d26\u53f7", None))
         self.actiong.setText(QCoreApplication.translate("mainWindow", u"\u7cfb\u7edf", None))
-        self.actionm.setText(QCoreApplication.translate("mainWindow", u"\u9ed8\u8ba4", None))
+        self.actionm.setText(QCoreApplication.translate("mainWindow", u"\u6697\u8272", None))
         self.medicine.setText(QCoreApplication.translate("mainWindow", u"\u836f\u54c1", None))
         self.sales_records.setText(QCoreApplication.translate("mainWindow", u"\u9500\u552e\u8bb0\u5f55", None))
         self.expiring_medicine.setText(QCoreApplication.translate("mainWindow", u"\u4e34\u671f\u836f\u54c1", None))
@@ -1367,6 +1370,7 @@ class Ui_mainWindow(object):
         self.inventory_del_btn.setText(QCoreApplication.translate("mainWindow", u"\u5220\u9664", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("mainWindow", u" \u9500\u552e\u5355", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("mainWindow", u"\u9500\u552e\u8be6\u60c5", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("mainWindow", u"\u9500\u552e\u7edf\u8ba1", None))
         self.label.setText(QCoreApplication.translate("mainWindow", u"\u8d77\u59cb\u65e5\u671f", None))
         self.label_2.setText(QCoreApplication.translate("mainWindow", u"\u622a\u6b62\u65e5\u671f", None))
         self.sales_records_btn.setText(QCoreApplication.translate("mainWindow", u"\u67e5\u8be2", None))

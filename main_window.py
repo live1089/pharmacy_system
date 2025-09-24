@@ -1,11 +1,13 @@
 from enum import Enum
 
-import qdarktheme
+
 from PySide6.QtCore import QTimer, QDate, QDateTime
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QMainWindow, QMessageBox
+
+import qdarktheme
 from qdarktheme.qtpy.QtWidgets import QApplication
-from qtmodern.styles import dark, light
+from qtmodern.styles import dark
 
 import data.sqlite_data
 import query_methods as qu
@@ -46,9 +48,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.sqlite_data()
 
         class_set_page(self)
-        self.actiond.triggered.connect(self.set_dark_theme)
+        self.actiond.triggered.connect(self.set_grey_theme)
         self.actionlight.triggered.connect(self.set_light_theme)
-        self.actionm.triggered.connect(self.set_default_theme)
+        self.actionm.triggered.connect(self.set_dark_theme)
 
         # 初始化药品有效期监控数据
         self.initialize_expiring_medicines_monitor()
@@ -63,6 +65,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.expiry_timer.start(24 * 60 * 60 * 1000)  # 24小时(毫秒)
         # 程序启动时立即更新一次
         self.update_expiry_days()
+
+        # 确保销售界面 tab_4 有布局管理器
+        if self.tab_4.layout() is None:
+            from PySide6.QtWidgets import QVBoxLayout
+            layout = QVBoxLayout(self.tab_4)
+            self.tab_4.setLayout(layout)
 
     def set_query_time(self):
         # 销售 - 设置默认为最近30天
@@ -335,20 +343,21 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def tab_changed(self, index):
         """标签切换时触发"""
         print(f"已切换到标签页: {index} ({self.stock_in_tabWidget.tabText(index)})")
+    # -------------------------------------------------------------------------------------------------------------
 
     # 添加暗色主题设置方法
-    def set_dark_theme(self):
+    def set_grey_theme(self):
         """设置暗色主题"""
         QApplication.instance().setStyleSheet(dark(QApplication.instance()))
 
     # 添加浅色主题设置方法
     def set_light_theme(self):
         """设置浅色主题"""
-        QApplication.instance().setStyleSheet(light(QApplication.instance()))
+        QApplication.instance().setStyleSheet(qdarktheme.load_stylesheet("light"))
+    def set_dark_theme(self):
+        QApplication.instance().setStyleSheet(qdarktheme.load_stylesheet("dark"))
 
-    def set_default_theme(self):
-        QApplication.instance().setStyleSheet(qdarktheme.load_stylesheet())
-
+    # -------------------------------------------------------------------------------------------------------------
     def bind_event(self):
         self.medicine.clicked.connect(lambda: self.show_page_by_name(PageMap.shelves_drug_tableView.value))
         self.sales_records.clicked.connect(lambda: self.show_page_by_name(PageMap.tabWidget.value))
@@ -399,7 +408,30 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.shelves_select_btn.clicked.connect(lambda: qu.shelves_select(self))
         self.sales_rec_btn.clicked.connect(lambda: qu.sales_record_query(self))
 
-        self.clear_btn.clicked.connect(self.clean_up_system_data)
+        # 添加销售统计查询按钮事件
+        self.sales_records_btn.clicked.connect(self.on_sales_statistics_query)
+        # 添加标签页切换事件，当切换到统计标签时更新数据
+        self.tabWidget.currentChanged.connect(self.on_sales_tab_changed)
+
+    def on_sales_statistics_query(self):
+        """
+        销售统计查询按钮点击事件
+        """
+        # 执行原有的销售记录查询
+        qu.sale_record(self)
+
+        # 如果当前在统计标签页，则更新统计信息
+        if self.tabWidget.currentIndex() == 2:  # tab_4 是索引2（从0开始计数）
+            self.setup_sales_statistics_tab()
+
+    def on_sales_tab_changed(self, index):
+        """
+        销售标签页切换事件
+        """
+        # 如果切换到统计标签页（tab_4）
+        if index == 2:  # tab_4 是索引2（从0开始计数）
+            self.setup_sales_statistics_tab()
+
 
     # 添加清理系统数据的方法
     def clean_up_system_data(self):
@@ -463,3 +495,197 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             data.sqlite_data.get_expiring_medicine_model(self)
         if page_name == PageMap.supplier_tableView.value:
             data.sqlite_data.get_supplier_model(self)
+
+# --------------------------------------------------------------------------------------
+
+    # 销售统计
+    def setup_sales_statistics_tab(self):
+        """
+        设置销售统计标签页
+        """
+        from PySide6.QtWidgets import QTableWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox
+
+        if not hasattr(self, 'sales_statistics_table'):
+            if self.tab_4.layout() is None:
+                layout = QVBoxLayout(self.tab_4)
+                self.tab_4.setLayout(layout)
+            else:
+                layout = self.tab_4.layout()
+                while layout.count():
+                    child = layout.takeAt(0)
+                    if child.widget():
+                        child.widget().deleteLater()
+
+            control_layout = QHBoxLayout()
+            self.sales_stat_time_dimension_label = QLabel("统计维度:")
+            self.sales_stat_time_dimension_combo = QComboBox()
+            self.sales_stat_time_dimension_combo.addItem("按日", "daily")
+            self.sales_stat_time_dimension_combo.addItem("按周", "weekly")
+            self.sales_stat_time_dimension_combo.addItem("按月", "monthly")
+            self.sales_stat_time_dimension_combo.currentIndexChanged.connect(self.update_sales_statistics)
+
+            control_layout.addWidget(self.sales_stat_time_dimension_label)
+            control_layout.addWidget(self.sales_stat_time_dimension_combo)
+            control_layout.addStretch()
+
+            self.sales_statistics_table = QTableWidget(self.tab_4)
+            self.sales_statistics_table.setColumnCount(2)
+            self.sales_statistics_table.setHorizontalHeaderLabels(["统计项目", "数值"])
+            self.sales_statistics_table.setEditTriggers(QTableWidget.NoEditTriggers)
+            self.sales_statistics_table.setSelectionBehavior(QTableWidget.SelectRows)
+            self.sales_statistics_table.horizontalHeader().setStretchLastSection(True)
+            self.sales_statistics_table.setAlternatingRowColors(True)
+
+            layout.addLayout(control_layout)
+            layout.addWidget(self.sales_statistics_table)
+
+        self.update_sales_statistics()
+
+    def update_sales_statistics(self):
+        """
+        更新销售统计数据
+        """
+        from PySide6.QtSql import QSqlQuery
+        from PySide6.QtWidgets import QTableWidgetItem
+        from PySide6.QtCore import Qt
+
+        if not hasattr(self, 'sales_statistics_table'):
+            return
+
+        start_date = self.sales_records_dateEdit_start.date().toString("yyyy-MM-dd")
+        end_date = self.sales_records_dateEdit_deadline.date().toString("yyyy-MM-dd")
+        time_dimension = self.sales_stat_time_dimension_combo.currentData()
+
+        query = QSqlQuery(self.db)
+        statistics_data = []
+
+        # 总销售额
+        query.prepare("""
+            SELECT COALESCE(SUM(total_amount), 0) as total_sales
+            FROM sale_details s
+            LEFT JOIN sales m ON s.sales_id = m.sales_id
+            WHERE m.sale_date BETWEEN ? AND ?
+        """)
+        query.addBindValue(start_date)
+        query.addBindValue(end_date)
+        if query.exec() and query.next():
+            total_sales = query.value(0)
+            statistics_data.append(("总销售额", f"¥{total_sales:.2f}"))
+
+        # 销售订单数
+        query.prepare("""
+            SELECT COUNT(*) as order_count
+            FROM sales
+            WHERE DATE(sale_date) BETWEEN ? AND ?
+        """)
+        query.addBindValue(start_date)
+        query.addBindValue(end_date)
+        if query.exec() and query.next():
+            order_count = query.value(0)
+            statistics_data.append(("销售订单数", str(order_count)))
+
+        # 销售药品总数
+        query.prepare("""
+            SELECT COALESCE(SUM(quantity), 0) as total_quantity
+            FROM sale_details s
+            LEFT JOIN sales m ON s.sales_id = m.sales_id
+            WHERE DATE(m.sale_date) BETWEEN ? AND ?
+        """)
+        query.addBindValue(start_date)
+        query.addBindValue(end_date)
+        if query.exec() and query.next():
+            total_quantity = query.value(0)
+            statistics_data.append(("销售药品总数", str(total_quantity)))
+
+        # 热销药品排行榜（前5名）
+        query.prepare("""
+            SELECT md.trade_name, SUM(s.quantity) as total_quantity
+            FROM sale_details s
+            LEFT JOIN medicine_dic md ON s.medicine_id = md.dic_id
+            LEFT JOIN sales m ON s.sales_id = m.sales_id
+            WHERE DATE(m.sale_date) BETWEEN ? AND ?
+            GROUP BY s.medicine_id, md.trade_name
+            ORDER BY total_quantity DESC
+            LIMIT 5
+        """)
+        query.addBindValue(start_date)
+        query.addBindValue(end_date)
+        if query.exec():
+            rank = 1
+            while query.next():
+                drug_name = query.value(0)
+                quantity = query.value(1)
+                statistics_data.append((f"热销药品第{rank}名", drug_name))
+                rank += 1
+
+        # 平均订单金额
+        if order_count and order_count > 0:
+            avg_order_amount = total_sales / order_count if order_count else 0
+            statistics_data.append(("平均订单金额", f"¥{avg_order_amount:.2f}"))
+
+        # 按时间维度的销售趋势
+        if time_dimension == "daily":
+            query.prepare("""
+                SELECT DATE(m.sale_date) as period, SUM(s.total_amount) as amount
+                FROM sale_details s
+                LEFT JOIN sales m ON s.sales_id = m.sales_id
+                WHERE DATE(m.sale_date) BETWEEN ? AND ?
+                GROUP BY DATE(m.sale_date)
+                ORDER BY period
+            """)
+            query.addBindValue(start_date)
+            query.addBindValue(end_date)
+            if query.exec():
+                statistics_data.append(("--- 销售趋势（按日） ---", ""))
+                while query.next():
+                    period = query.value(0)
+                    amount = query.value(1)
+                    statistics_data.append((f"日期: {period}", f"¥{amount:.2f}"))
+
+        elif time_dimension == "weekly":
+            query.prepare("""
+                SELECT strftime('%Y-%W', m.sale_date) as period, SUM(s.total_amount) as amount
+                FROM sale_details s
+                LEFT JOIN sales m ON s.sales_id = m.sales_id
+                WHERE DATE(m.sale_date) BETWEEN ? AND ?
+                GROUP BY strftime('%Y-%W', m.sale_date)
+                ORDER BY period
+            """)
+            query.addBindValue(start_date)
+            query.addBindValue(end_date)
+            if query.exec():
+                statistics_data.append(("--- 销售趋势（按周） ---", ""))
+                while query.next():
+                    period = query.value(0)
+                    amount = query.value(1)
+                    statistics_data.append((f"周次: {period}", f"¥{amount:.2f}"))
+
+        elif time_dimension == "monthly":
+            query.prepare("""
+                SELECT strftime('%Y-%m', m.sale_date) as period, SUM(s.total_amount) as amount
+                FROM sale_details s
+                LEFT JOIN sales m ON s.sales_id = m.sales_id
+                WHERE DATE(m.sale_date) BETWEEN ? AND ?
+                GROUP BY strftime('%Y-%m', m.sale_date)
+                ORDER BY period
+            """)
+            query.addBindValue(start_date)
+            query.addBindValue(end_date)
+            if query.exec():
+                statistics_data.append(("--- 销售趋势（按月） ---", ""))
+                while query.next():
+                    period = query.value(0)
+                    amount = query.value(1)
+                    statistics_data.append((f"月份: {period}", f"¥{amount:.2f}"))
+
+        self.sales_statistics_table.setRowCount(len(statistics_data))
+        for row, (item, value) in enumerate(statistics_data):
+            self.sales_statistics_table.setItem(row, 0, QTableWidgetItem(str(item)))
+            self.sales_statistics_table.setItem(row, 1, QTableWidgetItem(str(value)))
+
+            for col in range(2):
+                item_widget = self.sales_statistics_table.item(row, col)
+                if item_widget:
+                    item_widget.setTextAlignment(Qt.AlignCenter)
+
+        self.sales_statistics_table.viewport().update()

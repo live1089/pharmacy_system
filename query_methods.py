@@ -342,6 +342,10 @@ def sale_record(self):
         data.sqlite_data.get_sales_lists_model(self, sale_start_date, sale_end_date)
     elif current_interface_index == 1:
         data.sqlite_data.get_sales_model(self, sale_start_date, sale_end_date)
+    elif current_interface_index == 2:  # 统计标签页
+        # 确保主窗口有更新统计的方法
+        if hasattr(self, 'setup_sales_statistics_tab'):
+            self.setup_sales_statistics_tab()
 
 
 def pur_order(self):

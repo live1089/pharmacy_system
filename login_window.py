@@ -64,9 +64,9 @@ class LoginWindow(QWidget, Ui_Form):
         # 确保数据库中有用户，如果没有则创建默认用户
         self.ensure_default_user_exists()
 
-        # if not account or not password:
-        #     self.tiplb.setText("用户名和密码不能为空")
-        #     return
+        if not account or not password:
+            self.tiplb.setText("用户名和密码不能为空")
+            return
 
         query = QSqlQuery()
         query.prepare("SELECT password, salt FROM users WHERE username = ?")

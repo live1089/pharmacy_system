@@ -1,16 +1,24 @@
 import sys
-
+import os
 from PySide6.QtCore import Qt
 from PySide6.QtGui import Qt
 from PySide6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel, QSqlQueryModel
 from PySide6.QtWidgets import QMessageBox
 
-
 class DatabaseInit(QSqlDatabase, QMessageBox):
     def __init__(self):
         super().__init__()
+        if getattr(sys, 'frozen', False):
+            # 打包环境
+            base_path = sys._MEIPASS
+            db_path = os.path.join(base_path, "data", "pharmacy.db")
+        else:
+            # 开发环境
+            db_path = "data/pharmacy.db"
+
         self.db = QSqlDatabase.addDatabase("QSQLITE")
-        self.db.setDatabaseName("data/pharmacy.db")
+        self.db.setDatabaseName(db_path)
+
         if not self.db.open():
             QMessageBox.critical(
                 None, "数据库错误",
@@ -988,6 +996,8 @@ CREATE TRIGGER sales_delete_inventory_triggers
                 AND batch = NEW.inventory_of_batches;
             END;
         """)
+
+
 
 
 # 基表模型
