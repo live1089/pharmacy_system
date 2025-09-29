@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 from PySide6.QtCore import QTimer, QDate, QDateTime
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QMainWindow, QMessageBox
@@ -24,8 +23,8 @@ class PageMap(Enum):
     shelves_drug_tableView = 0  # 药品
     supplier_tableView = 1  # 供应商
     stock_in_tabWidget = 2  # 入库
-    inventory_tableView = 3  # 库存
-    tabWidget = 4  # 销售
+    inventory_tableView = 3  # 库存操作记录
+    stock_tabWidget = 4  # 库存余量
     expiring_drugs_tableView = 5  # 临期
     stock_out_tabWidget = 6  # 出库
     order_tabWidget = 7  # 采购订单
@@ -66,17 +65,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # 程序启动时立即更新一次
         self.update_expiry_days()
 
-        # 确保销售界面 tab_4 有布局管理器
-        if self.tab_4.layout() is None:
-            from PySide6.QtWidgets import QVBoxLayout
-            layout = QVBoxLayout(self.tab_4)
-            self.tab_4.setLayout(layout)
+        # 添加库存预警检查定时器
+        self.stock_warning_timer = QTimer(self)
+        self.stock_warning_timer.timeout.connect(self.check_stock_warnings)
+        self.stock_warning_timer.start(30 * 60 * 1000)  # 每30分钟检查一次
+
+        # 程序启动时立即检查一次
+        self.check_stock_warnings()
 
     def set_query_time(self):
-        # 销售 - 设置默认为最近30天
-        self.sales_records_dateEdit_start.setDate(QDate.currentDate().addDays(-30))
-        self.sales_records_dateEdit_deadline.setDate(QDate.currentDate().addDays(+1))
-
         # 采购 - 设置默认为最近30天
         self.purchase_order_dateEdit_start.setDate(QDate.currentDate().addDays(-30))
         self.purchase_order_dateEdit_deadline.setDate(QDate.currentDate().addDays(+1))
@@ -321,9 +318,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     # ------------------------------------------------------------------------------------------------------------
 
     def sqlite_data(self):
-        # data.sqlite_data.get_medicines_model(self)  # 药品
-        data.sqlite_data.get_sales_model(self, start_times, end_times)  # 销售
-        data.sqlite_data.get_sales_lists_model(self, start_times, end_times)
         data.sqlite_data.get_expiring_medicine_model(self)  # 临期
         data.sqlite_data.get_supplier_model(self)  # 供应商
         data.sqlite_data.get_inventory_model(self, start_times, end_times)  # 库存
@@ -336,6 +330,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         data.sqlite_data.get_inventory_check(self, start_times, end_times)  # 库存盘点
         data.sqlite_data.get_medicine_dic_model(self)  # 药品字典
         data.sqlite_data.get_shelves_drug_model(self)  # 上架药品
+
+        data.sqlite_data.get_stock_in_all_model(self)
+        data.sqlite_data.get_shelves_stock_model(self)
+        data.sqlite_data.setup_warning_display(self)
+        data.sqlite_data.setup_warning_stock(self)
         data.sqlite_data.get_shelves_drug_message_model(self)
 
         self.stock_in_tabWidget.currentChanged.connect(self.tab_changed)  # 入库标签切换时触发
@@ -343,6 +342,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def tab_changed(self, index):
         """标签切换时触发"""
         print(f"已切换到标签页: {index} ({self.stock_in_tabWidget.tabText(index)})")
+
     # -------------------------------------------------------------------------------------------------------------
 
     # 添加暗色主题设置方法
@@ -354,13 +354,13 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def set_light_theme(self):
         """设置浅色主题"""
         QApplication.instance().setStyleSheet(qdarktheme.load_stylesheet("light"))
+
     def set_dark_theme(self):
         QApplication.instance().setStyleSheet(qdarktheme.load_stylesheet("dark"))
 
     # -------------------------------------------------------------------------------------------------------------
     def bind_event(self):
         self.medicine.clicked.connect(lambda: self.show_page_by_name(PageMap.shelves_drug_tableView.value))
-        self.sales_records.clicked.connect(lambda: self.show_page_by_name(PageMap.tabWidget.value))
         self.expiring_medicine.clicked.connect(lambda: self.show_page_by_name(PageMap.expiring_drugs_tableView.value))
         self.pharmacy_operation_record.clicked.connect(
             lambda: self.show_page_by_name(PageMap.inventory_tableView.value))
@@ -373,7 +373,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.drug_dic_btn.clicked.connect(lambda: self.show_page_by_name(PageMap.drug_dic_tableView.value))
 
         self.add_stock_location_btn.clicked.connect(lambda: wim.add_stock_location(self))
-        self.stock_in_all_btn.clicked.connect(lambda: wim.stock_in_all(self))
+        self.stock_in_all_btn.clicked.connect(lambda: self.show_page_by_name(PageMap.stock_tabWidget.value))
+        # self.stock_in_all_btn.clicked.connect(lambda: wim.stock_in_all(self))
         self.drug_dic_del_btn.clicked.connect(lambda: wim.del_dic(self))
         self.supplier_del_btn.clicked.connect(lambda: wim.supplier_del(self))
         self.supplier_mod_btn.clicked.connect(lambda: wim.supplier_mod(self))
@@ -388,13 +389,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.shelves_del_btn.clicked.connect(lambda: wim.shelves_del(self))
         self.shelves_mod_btn.clicked.connect(lambda: wim.shelves_mod(self))
         self.inventory_del_btn.clicked.connect(lambda: wim.inventory_del(self))
-        self.sell_del_btn.clicked.connect(lambda: wim.del_sell(self))
-        self.drug_revise_btn.clicked.connect(lambda: wim.drug_revise)
+        self.drug_revise_btn.clicked.connect(lambda: wim.drug_revise(self))
         self.expiring_drugs_save_btn.clicked.connect(self.save_expiry_threshold)
         self.drug_ref_btn.clicked.connect(self.drug_ref)
         self.ex_ref_btn.clicked.connect(self.ex_ref)
 
-        self.sales_records_btn.clicked.connect(lambda: qu.sale_record(self))
         self.purchase_order_btn.clicked.connect(lambda: qu.pur_order(self))
         self.stock_out_query_btn.clicked.connect(lambda: qu.stock_out_query(self))
         self.inventory_check_query_btn.clicked.connect(lambda: qu.inventory_check_query(self))
@@ -406,32 +405,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.purchase_order_select_btn.clicked.connect(lambda: qu.purchase_order_select(self))
         self.stock_out_list_select_btn.clicked.connect(lambda: qu.stock_out_number_select(self))
         self.shelves_select_btn.clicked.connect(lambda: qu.shelves_select(self))
-        self.sales_rec_btn.clicked.connect(lambda: qu.sales_record_query(self))
+        self.clear_btn.clicked.connect(lambda: self.clean_up_system_data())
 
-        # 添加销售统计查询按钮事件
-        self.sales_records_btn.clicked.connect(self.on_sales_statistics_query)
-        # 添加标签页切换事件，当切换到统计标签时更新数据
-        self.tabWidget.currentChanged.connect(self.on_sales_tab_changed)
-
-    def on_sales_statistics_query(self):
-        """
-        销售统计查询按钮点击事件
-        """
-        # 执行原有的销售记录查询
-        qu.sale_record(self)
-
-        # 如果当前在统计标签页，则更新统计信息
-        if self.tabWidget.currentIndex() == 2:  # tab_4 是索引2（从0开始计数）
-            self.setup_sales_statistics_tab()
-
-    def on_sales_tab_changed(self, index):
-        """
-        销售标签页切换事件
-        """
-        # 如果切换到统计标签页（tab_4）
-        if index == 2:  # tab_4 是索引2（从0开始计数）
-            self.setup_sales_statistics_tab()
-
+        self.display_area_inquiry_btn.clicked.connect(lambda: qu.display_area_inquiry(self))
+        self.drug_library_query_btn.clicked.connect(lambda: qu.drug_library_query(self))
 
     # 添加清理系统数据的方法
     def clean_up_system_data(self):
@@ -474,7 +451,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         if page_name == PageMap.stock_in_tabWidget.value:
             data.sqlite_data.get_stock_in_main_model(self, start_times, end_times)
             data.sqlite_data.get_stock_in_detail_model(self, start_times, end_times)
-            # data.sqlite_data.get_inventory_datch_model(self)
         if page_name == PageMap.stock_out_tabWidget.value:
             data.sqlite_data.get_stock_out_main_model(self, start_times, end_times)
             data.sqlite_data.get_stock_out_detail_model(self, start_times, end_times)
@@ -488,204 +464,58 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             class_set_page(self)
         if page_name == PageMap.inventory_tableView.value:
             data.sqlite_data.get_inventory_model(self, start_times, end_times)
-        if page_name == PageMap.tabWidget.value:
-            data.sqlite_data.get_sales_model(self, start_times, end_times)
-            data.sqlite_data.get_sales_lists_model(self, start_times, end_times)
+        if page_name == PageMap.stock_tabWidget.value:
+            data.sqlite_data.get_stock_in_all_model(self)
+            data.sqlite_data.get_shelves_stock_model(self)
+            data.sqlite_data.setup_warning_display(self)
+            data.sqlite_data.setup_warning_stock(self)
         if page_name == PageMap.expiring_drugs_tableView.value:
             data.sqlite_data.get_expiring_medicine_model(self)
         if page_name == PageMap.supplier_tableView.value:
             data.sqlite_data.get_supplier_model(self)
 
-# --------------------------------------------------------------------------------------
+    # 检查库存预警
+    def check_stock_warnings(self):
+        query = QSqlQuery()
+        query.prepare(
+            "SELECT medicine_dic.dic_id, display_area_threshold, pharmacy_threshold "
+            "FROM medicine_dic")
 
-    # 销售统计
-    def setup_sales_statistics_tab(self):
-        """
-        设置销售统计标签页
-        """
-        from PySide6.QtWidgets import QTableWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox
-
-        if not hasattr(self, 'sales_statistics_table'):
-            if self.tab_4.layout() is None:
-                layout = QVBoxLayout(self.tab_4)
-                self.tab_4.setLayout(layout)
-            else:
-                layout = self.tab_4.layout()
-                while layout.count():
-                    child = layout.takeAt(0)
-                    if child.widget():
-                        child.widget().deleteLater()
-
-            control_layout = QHBoxLayout()
-            self.sales_stat_time_dimension_label = QLabel("统计维度:")
-            self.sales_stat_time_dimension_combo = QComboBox()
-            self.sales_stat_time_dimension_combo.addItem("按日", "daily")
-            self.sales_stat_time_dimension_combo.addItem("按周", "weekly")
-            self.sales_stat_time_dimension_combo.addItem("按月", "monthly")
-            self.sales_stat_time_dimension_combo.currentIndexChanged.connect(self.update_sales_statistics)
-
-            control_layout.addWidget(self.sales_stat_time_dimension_label)
-            control_layout.addWidget(self.sales_stat_time_dimension_combo)
-            control_layout.addStretch()
-
-            self.sales_statistics_table = QTableWidget(self.tab_4)
-            self.sales_statistics_table.setColumnCount(2)
-            self.sales_statistics_table.setHorizontalHeaderLabels(["统计项目", "数值"])
-            self.sales_statistics_table.setEditTriggers(QTableWidget.NoEditTriggers)
-            self.sales_statistics_table.setSelectionBehavior(QTableWidget.SelectRows)
-            self.sales_statistics_table.horizontalHeader().setStretchLastSection(True)
-            self.sales_statistics_table.setAlternatingRowColors(True)
-
-            layout.addLayout(control_layout)
-            layout.addWidget(self.sales_statistics_table)
-
-        self.update_sales_statistics()
-
-    def update_sales_statistics(self):
-        """
-        更新销售统计数据
-        """
-        from PySide6.QtSql import QSqlQuery
-        from PySide6.QtWidgets import QTableWidgetItem
-        from PySide6.QtCore import Qt
-
-        if not hasattr(self, 'sales_statistics_table'):
-            return
-
-        start_date = self.sales_records_dateEdit_start.date().toString("yyyy-MM-dd")
-        end_date = self.sales_records_dateEdit_deadline.date().toString("yyyy-MM-dd")
-        time_dimension = self.sales_stat_time_dimension_combo.currentData()
-
-        query = QSqlQuery(self.db)
-        statistics_data = []
-
-        # 总销售额
-        query.prepare("""
-            SELECT COALESCE(SUM(total_amount), 0) as total_sales
-            FROM sale_details s
-            LEFT JOIN sales m ON s.sales_id = m.sales_id
-            WHERE m.sale_date BETWEEN ? AND ?
-        """)
-        query.addBindValue(start_date)
-        query.addBindValue(end_date)
-        if query.exec() and query.next():
-            total_sales = query.value(0)
-            statistics_data.append(("总销售额", f"¥{total_sales:.2f}"))
-
-        # 销售订单数
-        query.prepare("""
-            SELECT COUNT(*) as order_count
-            FROM sales
-            WHERE DATE(sale_date) BETWEEN ? AND ?
-        """)
-        query.addBindValue(start_date)
-        query.addBindValue(end_date)
-        if query.exec() and query.next():
-            order_count = query.value(0)
-            statistics_data.append(("销售订单数", str(order_count)))
-
-        # 销售药品总数
-        query.prepare("""
-            SELECT COALESCE(SUM(quantity), 0) as total_quantity
-            FROM sale_details s
-            LEFT JOIN sales m ON s.sales_id = m.sales_id
-            WHERE DATE(m.sale_date) BETWEEN ? AND ?
-        """)
-        query.addBindValue(start_date)
-        query.addBindValue(end_date)
-        if query.exec() and query.next():
-            total_quantity = query.value(0)
-            statistics_data.append(("销售药品总数", str(total_quantity)))
-
-        # 热销药品排行榜（前5名）
-        query.prepare("""
-            SELECT md.trade_name, SUM(s.quantity) as total_quantity
-            FROM sale_details s
-            LEFT JOIN medicine_dic md ON s.medicine_id = md.dic_id
-            LEFT JOIN sales m ON s.sales_id = m.sales_id
-            WHERE DATE(m.sale_date) BETWEEN ? AND ?
-            GROUP BY s.medicine_id, md.trade_name
-            ORDER BY total_quantity DESC
-            LIMIT 5
-        """)
-        query.addBindValue(start_date)
-        query.addBindValue(end_date)
         if query.exec():
-            rank = 1
+            has_data = False
             while query.next():
-                drug_name = query.value(0)
-                quantity = query.value(1)
-                statistics_data.append((f"热销药品第{rank}名", drug_name))
-                rank += 1
+                has_data = True
+                dic_id = query.value(0)
+                display_area_threshold = query.value(1) if query.value(1) is not None else 0
+                pharmacy_threshold = query.value(2) if query.value(2) is not None else 0
 
-        # 平均订单金额
-        if order_count and order_count > 0:
-            avg_order_amount = total_sales / order_count if order_count else 0
-            statistics_data.append(("平均订单金额", f"¥{avg_order_amount:.2f}"))
+                # 为每个药品检查库存预警
+                try:
+                    stock_warning_model = qu.get_low_stock_warning(self, pharmacy_threshold)
+                    display_area_model = qu.get_low_exhibition_area_warning(self, display_area_threshold)
 
-        # 按时间维度的销售趋势
-        if time_dimension == "daily":
-            query.prepare("""
-                SELECT DATE(m.sale_date) as period, SUM(s.total_amount) as amount
-                FROM sale_details s
-                LEFT JOIN sales m ON s.sales_id = m.sales_id
-                WHERE DATE(m.sale_date) BETWEEN ? AND ?
-                GROUP BY DATE(m.sale_date)
-                ORDER BY period
-            """)
-            query.addBindValue(start_date)
-            query.addBindValue(end_date)
-            if query.exec():
-                statistics_data.append(("--- 销售趋势（按日） ---", ""))
-                while query.next():
-                    period = query.value(0)
-                    amount = query.value(1)
-                    statistics_data.append((f"日期: {period}", f"¥{amount:.2f}"))
+                    # 如果有预警数据，显示提醒
+                    if stock_warning_model.rowCount() > 0:
+                        warning_msg = f"药库库存预警：有{stock_warning_model.rowCount()}种药品库存偏低，请及时补货！"
+                        QMessageBox.warning(self, "库存预警", warning_msg, QMessageBox.StandardButton.Ok)
+                        break  # 避免重复提示
 
-        elif time_dimension == "weekly":
-            query.prepare("""
-                SELECT strftime('%Y-%W', m.sale_date) as period, SUM(s.total_amount) as amount
-                FROM sale_details s
-                LEFT JOIN sales m ON s.sales_id = m.sales_id
-                WHERE DATE(m.sale_date) BETWEEN ? AND ?
-                GROUP BY strftime('%Y-%W', m.sale_date)
-                ORDER BY period
-            """)
-            query.addBindValue(start_date)
-            query.addBindValue(end_date)
-            if query.exec():
-                statistics_data.append(("--- 销售趋势（按周） ---", ""))
-                while query.next():
-                    period = query.value(0)
-                    amount = query.value(1)
-                    statistics_data.append((f"周次: {period}", f"¥{amount:.2f}"))
+                    if display_area_model.rowCount() > 0:
+                        warning_msg = f"陈列区库存预警：有{display_area_model.rowCount()}种药品库存偏低，请及时补货！"
+                        QMessageBox.warning(self, "库存预警", warning_msg, QMessageBox.StandardButton.Ok)
+                        break
+                except Exception as e:
+                    print(f"检查库存预警时出错: {e}")
 
-        elif time_dimension == "monthly":
-            query.prepare("""
-                SELECT strftime('%Y-%m', m.sale_date) as period, SUM(s.total_amount) as amount
-                FROM sale_details s
-                LEFT JOIN sales m ON s.sales_id = m.sales_id
-                WHERE DATE(m.sale_date) BETWEEN ? AND ?
-                GROUP BY strftime('%Y-%m', m.sale_date)
-                ORDER BY period
-            """)
-            query.addBindValue(start_date)
-            query.addBindValue(end_date)
-            if query.exec():
-                statistics_data.append(("--- 销售趋势（按月） ---", ""))
-                while query.next():
-                    period = query.value(0)
-                    amount = query.value(1)
-                    statistics_data.append((f"月份: {period}", f"¥{amount:.2f}"))
-
-        self.sales_statistics_table.setRowCount(len(statistics_data))
-        for row, (item, value) in enumerate(statistics_data):
-            self.sales_statistics_table.setItem(row, 0, QTableWidgetItem(str(item)))
-            self.sales_statistics_table.setItem(row, 1, QTableWidgetItem(str(value)))
-
-            for col in range(2):
-                item_widget = self.sales_statistics_table.item(row, col)
-                if item_widget:
-                    item_widget.setTextAlignment(Qt.AlignCenter)
-
-        self.sales_statistics_table.viewport().update()
+            # 如果没有任何数据
+            if not has_data:
+                # 使用默认阈值检查
+                try:
+                    warning_model = qu.get_low_stock_warning(self, 0)
+                    display_area_model = qu.get_low_exhibition_area_warning(self, 0)
+                    if warning_model.rowCount() > 0:
+                        warning_msg = (f"库存预警：有{warning_model.rowCount()}，"
+                                       f"陈列区预警：有{display_area_model.rowCount()} 种药品库存偏低，请及时补货！")
+                        QMessageBox.warning(self, "库存预警", warning_msg, QMessageBox.StandardButton.Ok)
+                except Exception as e:
+                    print(f"检查库存预警时出错: {e}")

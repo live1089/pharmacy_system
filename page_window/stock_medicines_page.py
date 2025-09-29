@@ -1,7 +1,7 @@
 import random
 
 from PySide6.QtCore import QDateTime, QDate, Qt
-from PySide6.QtSql import QSqlQuery
+from PySide6.QtSql import QSqlQuery, QSqlQueryModel
 from PySide6.QtWidgets import QDialog, QMessageBox, QVBoxLayout, QLineEdit, QDialogButtonBox
 
 from data.sqlite_data import StockLocationModel, StockAllModel, shelves_stock_model
@@ -9,7 +9,6 @@ from page_window.medicines_page import delete_selected_rows
 from page_window.tools import install_enter_key_filter
 from ui_app.stock_in_page_ui import Ui_StockDialog
 from ui_app.stock_locaton_ui import Ui_StockLocationDialog
-from ui_app.stock_all_ui import Ui_StockInAllDialog
 
 
 class StockMedicinesPage(QDialog, Ui_StockDialog):
@@ -294,7 +293,6 @@ class StockMedicinesPage(QDialog, Ui_StockDialog):
         remarks = self.warehousing_remarks_plain_text_edit.toPlainText()  # 入库备注
         location = self.location_combox.itemData(self.location_combox.currentIndex())
 
-
         if stock_num < 0 or actual_warehousing_quantity < 0 or inbound_amount < 0:
             QMessageBox.warning(self, "输入错误", "数量和金额必须大于等于0。")
             return
@@ -450,58 +448,4 @@ class PopupDialog(QDialog):
         self.setLayout(layout)
 
 
-class StockInAllPage(QDialog, Ui_StockInAllDialog):
-    def __init__(self, parent):
-        super().__init__()
-        self.setupUi(self)
-        self.ui = parent
-        self.db = parent.db
-        self.bind_event()
-        self.get_stock_in_all_model()
-        self.get_shelves_stock_model()
 
-    def bind_event(self):
-        pass
-
-    def get_shelves_stock_model(self):
-        """获取上架药品库存模型并设置到表格视图"""
-        model = shelves_stock_model(self.ui)  # 使用主窗口的数据库连接
-        self.shelves_stock_tableView.setModel(model)
-
-        # 设置表头
-        model.setHeaderData(0, Qt.Orientation.Horizontal, "ID")
-        model.setHeaderData(1, Qt.Orientation.Horizontal, "出库单号")
-        model.setHeaderData(2, Qt.Orientation.Horizontal, "出库批次")
-        model.setHeaderData(3, Qt.Orientation.Horizontal, "药品名称")
-        model.setHeaderData(4, Qt.Orientation.Horizontal, "上架数量")
-        model.setHeaderData(5, Qt.Orientation.Horizontal, "上架位置")
-        model.setHeaderData(6, Qt.Orientation.Horizontal, "库存批次")
-        model.setHeaderData(7, Qt.Orientation.Horizontal, "有效期")
-
-        # 隐藏ID列
-        self.shelves_stock_tableView.hideColumn(0)
-
-        return model
-
-    def get_stock_in_all_model(self):
-        self.stock_all = StockAllModel(self, self.db)
-        sql = f"""
-            SELECT
-                s.stock_id,
-                dic.trade_name,
-                us.batch,
-                ud.location,
-                s.quantity,
-                s.last_update,
-                us.validity as 有效期,
-                us.production_lot_number as 生产批号
-            FROM stock s
-            LEFT JOIN stock_in_main us ON us.in_id = s.batch
-            LEFT JOIN warehouse_shelf_position ud ON ud.warehouse_shelf_id = s.location
-            LEFT JOIN medicine_dic dic ON dic.dic_id = s.drug_id
-        """
-        self.stock_all.setQuery(sql, self.db)
-        self.stock_all_tableView.setModel(self.stock_all)
-        for col in self.stock_all.hidden_columns:
-            self.stock_all_tableView.hideColumn(col)
-        return self.stock_all

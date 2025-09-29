@@ -22,7 +22,6 @@ def install_enter_key_filter(widget):
         widget.installEventFilter(widget._enter_key_filter)
 
 
-
 def safe_set_datetime(datetime_edit, value, format_str="yyyy-MM-dd hh:mm:ss"):
     """
     安全地设置 QDateTimeEdit 的时间值

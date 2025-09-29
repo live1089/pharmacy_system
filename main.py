@@ -30,12 +30,6 @@ if not os.path.exists(backups_dir):
 
 def main():
     app = QApplication(sys.argv)
-    # config = ConfigManager()
-    # # 确保数据目录存在
-    # data_path = config.get_db_path()
-    # data_dir = os.path.dirname(data_path)
-    # if not os.path.exists(data_dir):
-    #     os.makedirs(data_dir)
 
     app.setStyleSheet(qdarktheme.load_stylesheet("light"))
 

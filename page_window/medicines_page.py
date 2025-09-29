@@ -1,4 +1,3 @@
-from PySide6.QtCore import QEvent, Qt, QObject
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QMessageBox, QLineEdit, QDialog, QDialogButtonBox, QVBoxLayout
 
@@ -168,7 +167,7 @@ class MedicinesPage(QDialog, Ui_Dialog):
         """加载药品信息用于更新"""
         query = QSqlQuery()
         query.prepare("SELECT trade_name, generic_name, specification_id, manufacturer, formulation_id, "
-                      "approval_number, category_id, unit_id, price "
+                      "approval_number, category_id, unit_id, price, display_area_threshold, pharmacy_threshold "
                       "FROM medicine_dic "
                       "WHERE dic_id = ?")
         query.addBindValue(dic_id)
@@ -199,6 +198,8 @@ class MedicinesPage(QDialog, Ui_Dialog):
             self.cmsw_line_edit.setText(query.value(5) or "")
             self.price_line_edit.setText(str(query.value(8) or ""))
             self.manufacturer_line_edit.setText(query.value(3) or "")
+            self.display_area_threshold_spinBox.setValue(query.value(9) or 0)
+            self.pharmacy_threshold_spinBox.setValue(query.value(10) or 0)
 
     def update_drug(self):
         """更新药品信息"""
@@ -215,12 +216,14 @@ class MedicinesPage(QDialog, Ui_Dialog):
         drug_cmsw = self.cmsw_line_edit.text().strip()
         drug_dosage = self.dosage_combox.itemData(self.dosage_combox.currentIndex())
         drug_manufactur = self.manufacturer_line_edit.text().strip()
+        display_area_threshold = self.display_area_threshold_spinBox.value()
+        pharmacy_threshold = self.pharmacy_threshold_spinBox.value()
 
         query = QSqlQuery()
         query.prepare(
             "UPDATE medicine_dic "
             "SET trade_name = ?, generic_name = ?, specification_id = ?, manufacturer = ?, formulation_id = ?, "
-            "approval_number = ? ,category_id = ?, unit_id = ?, price = ? "
+            "approval_number = ? ,category_id = ?, unit_id = ?, price = ? , display_area_threshold = ?, pharmacy_threshold = ? "
             "WHERE dic_id = ?"
         )
         query.addBindValue(drug_name)
@@ -232,6 +235,8 @@ class MedicinesPage(QDialog, Ui_Dialog):
         query.addBindValue(drug_class)
         query.addBindValue(drug_unit)
         query.addBindValue(drug_price)
+        query.addBindValue(display_area_threshold)
+        query.addBindValue(pharmacy_threshold)
         query.addBindValue(self.dic_id)
 
         if not query.exec():
@@ -296,13 +301,15 @@ class MedicinesPage(QDialog, Ui_Dialog):
         drug_cmsw = self.cmsw_line_edit.text()
         drug_dosage = self.dosage_combox.itemData(self.dosage_combox.currentIndex())
         drug_manufactur = self.manufacturer_line_edit.text()
+        display_area_threshold = self.display_area_threshold_spinBox.value()
+        pharmacy_threshold = self.pharmacy_threshold_spinBox.value()
 
         query = QSqlQuery()
 
         query.prepare(
             "INSERT INTO medicine_dic (trade_name, generic_name, specification_id, manufacturer, formulation_id, "
-            "approval_number ,category_id, unit_id, price)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            "approval_number ,category_id, unit_id, price, display_area_threshold, pharmacy_threshold)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
         query.addBindValue(drug_name)
         query.addBindValue(drug_genre)
         query.addBindValue(drug_pack)
@@ -312,6 +319,8 @@ class MedicinesPage(QDialog, Ui_Dialog):
         query.addBindValue(drug_class)
         query.addBindValue(drug_unit)
         query.addBindValue(drug_price)
+        query.addBindValue(display_area_threshold)
+        query.addBindValue(pharmacy_threshold)
         if not query.exec():
             QMessageBox.critical(self, "数据库错误", f"添加失败: {query.lastError().text()}")
         else:

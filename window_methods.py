@@ -4,25 +4,19 @@ from PySide6.QtWidgets import QMessageBox, QDialog
 import data.sqlite_data
 from data.sqlite_data import DrugDicModel, SupplierModel, PurchaseOrderModel, \
     StockInMainModel, StockInDetailModel, StockOutMainModel, InventoryCheckModel, \
-    ShelvesDrugModel, InventoryModel, SalesListsModel, SalesModel
+    ShelvesDrugModel, InventoryModel
 from page_window.inventory_count_page import InventoryCountPage
 from page_window.medicines_page import MedicinesPage, delete_selected_rows, DrugRormulationPage, \
     DrugUnitPage, DrugAttributePage, DrugSpecificationPage
 from page_window.purchase_page import PurAddPage, AnOrderPage
-from page_window.sell_medicines_page import SellDrugUiDialog, SellListDialog
 from page_window.shelves_drug_page import ShelvesDrugPage
-from page_window.stock_medicines_page import StockMedicinesPage, StockLocationPage, StockInAllPage
+from page_window.stock_medicines_page import StockMedicinesPage, StockLocationPage
 from page_window.stock_out_page import StockOutPage, StockOutAddDrugPage
 from page_window.supplier_medicines_page import SupplierDrugPage, get_selected_logical_rows
 from page_window.user_set_menu import UserSetPage, CurrentUserPage, SystemPage
 
 start_times = QDateTime.currentDateTime().addDays(-30).date().toString("yyyy-MM-dd")
 end_times = QDateTime.currentDateTime().addDays(+1).date().toString("yyyy-MM-dd")
-
-
-def stock_in_all(self):
-    self.stock_all = StockInAllPage(self)
-    self.stock_all.exec()
 
 
 def add_stock_location(self):
@@ -45,37 +39,6 @@ def del_dic(self):
     else:
         QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
 
-
-def del_sell(self):
-    current_tab_index = self.tabWidget.currentIndex()
-    if current_tab_index == 0:
-        self.sell_li = SalesListsModel(self, self.db)
-        success, msg = delete_selected_rows(
-            self=self,
-            tableView=self.sales_lists_tableView,
-            model=self.sell_li,
-            db=self.db,
-        )
-        if success:
-            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
-            data.sqlite_data.get_sales_lists_model(self, start_times, end_times)
-            self.sales_lists_tableView.clearSelection()
-        else:
-            QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
-    elif current_tab_index == 1:
-        self.sell_sa = SalesModel(self, self.db)
-        success, msg = delete_selected_rows(
-            self=self,
-            tableView=self.sales_records_tableView,
-            model=self.sell_sa,
-            db=self.db,
-        )
-        if success:
-            QMessageBox.information(self, "成功", msg, QMessageBox.StandardButton.Ok)
-            data.sqlite_data.get_sales_model(self, start_times, end_times)
-            self.sales_records_tableView.clearSelection()
-        else:
-            QMessageBox.warning(self, "失败", msg, QMessageBox.StandardButton.Ok)
 
 
 def supplier_mod(self):
@@ -408,8 +371,6 @@ def sub_window_event(self):
     self.dosage_set_btn.clicked.connect(lambda: drug_rormulation(self))
     self.unit_set_btn.clicked.connect(lambda: drug_unit(self))
     self.specifications_set_btn.clicked.connect(lambda: drug_specification(self))
-    self.sell_drug_btn.clicked.connect(lambda: sell_drug_func(self))
-    self.add_sell_list_btn.clicked.connect(lambda: sell_list_func(self))
     self.supplier_add_btn.clicked.connect(lambda: supplier_add(self))
     self.stock_in_btn.clicked.connect(lambda: stock_in(self))
     self.purchase_add_btn.clicked.connect(lambda: purchase_add(self))
@@ -470,18 +431,6 @@ def drug_unit(self):
 def drug_specification(self):
     self.drug_sp = DrugSpecificationPage(self)
     self.drug_sp.exec()
-
-
-def sell_drug_func(self):
-    self.sell_d = SellDrugUiDialog(self)
-    self.sell_d.exec()
-    data.sqlite_data.get_sales_model(self, start_times, end_times)
-
-
-def sell_list_func(self):
-    self.sell_list = SellListDialog(self)
-    self.sell_list.exec()
-    data.sqlite_data.get_sales_lists_model(self, start_times, end_times)
 
 
 def supplier_add(self):

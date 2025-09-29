@@ -2,7 +2,6 @@
 
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtWidgets import QMessageBox
-import sqlite3
 
 
 class DataCleaner:
@@ -57,15 +56,7 @@ class DataCleaner:
             orphaned_stock_out_detail_count = query.numRowsAffected()
             cleaned_count += orphaned_stock_out_detail_count
 
-            # 6. 清理孤立的销售明细
-            query.exec("""
-                DELETE FROM sale_details 
-                WHERE sales_id NOT IN (SELECT sales_id FROM sales)
-            """)
-            orphaned_sale_details_count = query.numRowsAffected()
-            cleaned_count += orphaned_sale_details_count
-
-            # 7. 清理没有库存批次的库存信息
+            # 6. 清理没有库存批次的库存信息
             query.exec("""
                 DELETE FROM stock 
                 WHERE batch NOT IN (SELECT in_id FROM stock_in_main)
@@ -73,7 +64,7 @@ class DataCleaner:
             orphaned_stock_batch_count = query.numRowsAffected()
             cleaned_count += orphaned_stock_batch_count
 
-            # 8. 清理没有对应药品的库存信息
+            # 7. 清理没有对应药品的库存信息
             query.exec("""
                 DELETE FROM stock 
                 WHERE drug_id NOT IN (SELECT dic_id FROM medicine_dic)
@@ -81,7 +72,7 @@ class DataCleaner:
             orphaned_stock_drug_count = query.numRowsAffected()
             cleaned_count += orphaned_stock_drug_count
 
-            # 9. 清理没有对应货位的库存信息
+            # 8. 清理没有对应货位的库存信息
             query.exec("""
                 DELETE FROM stock 
                 WHERE location NOT IN (SELECT warehouse_shelf_id FROM warehouse_shelf_position)
@@ -89,16 +80,33 @@ class DataCleaner:
             orphaned_stock_location_count = query.numRowsAffected()
             cleaned_count += orphaned_stock_location_count
 
+            # 9. 清理孤立的上架药品记录
+            query.exec("""
+                DELETE FROM shelves_drug 
+                WHERE out_batch NOT IN (SELECT detail_id FROM stock_out_detail)
+            """)
+            orphaned_shelves_drug_count = query.numRowsAffected()
+            cleaned_count += orphaned_shelves_drug_count
+
+            # 10. 清理孤立的库存盘点记录
+            query.exec("""
+                DELETE FROM inventory_check 
+                WHERE medicine_id NOT IN (SELECT dic_id FROM medicine_dic)
+            """)
+            orphaned_inventory_check_count = query.numRowsAffected()
+            cleaned_count += orphaned_inventory_check_count
+
             return True, f"清理完成，共清理 {cleaned_count} 条无用数据记录:\n" \
                          f"- 过期药品监控记录: {expired_medicines_count} 条\n" \
                          f"- 零库存记录: {zero_stock_count} 条\n" \
                          f"- 孤立采购明细: {orphaned_purchase_detail_count} 条\n" \
                          f"- 孤立入库明细: {orphaned_stock_in_detail_count} 条\n" \
                          f"- 孤立出库明细: {orphaned_stock_out_detail_count} 条\n" \
-                         f"- 孤立销售明细: {orphaned_sale_details_count} 条\n" \
                          f"- 没有库存批次的库存信息: {orphaned_stock_batch_count} 条\n" \
                          f"- 没有对应药品的库存信息: {orphaned_stock_drug_count} 条\n" \
-                         f"- 没有对应货位的库存信息: {orphaned_stock_location_count} 条"
+                         f"- 没有对应货位的库存信息: {orphaned_stock_location_count} 条\n" \
+                         f"- 孤立上架药品记录: {orphaned_shelves_drug_count} 条\n" \
+                         f"- 孤立库存盘点记录: {orphaned_inventory_check_count} 条"
 
         except Exception as e:
             return False, f"清理过程中发生错误: {str(e)}"
@@ -158,7 +166,6 @@ def clean_up_useless_data(parent_window):
     """
     清理系统垃圾的主函数
     """
-    from data.sqlite_data import DatabaseInit
 
     try:
         # 创建数据清理器实例

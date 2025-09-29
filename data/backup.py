@@ -224,7 +224,7 @@ class DatabaseBackup:
         return f"{size_bytes:.1f} {size_names[i]}"
 
 
-def backup_database(parent_window, db_path="_internal/data/pharmacy.db"):
+def backup_database(parent_window, db_path="data/pharmacy.db"):
     """
     备份数据库文件
 
@@ -272,7 +272,7 @@ def backup_database(parent_window, db_path="_internal/data/pharmacy.db"):
         return False
 
 
-def restore_database(parent_window, db_path="_internal/data/pharmacy.db"):
+def restore_database(parent_window, db_path):
     """
     从备份恢复数据库文件
 
@@ -331,11 +331,6 @@ def restore_database(parent_window, db_path="_internal/data/pharmacy.db"):
 def auto_backup_database(parent_window, db_path, backup_dir):
     """
     自动备份数据库到指定目录
-
-    Args:
-        parent_window: 父窗口对象
-        db_path: 数据库文件路径
-        backup_dir: 备份目录
     """
     try:
         # 检查数据库文件是否存在
@@ -343,9 +338,27 @@ def auto_backup_database(parent_window, db_path, backup_dir):
             QMessageBox.warning(parent_window, "备份失败", f"数据库文件不存在: {db_path}")
             return False
 
-        # 创建备份目录（如果不存在）
+        # 检查并修复备份目录权限
         if not os.path.exists(backup_dir):
-            os.makedirs(backup_dir)
+            try:
+                os.makedirs(backup_dir)
+                print(f"成功创建备份目录: {backup_dir}")
+            except PermissionError as e:
+                QMessageBox.critical(
+                    parent_window,
+                    "权限错误",
+                    f"无法创建备份目录: {backup_dir}\n错误信息: {str(e)}\n请检查目录权限或选择其他位置"
+                )
+                return False
+
+        # 检查当前用户是否有写权限
+        if not os.access(backup_dir, os.W_OK):
+            QMessageBox.critical(
+                parent_window,
+                "权限错误",
+                f"当前用户没有写入权限: {backup_dir}\n请检查目录权限或选择其他位置"
+            )
+            return False
 
         # 生成备份文件名
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -358,7 +371,11 @@ def auto_backup_database(parent_window, db_path, backup_dir):
         # 清理旧备份（保留最近7天的备份）
         cleanup_old_backups(backup_dir, days=7)
 
-        QMessageBox.warning(parent_window, "自动备份完成", f"备份地址: {backup_path}")
+        QMessageBox.information(
+            parent_window,
+            "自动备份完成",
+            f"备份地址: {backup_path}"
+        )
         return True
 
     except Exception as e:

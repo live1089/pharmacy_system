@@ -111,7 +111,14 @@ class StockOutPage(QDialog, Ui_OutWarehouseMTDialog):
             query.addBindValue(stock_out_remark)
             query.addBindValue(self.out_id)
             if not query.exec():
-                raise Exception(f"更新出库单失败: {query.lastError().text()}")
+                raise Exception(f"无法更新出库单: {query.lastError().text()}")
+            # 提交事务
+            if not query.exec("COMMIT"):
+                raise Exception(f"无法提交事务: {query.lastError().text()}")
+
+            QMessageBox.information(self, "成功", "更新成功")
+            self.accept()  # 关闭对话框
+
         except Exception as e:
             # 回滚事务
             query.exec("ROLLBACK")
@@ -274,7 +281,6 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
         self.outbatch_lineEdit.setText(out_batch)
 
     def create_stock_out_drug(self):
-        print(f"当前 detail_id: {self.detail_id}")
         stock_out_list = self.stock_out_list_combox.itemData(self.stock_out_list_combox.currentIndex())
         stock_out_drug = self.stock_out_drug_combox.itemData(self.stock_out_drug_combox.currentIndex())
         stock_batch = self.stock_batch_combox.itemData(self.stock_batch_combox.currentIndex())
@@ -288,7 +294,6 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
         if not stock_out_list or not stock_out_drug or not stock_batch or not out_batch:
             QMessageBox.warning(self, "输入错误", "请填写所有必填项。")
             return
-        print(f"准备插入: quantity={stock_out_number}, out_batch={out_batch}")
 
         query = QSqlQuery()
         try:
@@ -329,26 +334,19 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
             query.finish()
 
     def update_stock_out_drug(self):
-        if not self.detail_id:
-            QMessageBox.critical(self, "错误", "无法找到要修改的出库单")
-            return
-        print(f"当前 detail_id: {self.detail_id}")
         stock_out_list = self.stock_out_list_combox.itemData(self.stock_out_list_combox.currentIndex())
         stock_out_drug = self.stock_out_drug_combox.itemData(self.stock_out_drug_combox.currentIndex())
         stock_batch = self.stock_batch_combox.itemData(self.stock_batch_combox.currentIndex())
         out_batch = self.outbatch_lineEdit.text()
         stock_out_number = self.stock_out_number_spinBox.value()
         stock_out_date = self.stock_out_dateTimeEdit.dateTime().toString("yyyy-MM-dd hh:mm:ss")
-        # 添加验证
-        if stock_out_number <= 0:
-            QMessageBox.warning(self, "输入错误", "出库数量必须大于0")
-            return
+
         # 开始事务以确保数据一致性
         query = QSqlQuery()
+        if not query.exec("BEGIN"):
+            QMessageBox.critical(self, "数据库错误", f"无法开始事务: {query.lastError().text()}")
+            return
         try:
-            if not query.exec("BEGIN"):
-                raise Exception(f"无法开始事务: {query.lastError().text()}")
-
             query.prepare(
                 "UPDATE stock_out_detail "
                 "SET out_id=?, medicine_id=?, stock_batch=?, out_batch=?, quantity=?, time=? "
@@ -372,7 +370,6 @@ class StockOutAddDrugPage(QDialog, Ui_OutWarehouseDrugDialog):
             self.accept()  # 关闭对话框
 
         except Exception as e:
-            # 回滚事务
             query.exec("ROLLBACK")
             QMessageBox.critical(self, "数据库错误", str(e))
         finally:

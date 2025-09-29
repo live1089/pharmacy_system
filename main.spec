@@ -7,16 +7,15 @@ a = Analysis(
     binaries=[],
     datas=[
 		 # 包含数据库文件
-        ('data/pharmacy.db', 'data'),
-        ('data/backup.py', 'data'),
-        ('data/clean_up_useless_data.py', 'data'),
-        ('data/sqlite_data.py', 'data'),
+       # ('data/backup.py', 'data'),
+       # ('data/clean_up_useless_data.py', 'data'),
+       # ('data/sqlite_data.py', 'data'),
         
         # 包含page_window下的所有模块
-        ('page_window/*.py', 'page_window'),
+        #('page_window/*.py', 'page_window'),
 		
 		# 包含ui_app下的所有模块
-		('ui_app/*.py', 'ui_app'),
+		#('ui_app/*.py', 'ui_app'),
 	],
     hiddenimports=[
 		 # 显式声明可能无法自动检测的依赖
@@ -37,7 +36,6 @@ a = Analysis(
         'page_window.inventory_count_page',
         'page_window.medicines_page',
         'page_window.purchase_page',
-        'page_window.sell_medicines_page',
         'page_window.shelves_drug_page',
         'page_window.stock_medicines_page',
         'page_window.stock_out_page',
@@ -59,8 +57,6 @@ a = Analysis(
 		 'ui_app.inventory_count_entry_ui',
 		 'ui_app.log_in_ui',
 		 'ui_app.mainwondows_ui',
-		 'ui_app.sell_drug_ui',
-		 'ui_app.sell_list_ui',
 		 'ui_app.shelves_drug_ui',
 		 'ui_app.stock_all_ui',
 		 'ui_app.stock_in_page_ui',

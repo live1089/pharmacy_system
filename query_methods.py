@@ -1,11 +1,11 @@
 from PySide6.QtCore import QDateTime
-from PySide6.QtSql import QSqlQuery
+from PySide6.QtSql import QSqlQuery, QSqlQueryModel
 from PySide6.QtWidgets import QMessageBox
 
 import data.sqlite_data
 from data.sqlite_data import (SupplierModel, StockInMainModel, StockInDetailModel, ShelvesDrugsMessageModel,
                               PurchaseDetailModel, PurchaseOrderModel, StockOutMainModel, StockOutDetailModel,
-                              ShelvesDrugModel
+                              ShelvesDrugModel, StockAllModel
                               )
 
 # 其他工具
@@ -393,30 +393,148 @@ def inventory_record_query(self):
         QMessageBox.critical(self, "查询错误", f"查询库存记录时出错: {str(e)}")
 
 
-def sales_record_query(self):
-    text = self.sales_records_lineEdit.text().strip()
-    if not text:
-        data.sqlite_data.get_sales_lists_model(self)
-        return
+# 药库库存
+def get_low_stock_warning(self, min_warehouse_stock):
+    """
+    获取低库存预警信息（药库）
+    按药品名称和库存批次分组，合并相同项的数量
+    """
+    self.low_stock_model = QSqlQueryModel(self)
+    sql = """
+        SELECT
+            md.dic_id,
+            md.trade_name as 药品名称,
+            sim.batch as 库存批次,
+            SUM(s.quantity) as 仓库库存,
+            GROUP_CONCAT(DISTINCT wsp.location) as 存放位置
+        FROM stock s
+        LEFT JOIN main.medicine_dic md on s.drug_id = md.dic_id
+        LEFT JOIN stock_in_main sim on s.batch = sim.in_id
+        LEFT JOIN warehouse_shelf_position wsp on s.location = wsp.warehouse_shelf_id
+        WHERE s.quantity < ?
+        GROUP BY md.dic_id, md.trade_name, sim.batch
+        ORDER BY md.trade_name, sim.batch
+    """
+    query = QSqlQuery(self.db)
+    query.prepare(sql)
+    query.addBindValue(min_warehouse_stock)
 
-    self.purchase_order_detail_model = PurchaseDetailModel(self, self.db)
+    if not query.exec():
+        print(f"查询错误: {query.lastError().text()}")
+        return self.low_stock_model
+
+    self.low_stock_model.setQuery(query)
+    print(f"查询到药库库存 {self.low_stock_model.rowCount()} 条预警数据")
+    return self.low_stock_model
+
+# 陈列区
+def get_low_exhibition_area_warning(self, min_exhibition_area_stock):
+    """
+    获取低库存预警信息（陈列区）
+    按药品名称和库存批次分组，合并相同项的数量
+    """
+    self.low_stock_model = QSqlQueryModel(self)
+    sql = """
+        SELECT
+            md.dic_id,
+            md.trade_name as 药品名称,
+            sim.batch as 库存批次,
+            SUM(s.shelves_number) as 陈列区库存,
+            GROUP_CONCAT(DISTINCT wsp.location) as 存放位置
+        FROM shelves_drug s
+        LEFT JOIN main.medicine_dic md on s.drug = md.dic_id
+        LEFT JOIN stock_out_detail sod on s.out_batch = sod.detail_id
+        LEFT JOIN stock_in_main sim on sod.stock_batch = sim.in_id
+        LEFT JOIN warehouse_shelf_position wsp on s.location_id = wsp.warehouse_shelf_id
+        WHERE s.shelves_number < ?
+        GROUP BY md.dic_id, md.trade_name, sim.batch
+        ORDER BY md.trade_name, sim.batch
+    """
+    query = QSqlQuery(self.db)
+    query.prepare(sql)
+    query.addBindValue(min_exhibition_area_stock)
+
+    if not query.exec():
+        print(f"查询错误: {query.lastError().text()}")
+        return self.low_stock_model
+
+    self.low_stock_model.setQuery(query)
+    print(f"查询到陈列区库存 {self.low_stock_model.rowCount()} 条预警数据")
+    return self.low_stock_model
+
+
+def display_area_inquiry(self):
+    text = self.display_area_inquiry_lineEdit.text().strip()
+    print(text)
+    if not text:
+        data.sqlite_data.shelves_stock_model(self)
+        return
+    sql = """
+         SELECT
+            e.shelves_id,
+            md.trade_name as 药品名称,
+            SUM(e.shelves_number) as 上架数量,
+            wsp.location as 存放位置,
+            sma.batch as 库存批次,
+            sma.validity as 有效期
+        FROM shelves_drug e
+        LEFT JOIN stock_out_detail sd ON e.out_batch = sd.detail_id
+        LEFT JOIN medicine_dic md ON e.drug = md.dic_id
+        LEFT JOIN stock_in_main sma ON sd.stock_batch = sma.in_id
+        LEFT JOIN warehouse_shelf_position wsp ON e.location_id = wsp.warehouse_shelf_id
+        WHERE md.trade_name LIKE ? OR wsp.location LIKE ?
+            OR sd.out_batch LIKE ? OR sma.batch LIKE ?
+        GROUP BY md.trade_name, sma.batch, wsp.location   
+    """
+
+    # 创建查询对象并准备查询
+    query = QSqlQuery(self.db)
+    query.prepare(sql)
+    query.addBindValue(f"%{text}%")
+    query.addBindValue(f"%{text}%")
+    query.addBindValue(f"%{text}%")
+    query.addBindValue(f"%{text}%")
+    query.addBindValue(f"%{text}%")
+
+    # 执行查询
+    if not query.exec():
+        print(f"查询错误: {query.lastError().text()}")
+        return
+    # 创建模型并设置查询结果
+    model = QSqlQueryModel(self)
+    model.setQuery(query)
+    self.shelves_stock_tableView.setModel(model)
+
+
+def drug_library_query(self):
+    text = self.drug_library_query_lineEdit.text().strip()
+    self.stock_all = StockAllModel(self, self.db)
     sql = f"""
         SELECT
-            pur.detail_id,
-            ord.order_number,
-            de.trade_name,
-            pur.quantity,
-            pur.purchase_total_price,
-            pur.purchase_price,
-            de.price as 售价,
-            ord.order_date as 下单时间,
-            pur.remarks as 备注  
-        FROM purchase_detail pur
-        LEFT JOIN medicine_dic de ON pur.medicine_id = de.dic_id
-        LEFT JOIN purchase_order ord ON pur.order_id = ord.order_id
-        WHERE ord.order_number LIKE '%{text}%'
+            s.stock_id,
+            dic.trade_name,
+            us.batch,
+            ud.location,
+            s.quantity,
+            s.last_update,
+            us.validity as 有效期,
+            us.production_lot_number as 生产批号
+        FROM stock s
+        LEFT JOIN stock_in_main us ON us.in_id = s.batch
+        LEFT JOIN warehouse_shelf_position ud ON ud.warehouse_shelf_id = s.location
+        LEFT JOIN medicine_dic dic ON dic.dic_id = s.drug_id
+        WHERE dic.trade_name LIKE ? OR us.batch LIKE ? OR ud.location LIKE ?
     """
-    self.purchase_order_detail_model.setQuery(sql, self.db)
-    self.purchase_detail_tableView.setModel(self.purchase_order_detail_model)
-    for col in self.purchase_order_detail_model.hidden_columns:
-        self.purchase_detail_tableView.hideColumn(col)
+    query = QSqlQuery(self.db)
+    query.prepare(sql)
+    query.addBindValue(f"%{text}%")
+    query.addBindValue(f"%{text}%")
+    query.addBindValue(f"%{text}%")
+
+    if not query.exec():
+        print(f"查询错误: {query.lastError().text()}")
+        return
+    self.stock_all.setQuery(query)
+    self.stock_all_tableView.setModel(self.stock_all)
+    for col in self.stock_all.hidden_columns:
+        self.stock_all_tableView.hideColumn(col)
