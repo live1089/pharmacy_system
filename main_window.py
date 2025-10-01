@@ -475,47 +475,53 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             data.sqlite_data.get_supplier_model(self)
 
     # 检查库存预警
+    # 根据medicine_dic表中的阈值对比实际库存量来判断是否需要预警
     def check_stock_warnings(self):
-        query = QSqlQuery()
-        query.prepare(
-            "SELECT medicine_dic.dic_id, display_area_threshold, pharmacy_threshold "
-            "FROM medicine_dic")
+        try:
+            # 检查药库库存预警 - 查询低于阈值的药库库存
+            stock_warning_query = QSqlQuery(self.db)
+            stock_warning_query.prepare("""
+                SELECT 
+                    COUNT(*) 
+                FROM medicine_dic md
+                LEFT JOIN stock s ON md.dic_id = s.drug_id
+                WHERE s.quantity < md.pharmacy_threshold
+            """)
 
-        if query.exec():
-            has_data = False
-            while query.next():
-                has_data = True
-                dic_id = query.value(0)
-                display_area_threshold = query.value(1) if query.value(1) is not None else 0
-                pharmacy_threshold = query.value(2) if query.value(2) is not None else 0
+            if stock_warning_query.exec() and stock_warning_query.next():
+                low_stock_count = stock_warning_query.value(0)
+            else:
+                low_stock_count = 0
+                print(f"查询药库预警失败: {stock_warning_query.lastError().text()}")
 
-                # 为每个药品检查库存预警
-                try:
-                    stock_warning_model = qu.get_low_stock_warning(self, pharmacy_threshold)
-                    display_area_model = qu.get_low_exhibition_area_warning(self, display_area_threshold)
+            # 检查陈列区库存预警 - 查询低于阈值的陈列区库存
+            display_warning_query = QSqlQuery(self.db)
+            display_warning_query.prepare("""
+                SELECT 
+                    COUNT(*) 
+                FROM medicine_dic md
+                LEFT JOIN shelves_drug sd ON md.dic_id = sd.drug
+                WHERE sd.shelves_number < md.display_area_threshold
+            """)
 
-                    # 如果有预警数据，显示提醒
-                    if stock_warning_model.rowCount() > 0:
-                        warning_msg = f"药库库存预警：有{stock_warning_model.rowCount()}种药品库存偏低，请及时补货！"
-                        QMessageBox.warning(self, "库存预警", warning_msg, QMessageBox.StandardButton.Ok)
-                        break  # 避免重复提示
+            if display_warning_query.exec() and display_warning_query.next():
+                low_display_count = display_warning_query.value(0)
+            else:
+                low_display_count = 0
+                print(f"查询陈列区预警失败: {display_warning_query.lastError().text()}")
 
-                    if display_area_model.rowCount() > 0:
-                        warning_msg = f"陈列区库存预警：有{display_area_model.rowCount()}种药品库存偏低，请及时补货！"
-                        QMessageBox.warning(self, "库存预警", warning_msg, QMessageBox.StandardButton.Ok)
-                        break
-                except Exception as e:
-                    print(f"检查库存预警时出错: {e}")
+            # 如果有任何预警，显示提醒
+            warnings = []
+            if low_stock_count > 0:
+                warnings.append(f"药库库存预警：有{low_stock_count}种药品库存偏低，请及时补货！")
 
-            # 如果没有任何数据
-            if not has_data:
-                # 使用默认阈值检查
-                try:
-                    warning_model = qu.get_low_stock_warning(self, 0)
-                    display_area_model = qu.get_low_exhibition_area_warning(self, 0)
-                    if warning_model.rowCount() > 0:
-                        warning_msg = (f"库存预警：有{warning_model.rowCount()}，"
-                                       f"陈列区预警：有{display_area_model.rowCount()} 种药品库存偏低，请及时补货！")
-                        QMessageBox.warning(self, "库存预警", warning_msg, QMessageBox.StandardButton.Ok)
-                except Exception as e:
-                    print(f"检查库存预警时出错: {e}")
+            if low_display_count > 0:
+                warnings.append(f"陈列区库存预警：有{low_display_count}种药品库存偏低，请及时补货！")
+
+            if warnings:
+                warning_msg = "\n".join(warnings)
+                QMessageBox.warning(self, "库存预警", warning_msg, QMessageBox.StandardButton.Ok)
+
+        except Exception as e:
+            print(f"检查库存预警时出错: {e}")
+
